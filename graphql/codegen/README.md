@@ -6,7 +6,7 @@ Usage:
 
 - Make sure you have cnc installed `pnpm i -g @constructive-io/cli`
 
-- Run `pnpm run codegen` from this directory to generate the SDK into `generated/`.
+- Run `pnpm run codegen` from this directory to generate the SDK into `src/`.
 
 Notes:
 
