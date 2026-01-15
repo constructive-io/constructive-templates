@@ -12,6 +12,5 @@
   "scripts": {
     "codegen": "cnc codegen --database constructive_db --schemas metaschema_public,metaschema_modules_public,services_public --out ./generated --verbose"
   },
-  "keywords": [],
-  "packageManager": "pnpm@10.25.0"
+  "keywords": []
 }
