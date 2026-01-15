@@ -1,0 +1,13 @@
+{
+  "name": "codegen",
+  "version": "1.0.0",
+  "description": "Boilerplate for graphql codegen",
+  "main": "index.js",
+  "scripts": {
+    "codegen": "cnc codegen --database constructive_db --schemas metaschema_public,metaschema_modules_public,services_public --out ./generated --verbose"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.25.0"
+}
