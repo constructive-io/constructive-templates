@@ -4,6 +4,8 @@ This directory contains the GraphQL code generation boilerplate for Constructive
 
 Usage:
 
+- Make sure you have cnc installed `pnpm i -g @constructive-io/cli`
+
 - Run `pnpm run codegen` from this directory to generate the SDK into `generated/`.
 
 Notes:
