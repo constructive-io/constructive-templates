@@ -11,7 +11,17 @@
  *   DATABASE_ID=xxx ACCESS_TOKEN=xxx tsx src/run-graphql-export.ts
  *
  * Environment:
- *   META_ENDPOINT     - GraphQL endpoint for metaschema/services data (default: http://api.localhost:3000/graphql)
+ *   META_ENDPOINT     - GraphQL endpoint for metaschema/services/modules data
+ *                      (default: http://modules.localhost:3000/graphql). Must be the `modules`
+ *                      API, which links all three meta schemas (metaschema_public,
+ *                      services_public, metaschema_modules_public). The `api` API
+ *                      (api.localhost) only links metaschema_public + services_public
+ *                      and cannot serve metaschema_modules_public tables.
+ *   META_SCHEMAS      - Comma-separated schemas to expose via X-Schemata on the meta endpoint
+ *                      (default: services_public,metaschema_public,metaschema_modules_public).
+ *                      The export requests exactly the schemas it reads rather than relying on
+ *                      the server's metaSchemas default, so it is self-sufficient across
+ *                      machines/sandboxes regardless of how the server was launched.
  *   MIGRATE_ENDPOINT  - GraphQL endpoint for sql_actions (default: http://migrate-{dbName}.localhost:3000/graphql)
  *                     The migrate API is public (isPublic: true) after running
  *                     'pnpm provision', so subdomain routing works.
@@ -93,7 +103,22 @@ async function main() {
   const author = process.env.AUTHOR || 'constructive-app';
 
   // GraphQL-specific env vars
-  const metaEndpoint = process.env.META_ENDPOINT || process.env.API_ENDPOINT || 'http://api.localhost:3000/graphql';
+  // Meta/module data must be read from the `modules` API (modules.localhost), which
+  // links all three meta schemas — including metaschema_modules_public (StorageModule,
+  // MembershipsModule, …). The `api` API (api.localhost) only links metaschema_public +
+  // services_public (the schema-builder set), so it silently drops every module table.
+  // In isPublic=true (domain-lookup) mode the Host header selects the API; in
+  // isPublic=false mode the X-Schemata header below drives exposure regardless of host.
+  // NOTE: API_ENDPOINT is intentionally NOT used here — it points at the app API.
+  const metaEndpoint = process.env.META_ENDPOINT || `http://modules.localhost:${process.env.NEXT_PUBLIC_API_PORT || '3000'}/graphql`;
+  // Schemas the export must read: metaschema_public, services_public, metaschema_modules_public.
+  // Sent via X-Schemata so the meta API exposes them regardless of the server's metaSchemas
+  // default — the export no longer depends on how the server was launched. Override with
+  // META_SCHEMAS=... if a deployment ever needs a different set.
+  const metaSchemas = (process.env.META_SCHEMAS || 'services_public,metaschema_public,metaschema_modules_public')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   const token = process.env.ACCESS_TOKEN || process.env.TOKEN;
   const databaseId = process.env.DATABASE_ID;
   const databaseNameEnv = process.env.DATABASE_NAME || 'myapp';
@@ -110,6 +135,7 @@ async function main() {
   console.log(`\npgpm GraphQL export (workspace-free)\n`);
   console.log(`  projectRoot:      ${projectRoot}`);
   console.log(`  metaEndpoint:     ${metaEndpoint}`);
+  console.log(`  metaSchemas:     ${metaSchemas.join(',')} (via X-Schemata)`);
   console.log(`  migrateEndpoint:  ${migrateEndpoint || '(not set — sql_actions will be skipped)'}`);
   console.log(`  extension:        ${extensionName}`);
   console.log(`  author:           ${author}`);
@@ -123,8 +149,14 @@ async function main() {
   // Output directory — packages/ under the project root
   const outdir = normalizeOutdir(path.resolve(projectRoot, 'packages/'));
 
-  // 1. Create GraphQL client for discovery
-  const headers: Record<string, string> = { 'X-Meta-Schema': 'true' };
+  // 1. Create GraphQL client for discovery.
+  // Send X-Schemata (not X-Meta-Schema) so the meta API exposes exactly the schemas the
+  // export reads — independent of the server's metaSchemas default. In isPublic=false mode
+  // the server merges X-Schemata into its candidate schemas and exposes the validated
+  // subset (api.ts resolveSchemataHeader), so metaschema_modules_public (StorageModule,
+  // MembershipsModule, …) is always built and readable. Both `client` (discovery) and
+  // `metaClient` reuse this headers object, so the one change covers both phases.
+  const headers: Record<string, string> = { 'X-Schemata': metaSchemas.join(',') };
   if (databaseId) {
     headers['X-Database-Id'] = databaseId;
   }
@@ -225,7 +257,7 @@ async function main() {
       // view doesn't expose a primary key, so PostGraphile rejects cursors
       // for this view. Using a large first: N gets everything in one round-trip.
       const PAGE_SIZE = 10000;
-      const result = await db.sqlAction.findMany({
+      const result = await (db as any).sqlAction.findMany({
         select: {
           id: true,
           databaseId: true,
@@ -235,7 +267,7 @@ async function main() {
           verify: true,
           content: true,
           deps: true,
-          action: true,
+          actionName: true,
           actionId: true,
           actorId: true,
           payload: true
@@ -291,10 +323,10 @@ async function main() {
   // 7. Fetch and write metadata/services module
   // ==========================================================================
   // Small delay between the migrate client's huge sql_actions response
-  // (4070 rows) and the first API request. The previous response's
-  // connection is still being closed on the server when the next request
-  // arrives, which causes the server to ECONNRESET the new socket. A brief
-  // pause gives the server time to fully drain the prior response.
+  // and the first API request. The previous response's connection is still
+  // being closed on the server when the next request arrives, which causes
+  // the server to ECONNRESET the new socket. A brief pause gives the server
+  // time to fully drain the prior response.
   await new Promise((r) => setTimeout(r, 200));
   console.log(`Fetching metadata from ${metaEndpoint}...`);
   const metaClient = new GraphQLClient({ endpoint: metaEndpoint, token, headers });

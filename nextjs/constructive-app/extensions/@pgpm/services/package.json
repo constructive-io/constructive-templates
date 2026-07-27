@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/services",
-  "version": "0.26.2",
+  "version": "0.1.0",
   "description": "Services schemas for module registration and service configuration",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
@@ -21,11 +21,12 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@pgpm/metaschema-schema": "0.26.2",
-    "@pgpm/verify": "0.26.0"
+    "@pgpm/database-jobs": "workspace:*",
+    "@pgpm/metaschema-schema": "workspace:*",
+    "@pgpm/verify": "workspace:*"
   },
   "devDependencies": {
-    "pgpm": "^4.23.2"
+    "pgpm": "^5.0.4"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,5 @@
   "homepage": "https://github.com/constructive-io/constructive-db",
   "bugs": {
     "url": "https://github.com/constructive-io/constructive-db/issues"
-  },
-  "gitHead": "d938867e5d7c0e7b2e130a2bdc5d58cd0d5874e1"
+  }
 }

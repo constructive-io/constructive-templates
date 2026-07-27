@@ -1,0 +1,7 @@
+-- Revert: schemas/myapp_user_identifiers_private/tables/connected_accounts/constraints/connected_accounts_service_identifier_key/constraint
+
+
+ALTER TABLE myapp_user_identifiers_private.connected_accounts 
+  DROP CONSTRAINT connected_accounts_service_identifier_key;
+
+

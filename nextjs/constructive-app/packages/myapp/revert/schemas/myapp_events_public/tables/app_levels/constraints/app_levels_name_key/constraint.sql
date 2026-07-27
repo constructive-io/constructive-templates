@@ -1,7 +1,0 @@
--- Revert: schemas/myapp_events_public/tables/app_levels/constraints/app_levels_name_key/constraint
-
-
-ALTER TABLE myapp_events_public.app_levels 
-  DROP CONSTRAINT app_levels_name_key;
-
-

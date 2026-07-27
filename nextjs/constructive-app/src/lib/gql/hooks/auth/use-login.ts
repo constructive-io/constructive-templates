@@ -4,6 +4,7 @@ import { createInvalidCredentialsError } from '@/lib/auth/auth-errors';
 import type { LoginFormData } from '@/lib/auth/schemas';
 import { TokenManager } from '@/lib/auth/token-manager';
 import { toApiToken } from '@/lib/auth/token-utils';
+import { reconfigureSdkClients } from '@/components/app-provider';
 import { useAuthActions } from '@/store/app-store';
 import type { UserProfile } from '@/store/auth-slice';
 import { useSignInMutation } from '@sdk/auth';
@@ -100,6 +101,9 @@ export function useLogin() {
 		onSuccess: async ({ token, rememberMe, email }) => {
 			// Store token for admin context
 			TokenManager.setToken(token, rememberMe, 'admin');
+
+			// Re-configure SDK clients so they pick up the new auth token
+			reconfigureSdkClients();
 
 			const userId = token.userId ?? token.id;
 

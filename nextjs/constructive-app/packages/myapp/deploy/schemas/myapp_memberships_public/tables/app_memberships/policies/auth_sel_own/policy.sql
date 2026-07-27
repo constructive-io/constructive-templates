@@ -10,6 +10,6 @@ CREATE POLICY auth_sel_own ON myapp_memberships_public.app_memberships
 FOR SELECT
 TO authenticated
 USING (
-  actor_id = jwt_public.current_user_id()
+  actor_id = jwt_public.current_principal_id()
 );
 

@@ -13,7 +13,8 @@ CREATE FUNCTION myapp_auth_private.authenticate_strict(
   user_id uuid,
   session_id uuid,
   access_level text,
-  kind text
+  kind text,
+  principal_id uuid
 ) AS $_PGFN_$
 DECLARE
   v_cred_id uuid;
@@ -39,7 +40,8 @@ BEGIN
     sess.user_id,
     cred.session_id,
     cred.access_level,
-    cred.kind
+    cred.kind,
+    cred.principal_id
   FROM myapp_auth_private.session_credentials AS cred INNER JOIN myapp_auth_private.sessions AS sess ON sess.id = cred.session_id
   WHERE
     (((((cred.secret_hash = digest(authenticate_strict.token_str, 'sha256') AND EXTRACT(EPOCH FROM cred.expires_at - now()) > 0) AND cred.revoked_at IS NULL) AND sess.revoked_at IS NULL) AND EXTRACT(EPOCH FROM sess.expires_at - now()) > 0) AND CASE 

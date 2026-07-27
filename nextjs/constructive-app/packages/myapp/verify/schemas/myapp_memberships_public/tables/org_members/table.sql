@@ -1,6 +1,0 @@
--- Verify: schemas/myapp_memberships_public/tables/org_members/table
-
-
-SELECT verify_table('myapp_memberships_public.org_members');
-
-

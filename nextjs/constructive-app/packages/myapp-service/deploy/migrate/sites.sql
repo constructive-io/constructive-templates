@@ -1,7 +1,7 @@
 -- Deploy: migrate/sites
 -- made with <3 @ constructive.io
 
--- requires: migrate/domains
+-- requires: migrate/apis
 
 
 SET session_replication_role TO replica;
@@ -28,9 +28,11 @@ INSERT INTO services_public.sites (
   og_image,
   favicon,
   apple_touch_icon,
-  logo
+  logo,
+  labels,
+  annotations
 ) VALUES
-  ('019eaaf4-a9f5-72d7-857d-5ec9b9a61d8d', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'Myapp', 'Application powered by Myapp', '{"url":"https://constructive.io/og_image/constructive.jpg","mime":"image/jpeg"}', 'https://constructive.io/favicon.ico', '{"url":"https://constructive.io/brand/constructive.svg","mime":"image/svg+xml"}', '{"url":"https://constructive.io/brand/constructive.png","mime":"image/png"}');
+  ('019fa2a1-5009-7a3c-8273-4676bbf9bcaa', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'Myapp', 'Application powered by Myapp', '{"url":"https://constructive.io/og_image/constructive.jpg","mime":"image/jpeg"}', 'https://constructive.io/favicon.ico', '{"url":"https://constructive.io/brand/constructive.svg","mime":"image/svg+xml"}', '{"url":"https://constructive.io/brand/constructive.png","mime":"image/png"}', '{}', '{}');
 
 
 SET session_replication_role TO DEFAULT;

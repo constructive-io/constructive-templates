@@ -7,6 +7,9 @@
 
 CREATE FUNCTION myapp_memberships_private.app_mbr_create() RETURNS TRIGGER AS $_PGFN_$
 BEGIN
+  IF NEW.type = 3 THEN
+    RETURN NEW;
+  END IF;
   INSERT INTO myapp_memberships_public.app_memberships (
     actor_id
   )

@@ -20,5 +20,5 @@ CREATE VIEW myapp_auth_private.user_sessions WITH ( security_invoker = true ) AS
   updated_at
 FROM myapp_auth_private.sessions
 WHERE
-  user_id = jwt_public.current_user_id();
+  user_id = jwt_public.current_principal_id();
 

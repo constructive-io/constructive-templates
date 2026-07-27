@@ -3,7 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@pgpm/metaschema-modules": "0.26.5",
-    "@pgpm/metaschema-schema": "0.26.5"
+    "@pgpm/database-jobs": "0.22.0",
+    "@pgpm/inflection": "0.15.5",
+    "@pgpm/jwt-claims": "0.15.5",
+    "@pgpm/metaschema-modules": "0.15.5",
+    "@pgpm/metaschema-schema": "0.15.5",
+    "@pgpm/stamps": "0.15.5",
+    "@pgpm/types": "0.15.5",
+    "@pgpm/utils": "0.15.5"
   }
 }

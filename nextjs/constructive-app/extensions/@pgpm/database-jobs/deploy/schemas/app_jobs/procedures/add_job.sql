@@ -4,6 +4,7 @@
 -- requires: schemas/app_jobs/tables/job_queues/table
 -- requires: pgpm-jwt-claims:schemas/jwt_private/procedures/current_database_id
 -- requires: pgpm-jwt-claims:schemas/jwt_public/procedures/current_user_id
+-- requires: pgpm-jwt-claims:schemas/jwt_public/procedures/current_principal_id
 
 BEGIN;
 CREATE FUNCTION app_jobs.add_job (
@@ -16,7 +17,9 @@ CREATE FUNCTION app_jobs.add_job (
   priority integer DEFAULT 0,
   entity_id uuid DEFAULT NULL,
   organization_id uuid DEFAULT NULL,
-  entity_type text DEFAULT NULL
+  entity_type text DEFAULT NULL,
+  function_definition_id uuid DEFAULT NULL,
+  definition_scope text DEFAULT NULL
 )
   RETURNS app_jobs.jobs
   AS $$
@@ -24,19 +27,25 @@ DECLARE
   v_job app_jobs.jobs;
   v_database_id uuid;
   v_actor_id uuid;
+  v_principal_id uuid;
 BEGIN
   -- Read context from JWT claims
   v_database_id := jwt_private.current_database_id();
   v_actor_id := jwt_public.current_user_id();
+
+  v_principal_id := jwt_public.current_principal_id();
 
   IF job_key IS NOT NULL THEN
     -- Upsert job
     INSERT INTO app_jobs.jobs (
       database_id,
       actor_id,
+      principal_id,
       entity_id,
       organization_id,
       entity_type,
+      function_definition_id,
+      definition_scope,
       task_identifier,
       payload,
       queue_name,
@@ -47,9 +56,12 @@ BEGIN
     ) VALUES (
         v_database_id,
         v_actor_id,
+        v_principal_id,
         add_job.entity_id,
         add_job.organization_id,
         add_job.entity_type,
+        add_job.function_definition_id,
+        add_job.definition_scope,
         identifier,
         coalesce(payload, '{}'::json),
         queue_name,
@@ -66,6 +78,8 @@ BEGIN
         max_attempts = EXCLUDED.max_attempts,
         run_at = EXCLUDED.run_at,
         priority = EXCLUDED.priority,
+        function_definition_id = EXCLUDED.function_definition_id,
+        definition_scope = EXCLUDED.definition_scope,
         -- always reset error/retry state
         attempts = 0, last_error = NULL
       WHERE
@@ -93,9 +107,12 @@ BEGIN
   INSERT INTO app_jobs.jobs (
     database_id,
     actor_id,
+    principal_id,
     entity_id,
     organization_id,
     entity_type,
+    function_definition_id,
+    definition_scope,
     task_identifier,
     payload,
     queue_name,
@@ -105,9 +122,12 @@ BEGIN
   ) VALUES (
     v_database_id,
     v_actor_id,
+    v_principal_id,
     add_job.entity_id,
     add_job.organization_id,
     add_job.entity_type,
+    add_job.function_definition_id,
+    add_job.definition_scope,
     identifier,
     payload,
     queue_name,

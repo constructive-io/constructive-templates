@@ -1,6 +1,0 @@
--- Revert: schemas/myapp_events_public/tables/org_event_aggregates/triggers/org_event_aggregates_after_insert_update_tgr
-
-
-DROP TRIGGER org_event_aggregates_after_insert_update_tgr ON myapp_events_public.org_event_aggregates;
-
-

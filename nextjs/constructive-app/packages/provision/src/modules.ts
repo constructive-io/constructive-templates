@@ -1,9 +1,10 @@
 /**
  * modules.ts — Provision module presets for the constructive-app.
  *
- * Source of truth: references/flows.json (the agentic-flow flow catalog).
- * The tuples below mirror `email-password.backend.modules` / `profile.backend.modules`
- * exactly — those entries are already provisioning-ready.
+ * Source of truth: the upstream module presets in constructive-db
+ * (packages/node-type-registry/src/module-presets/). AUTH_HARDENED_MODULES
+ * mirrors the `auth:hardened` preset verbatim; ORG_MODULES is the delta that
+ * `b2b:storage` layers on top for the B2B opt-in path (see docs/B2B.md).
  *
  * IMPORTANT — module shape:
  *   - Unscoped modules are plain strings:        'users_module'
@@ -19,15 +20,17 @@ export type ModuleScope = { scope: 'app' | 'org' };
 export type ProvisionModule = string | [string, ModuleScope];
 
 /**
- * BASE tier — the `auth:email` preset.
+ * BASE tier — the upstream `auth:hardened` preset.
  *
- * The ~13-module single-user auth surface backing the email-password / profile
- * flows. NO org / memberships{org} / hierarchy / invites modules — a base
- * scaffold ships no org/b2b code, so it does not provision those modules.
+ * Email/password auth with rate limiting, SSO, passkeys, SMS, and magic-link /
+ * OTP infrastructure installed. Single-tenant (no orgs / teams / invites /
+ * permissions at org scope). For multi-tenant B2B, layer on ORG_MODULES.
  *
- * Mirrors references/flows.json → email-password.backend.modules verbatim.
+ * Mirrors constructive-db/packages/node-type-registry/src/module-presets/auth-hardened.ts
+ * verbatim. Note: `internal_secrets_module` replaces the removed
+ * `config_secrets_module` from the old auth:email set.
  */
-export const AUTH_EMAIL_MODULES: ProvisionModule[] = [
+export const AUTH_HARDENED_MODULES: ProvisionModule[] = [
   'users_module',
   'membership_types_module',
   ['permissions_module', { scope: 'app' }],
@@ -37,29 +40,39 @@ export const AUTH_EMAIL_MODULES: ProvisionModule[] = [
   'sessions_module',
   'user_state_module',
   'user_credentials_module',
-  'config_secrets_module',
+  'internal_secrets_module',
   'emails_module',
   'rls_module',
-  'user_auth_module'
+  'user_auth_module',
+  'session_secrets_module',
+  'rate_limits_module',
+  'connected_accounts_module',
+  'identity_providers_module',
+  'webauthn_credentials_module',
+  'webauthn_auth_module',
+  'phone_numbers_module',
+  'devices_module'
 ];
 
 /**
- * B2B OPT-IN — the org modules layered on top of {@link AUTH_EMAIL_MODULES}.
+ * B2B OPT-IN — the org modules layered on top of {@link AUTH_HARDENED_MODULES}.
  *
  * An app that adopts the registry org blocks (org-create-card,
  * org-members-list, org-roles-editor, org-settings-form) provisions these in
- * addition to the base set. Mirrors references/flows.json →
- * organization.backend.modules (the org-scoped half). See docs/B2B.md.
+ * addition to the base set. This is the delta between the upstream
+ * `b2b:storage` preset and `auth:hardened` (see docs/B2B.md).
  */
 export const ORG_MODULES: ProvisionModule[] = [
   ['permissions_module', { scope: 'org' }],
   ['limits_module', { scope: 'org' }],
   ['levels_module', { scope: 'org' }],
   ['memberships_module', { scope: 'org' }],
+  ['profiles_module', { scope: 'app' }],
   ['profiles_module', { scope: 'org' }],
   ['hierarchy_module', { scope: 'org' }],
   ['invites_module', { scope: 'app' }],
-  ['invites_module', { scope: 'org' }]
+  ['invites_module', { scope: 'org' }],
+  'storage_module'
 ];
 
 /**

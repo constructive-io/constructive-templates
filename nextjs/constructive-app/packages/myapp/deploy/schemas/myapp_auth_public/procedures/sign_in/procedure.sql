@@ -6,7 +6,9 @@
 -- requires: schemas/myapp_auth_private/tables/auth_rate_limits/table
 -- requires: schemas/myapp_logging_public/tables/audit_log_auth/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_auth/table
+-- requires: schemas/myapp_auth_private/tables/auth_user_devices/table
 -- requires: schemas/myapp_user_identifiers_public/tables/emails/table
+-- requires: schemas/myapp_auth_private/tables/app_settings_device/table
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
@@ -27,7 +29,9 @@ CREATE FUNCTION myapp_auth_public.sign_in(
   OUT is_verified boolean,
   OUT totp_enabled boolean,
   OUT mfa_required boolean,
-  OUT mfa_challenge_token text
+  OUT mfa_challenge_token text,
+  OUT out_device_token text,
+  OUT device_approval_required boolean
 ) AS $_PGFN_$
 DECLARE
   v_email myapp_user_identifiers_public.emails;
@@ -47,6 +51,12 @@ DECLARE
   v_session_expires_at timestamptz;
   v_mfa_enabled boolean := false;
   v_mfa_challenge_token text;
+  v_device_token_hash bytea;
+  v_device myapp_auth_private.auth_user_devices;
+  v_device_settings myapp_auth_private.app_settings_device;
+  v_device_trusted boolean := false;
+  v_device_approved boolean := false;
+  v_new_device_token text;
   v_rate_settings myapp_auth_private.app_settings_rate_limit;
   v_ip_rate_limit myapp_auth_private.auth_ip_rate_limits;
   v_ip_address inet;
@@ -143,6 +153,47 @@ BEGIN
       WHERE
         id = v_anon_session.id;
     END IF;
+    SELECT *
+    FROM myapp_auth_private.app_settings_device
+    LIMIT
+    1 INTO v_device_settings;
+    IF v_device_settings.enable_device_tracking IS TRUE THEN
+      IF sign_in.device_token IS NOT NULL THEN
+        SELECT digest(sign_in.device_token, 'sha256') INTO v_device_token_hash;
+        SELECT *
+        FROM myapp_auth_private.auth_user_devices AS ud
+        WHERE
+          ud.user_id = v_email.owner_id AND ud.device_token_hash = v_device_token_hash INTO v_device;
+        IF v_device.is_trusted IS TRUE AND v_device.trust_expires_at > now() THEN
+          SELECT true INTO v_device_trusted;
+        END IF;
+        IF v_device.is_approved IS TRUE THEN
+          SELECT true INTO v_device_approved;
+        END IF;
+      ELSE
+        SELECT encode(gen_random_bytes(32), 'hex') INTO v_new_device_token;
+        SELECT digest(v_new_device_token, 'sha256') INTO v_device_token_hash;
+      END IF;
+    END IF;
+    IF v_device_settings.require_device_approval IS TRUE AND v_device_approved IS NOT TRUE THEN
+      IF v_device.id IS NULL THEN
+        INSERT INTO myapp_auth_private.auth_user_devices (
+          user_id,
+          device_token_hash,
+          first_seen_ip,
+          last_seen_ip,
+          user_agent,
+          origin
+        )
+        VALUES
+          (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
+      END IF;
+      SELECT true INTO device_approval_required;
+      SELECT v_email.owner_id INTO user_id;
+      SELECT
+        COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
+      RETURN;
+    END IF;
     v_csrf_secret := encode(gen_random_bytes(32), 'hex');
     v_session_id := uuidv7();
     IF sign_in.remember_me IS TRUE THEN
@@ -189,6 +240,27 @@ BEGIN
     SELECT v_user_is_verified INTO is_verified;
     SELECT false INTO mfa_required;
     SELECT false INTO totp_enabled;
+    IF v_device_settings.enable_device_tracking IS TRUE THEN
+      IF v_device.id IS NOT NULL THEN
+        UPDATE myapp_auth_private.auth_user_devices AS ud SET
+        last_seen_at = now(), last_seen_ip = v_ip_address, user_agent = jwt_public.current_user_agent()
+        WHERE
+          ud.id = v_device.id;
+      ELSE
+        INSERT INTO myapp_auth_private.auth_user_devices (
+          user_id,
+          device_token_hash,
+          first_seen_ip,
+          last_seen_ip,
+          user_agent,
+          origin
+        )
+        VALUES
+          (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
+      END IF;
+    END IF;
+    SELECT
+      COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
     IF v_ip_address IS NOT NULL THEN
       DELETE FROM myapp_auth_private.auth_ip_rate_limits
       WHERE

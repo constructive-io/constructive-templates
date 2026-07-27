@@ -1,6 +1,0 @@
--- Verify: schemas/myapp_memberships_public/tables/org_members/policies/auth_sel_ent_mem/policy
-
-
-SELECT verify_policy('auth_sel_ent_mem', 'myapp_memberships_public.org_members');
-
-

@@ -12,6 +12,7 @@ CREATE FUNCTION myapp_auth_public.create_api_key(
   IN access_level text DEFAULT 'full_access',
   IN mfa_level text DEFAULT 'none',
   IN expires_in interval DEFAULT NULL,
+  IN principal_id uuid DEFAULT NULL,
   OUT api_key text,
   OUT key_id uuid,
   OUT expires_at timestamptz
@@ -29,6 +30,9 @@ BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'NOT_AUTHENTICATED';
+  END IF;
+  IF jwt_public.current_principal_id() <> v_user_id THEN
+    RAISE EXCEPTION 'PRINCIPAL_CANNOT_CREATE_API_KEY';
   END IF;
   SELECT *
   FROM myapp_auth_private.app_settings_auth
@@ -55,6 +59,12 @@ BEGIN
   WHERE
     c.id = jwt_private.current_token_id() AND ((c.mfa_level = 'verified' OR s.last_password_verified > (now() - '30 minutes'::interval)) OR s.last_mfa_verified > (now() - '30 minutes'::interval)))) THEN
     RAISE EXCEPTION 'STEP_UP_REQUIRED';
+  END IF;
+  IF create_api_key.principal_id IS NOT NULL AND NOT (EXISTS (SELECT 1
+  FROM myapp_auth_public.principals AS p
+  WHERE
+    (p.user_id = create_api_key.principal_id AND p.owner_id = v_user_id))) THEN
+    RAISE EXCEPTION 'PRINCIPAL_NOT_OWNED';
   END IF;
   v_effective_duration := COALESCE(create_api_key.expires_in, v_settings.api_key_default_duration, '90 days'::interval);
   IF v_settings.api_key_max_duration IS NOT NULL AND v_effective_duration > v_settings.api_key_max_duration THEN
@@ -89,10 +99,11 @@ BEGIN
     mfa_level,
     access_level,
     expires_at,
-    name
+    name,
+    principal_id
   )
   VALUES
-    (v_credential_id, v_session_id, 'api_key', digest(v_plaintext_key, 'sha256'), create_api_key.mfa_level, create_api_key.access_level, v_expires_at, create_api_key.key_name);
+    (v_credential_id, v_session_id, 'api_key', digest(v_plaintext_key, 'sha256'), create_api_key.mfa_level, create_api_key.access_level, v_expires_at, create_api_key.key_name, create_api_key.principal_id);
   INSERT INTO myapp_logging_public.audit_log_auth (
     actor_id,
     event,

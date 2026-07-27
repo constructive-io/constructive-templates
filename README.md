@@ -24,6 +24,7 @@ pgpm admin-users bootstrap --database myapp --yes
 pgpm admin-users add --database myapp --test --yes
 pgpm deploy --package myapp-service --database myapp --yes
 pgpm deploy --package myapp --database myapp --yes
+pgpm deploy --package dev-local --database myapp --yes
 pgpm deploy --package myapp-test-seed --database myapp --yes
 
 # 4. Start GraphQL server

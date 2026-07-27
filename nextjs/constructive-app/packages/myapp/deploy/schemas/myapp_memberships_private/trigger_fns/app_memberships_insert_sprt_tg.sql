@@ -23,7 +23,10 @@ BEGIN
       actor_id
     )
     VALUES
-      (NEW.is_owner, NEW.is_admin, NEW.permissions, NEW.actor_id);
+      (NEW.is_owner, NEW.is_admin, CASE 
+          WHEN (NEW.is_owner IS TRUE OR NEW.is_admin IS TRUE) AND (NEW.permissions IS NULL OR NEW.permissions = (lpad('', (bit_length(NEW.permissions))::int, '0'))::pg_catalog.varbit) THEN (lpad('', (bit_length(NEW.permissions))::int, '1'))::pg_catalog.varbit 
+          ELSE NEW.permissions 
+        END, NEW.actor_id);
   END IF;
   RETURN NEW;
 END;

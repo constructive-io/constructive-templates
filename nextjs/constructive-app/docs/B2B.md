@@ -1,6 +1,6 @@
 # B2B / Organizations — opt-in
 
-This template ships as a **BASE tier** app: the `auth:email` module set only.
+This template ships as a **BASE tier** app: the `auth:hardened` module set only.
 Out of the box it has authentication (sign in / up / out, password reset, email
 verification), an account/profile surface, and a place to build your own app
 data. It ships **no** organization, members, roles, or invite code — so a base
@@ -13,24 +13,26 @@ hand-write the org UI — the registry org blocks already implement it.
 ## 1. Provision the org modules
 
 The base default module set lives in `packages/provision/src/modules.ts`
-(`AUTH_EMAIL_MODULES`). To go b2b, extend it with `ORG_MODULES` (also exported
+(`AUTH_HARDENED_MODULES`). To go b2b, extend it with `ORG_MODULES` (also exported
 from that file) when creating the database:
 
 ```ts
 // packages/provision/src/create-db.ts
-import { asModules, AUTH_EMAIL_MODULES, ORG_MODULES } from './modules.js';
+import { asModules, AUTH_HARDENED_MODULES, ORG_MODULES } from './modules.js';
 
-const APP_MODULES = [...AUTH_EMAIL_MODULES, ...ORG_MODULES];
+const APP_MODULES = [...AUTH_HARDENED_MODULES, ...ORG_MODULES];
 // ...
 modules: asModules(APP_MODULES),
 ```
 
-`ORG_MODULES` mirrors the `organization` flow's backend module set from the
-flow catalog (`references/flows.json`): the org-scoped `permissions`, `limits`,
-`levels`, `memberships`, `profiles`, `hierarchy` modules plus app- and
-org-scoped `invites`. All scoped modules are tuple form
-(`['memberships_module', { scope: 'org' }]`) — the colon-string form
-(`'memberships_module:org'`) is rejected by the provision proc.
+`ORG_MODULES` is the delta between the upstream `b2b:storage` and
+`auth:hardened` presets (constructive-db
+`packages/node-type-registry/src/module-presets/`): the org-scoped
+`permissions`, `limits`, `levels`, `memberships`, `profiles`, `hierarchy`
+modules plus app- and org-scoped `invites` and `storage_module`. All scoped
+modules are tuple form (`['memberships_module', { scope: 'org' }]`) — the
+colon-string form (`'memberships_module:org'`) is rejected by the provision
+proc.
 
 After provisioning, re-run codegen (`pnpm codegen`) so the generated admin SDK
 (`@sdk/admin`) gains the org / members / invites query + mutation hooks that the
@@ -85,8 +87,8 @@ the org-create mutation (the `org-create-card` block).
 
 How this template grants it: `packages/provision/src/create-db.ts` already
 elevates the bootstrap admin to full permissions right after provisioning — it
-resolves **this tenant's** `memberships_public` schema via the metaschema
-(scoped by `database_id`, not a floating `LIKE`) and runs:
+scans **this tenant's** `memberships_public` schemas (app and, when
+provisioned, org) and runs:
 
 ```sql
 UPDATE "<tenant>_memberships_public".app_memberships

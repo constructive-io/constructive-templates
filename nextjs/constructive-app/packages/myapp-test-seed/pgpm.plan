@@ -2,4 +2,4 @@
 %project=myapp-test-seed
 %uri=myapp-test-seed
 
-000-test-users 2025-06-03T00:00:00Z Constructive <dev@constructive.io> # seed test users, org, and memberships
+000-test-users 2025-06-03T00:00:00Z Constructive <dev@constructive.io> # seed test users and memberships (no org surface)

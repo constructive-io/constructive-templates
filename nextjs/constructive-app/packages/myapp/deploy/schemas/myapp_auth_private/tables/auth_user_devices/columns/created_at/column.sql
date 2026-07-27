@@ -1,0 +1,10 @@
+-- Deploy: schemas/myapp_auth_private/tables/auth_user_devices/columns/created_at/column
+-- made with <3 @ constructive.io
+
+-- requires: schemas/myapp_auth_private/schema
+-- requires: schemas/myapp_auth_private/tables/auth_user_devices/table
+
+
+ALTER TABLE myapp_auth_private.auth_user_devices 
+  ADD COLUMN created_at timestamptz;
+

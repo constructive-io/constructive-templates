@@ -13,6 +13,6 @@ USING (
   EXISTS (SELECT 1
   FROM myapp_memberships_private.app_memberships_sprt AS app_sprt
   WHERE
-      app_sprt.actor_id = jwt_public.current_user_id())
+      app_sprt.actor_id = jwt_public.current_principal_id())
 );
 
