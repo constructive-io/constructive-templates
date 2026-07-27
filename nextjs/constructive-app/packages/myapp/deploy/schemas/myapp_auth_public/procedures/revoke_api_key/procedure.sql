@@ -17,6 +17,9 @@ BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'NOT_AUTHENTICATED';
   END IF;
+  IF jwt_public.current_principal_id() <> v_user_id THEN
+    RAISE EXCEPTION 'PRINCIPAL_CANNOT_REVOKE_API_KEY';
+  END IF;
   SELECT sc.session_id
   FROM myapp_auth_private.session_credentials AS sc INNER JOIN myapp_auth_private.sessions AS s ON s.id = sc.session_id
   WHERE
@@ -24,8 +27,12 @@ BEGIN
   IF v_session_id IS NULL THEN
     RAISE EXCEPTION 'API_KEY_NOT_FOUND';
   END IF;
-  -- Unknown statement type: PLpgSQL_expr
-  -- Unknown statement type: PLpgSQL_expr
+  DELETE FROM myapp_auth_private.session_credentials
+  WHERE
+    id = revoke_api_key.key_id;
+  DELETE FROM myapp_auth_private.sessions
+  WHERE
+    id = v_session_id;
   INSERT INTO myapp_logging_public.audit_log_auth (
     actor_id,
     event,

@@ -5,6 +5,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { useExtendToken } from '@/lib/gql/hooks/auth';
 import { useLogin } from '@/lib/gql/hooks/auth';
 import { useLogout } from '@/lib/gql/hooks/auth';
+import { reconfigureSdkClients } from '@/components/app-provider';
 import { initEnvOverridesSync } from '@/lib/runtime/env-sync';
 import { useAuth, useAuthActions } from '@/store/app-store';
 import type { UserProfile } from '@/store/auth-slice';
@@ -74,6 +75,9 @@ function initializeAuth(
 	};
 
 	authActions.setAuthenticated(user, token, rememberMe);
+
+	// Re-configure SDK clients so they pick up the restored token
+	reconfigureSdkClients();
 }
 
 /**

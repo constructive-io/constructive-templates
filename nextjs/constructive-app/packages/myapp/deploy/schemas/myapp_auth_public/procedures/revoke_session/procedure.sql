@@ -21,8 +21,12 @@ BEGIN
   IF revoke_session.session_id = v_current_session THEN
     RAISE EXCEPTION 'CANNOT_REVOKE_CURRENT_SESSION';
   END IF;
-  -- Unknown statement type: PLpgSQL_expr
-  -- Unknown statement type: PLpgSQL_expr
+  DELETE FROM myapp_auth_private.session_credentials
+  WHERE
+    session_credentials.session_id = revoke_session.session_id;
+  DELETE FROM myapp_auth_private.sessions
+  WHERE
+    id = revoke_session.session_id AND user_id = v_user_id;
   IF NOT (FOUND) THEN
     RAISE EXCEPTION 'SESSION_NOT_FOUND';
   END IF;

@@ -8,6 +8,11 @@ CREATE TABLE metaschema_modules_public.merkle_store_module (
     id uuid PRIMARY KEY DEFAULT uuidv7(),
     database_id uuid NOT NULL,
 
+
+    -- Scope-key column name on the generated table(s), recorded by the insert
+    -- trigger via metaschema_generators.scope_key_column(scope, key): database ->
+    -- 'database_id', entity -> the module's key ('entity_id' here), global -> NULL.
+    entity_field text,
     -- Schema references (if uuid_nil, resolved from schema name or default)
     schema_id uuid NOT NULL DEFAULT uuid_nil(),
     private_schema_id uuid NOT NULL DEFAULT uuid_nil(),
@@ -30,8 +35,19 @@ CREATE TABLE metaschema_modules_public.merkle_store_module (
     api_name text,
     private_api_name text,
 
-    -- Scope field name (column used for multi-tenant isolation)
-    scope_field text NOT NULL DEFAULT 'scope_id',
+    -- Scope: 'app' for app-level, 'platform' for database-scoped with
+    -- RLS through metaschema_public.database ownership.
+    scope text NOT NULL DEFAULT 'app',
+
+    -- Function name prefix override: NULL (default) inherits from `prefix`;
+    -- '' (empty string) generates unprefixed function names (e.g., get_all instead of function_graph_get_all);
+    -- any other value is used as-is. Tables always keep their prefix regardless of this setting.
+    function_prefix text DEFAULT NULL,
+
+    -- Permission key for SELECT gating: when set, all 4 merkle tables require this
+    -- permission for SELECT at platform/app scope (e.g., 'manage_graphs').
+    -- NULL means the caller intentionally wants open membership SELECT.
+    permission_key text DEFAULT NULL,
 
     -- Timestamps
     created_at timestamptz NOT NULL DEFAULT now(),

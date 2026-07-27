@@ -3,6 +3,6 @@
 
 DELETE FROM metaschema_public.partition
 WHERE
-  table_id = '019eaaf5-0111-711b-ab29-61002956e7d7'::uuid;
+  table_id = '019fa2a1-703c-73a4-bcd4-ef0ed194b005'::uuid;
 
 

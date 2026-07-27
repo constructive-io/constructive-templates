@@ -1,7 +1,7 @@
 -- Deploy: migrate/apis
 -- made with <3 @ constructive.io
 
--- requires: migrate/sites
+-- requires: migrate/trigger_function
 
 
 SET session_replication_role TO replica;
@@ -26,14 +26,19 @@ INSERT INTO services_public.apis (
   name,
   role_name,
   anon_role,
-  is_public
+  is_public,
+  labels,
+  annotations
 ) VALUES
-  ('019eaaf4-a9f3-72f5-8de7-eaadb9498833', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'admin', 'authenticated', 'anonymous', true),
-  ('019eaaf4-a9f3-78ca-9f79-1961e3031af5', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'auth', 'authenticated', 'anonymous', true),
-  ('019eaaf4-a9f3-7aa0-97d3-bffbcccfe74c', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'api', 'authenticated', 'anonymous', true),
-  ('019eaaf4-a9f3-7c43-96db-e79b1cc717a2', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'usage', 'authenticated', 'anonymous', true),
-  ('019eaaf4-ef69-7366-a138-7d41c1fa503b', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'config', 'authenticated', 'anonymous', true),
-  ('019eaaf5-0de1-7c4b-aceb-8c5797cea3d6', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', 'migrate', 'administrator', 'anonymous', true);
+  ('019fa2a1-5001-790c-8dfa-3347bd8f781b', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'admin', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5002-72ae-930b-fa3c13f980d4', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'auth', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5002-75ec-833a-651fda3d74d6', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'api', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5002-78dc-aba5-6416d5eb3aa1', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'usage', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5002-7ba8-9dc9-50d761475f33', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'compute', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5002-7e71-b97c-34cbe0c7cdc7', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'objects', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-5003-71ec-9509-7a1d4fbf22a4', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'agent', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-674d-7187-a86f-9ebcb7cdc736', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'config', 'authenticated', 'anonymous', true, '{}', '{}'),
+  ('019fa2a1-762f-7b91-aeb4-b40200a7b932', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'migrate', 'authenticated', 'anonymous', true, '{}', '{}');
 
 
 SET session_replication_role TO DEFAULT;

@@ -4,6 +4,7 @@
 -- requires: schemas/myapp_auth_public/schema
 -- requires: schemas/myapp_store_private/schema
 -- requires: schemas/myapp_auth_private/tables/auth_rate_limits/table
+-- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
 CREATE FUNCTION myapp_auth_public.verify_totp(
@@ -15,10 +16,15 @@ DECLARE
   v_user_id uuid;
   v_session_id uuid;
   v_user_rate_limit myapp_auth_private.auth_rate_limits;
+  v_rate_settings myapp_auth_private.app_settings_rate_limit;
 BEGIN
   v_user_id := jwt_public.current_user_id();
   v_session_id := jwt_private.current_session_id();
   PERFORM pg_advisory_xact_lock(hashtext('verify_totp'), hashtext(v_user_id::text));
+  SELECT *
+  FROM myapp_auth_private.app_settings_rate_limit
+  LIMIT
+  1 INTO v_rate_settings;
   totp_secret := myapp_store_private.user_state_get(v_user_id, 'totp_secret');
   IF totp_secret IS NULL THEN
     RAISE EXCEPTION 'TOTP_NOT_ENABLED';

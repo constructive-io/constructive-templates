@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { TokenManager } from '@/lib/auth/token-manager';
+import { reconfigureSdkClients } from '@/components/app-provider';
 import { useAuthActions } from '@/store/app-store';
 import { ROUTE_PATHS } from '@/app-routes';
 import { useSignOutMutation } from '@sdk/auth';
@@ -33,6 +34,7 @@ export function useLogout() {
 		onSuccess: () => {
 			// Clear token and auth state
 			TokenManager.clearToken('admin');
+			reconfigureSdkClients();
 			authActions.setUnauthenticated();
 
 			// Invalidate all queries

@@ -30,6 +30,16 @@ configureAdmin(createSdkConfig('admin'));
 configureAuth(createSdkConfig('auth'));
 configureApp(createSdkConfig('app'));
 
+/**
+ * Re-configure SDK clients with fresh auth headers.
+ * Call after login/logout so the generated FetchAdapter picks up the new token.
+ */
+export function reconfigureSdkClients(): void {
+	configureAdmin(createSdkConfig('admin'));
+	configureAuth(createSdkConfig('auth'));
+	configureApp(createSdkConfig('app'));
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<QueryClientProvider client={queryClient}>

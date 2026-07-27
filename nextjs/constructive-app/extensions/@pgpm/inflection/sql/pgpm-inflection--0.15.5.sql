@@ -377,6 +377,57 @@ CREATE FUNCTION inflection.slugify(
   text
 ) RETURNS text AS $EOFCODE$SELECT inflection.slugify($1, false)$EOFCODE$ LANGUAGE sql IMMUTABLE;
 
+CREATE FUNCTION inflection.dns_1123(
+  value text
+) RETURNS text AS $EOFCODE$
+  WITH lowercased AS (
+    SELECT
+      lower(value) AS value
+),
+-- ':' delimits namespaced identifiers; map to '--' so the boundary survives
+namespaced AS (
+  SELECT
+    replace(value, ':', '--') AS value
+FROM
+  lowercased
+),
+hyphenated AS (
+  SELECT
+    replace(value, '_', '-') AS value
+FROM
+  namespaced
+),
+stripped AS (
+  SELECT
+    regexp_replace(value, '[^a-z0-9-]', '', 'g') AS value
+FROM
+  hyphenated
+),
+trimmed AS (
+  SELECT
+    regexp_replace(value, '^-+|-+$', '', 'g') AS value
+FROM
+  stripped
+),
+truncated AS (
+  SELECT
+    "left"(value, 63) AS value
+FROM
+  trimmed
+),
+-- truncation can leave a dangling '-'; drop any trailing non-alphanumerics
+final AS (
+  SELECT
+    regexp_replace(value, '[^a-z0-9]+$', '') AS value
+FROM
+  truncated
+)
+SELECT
+  value
+FROM
+  final;
+$EOFCODE$ LANGUAGE sql STRICT IMMUTABLE;
+
 INSERT INTO inflection.inflection_rules (
   type,
   test,

@@ -7,5 +7,5 @@
 
 
 ALTER TABLE myapp_users_public.users 
-  ALTER COLUMN id SET NOT NULL;
+  ALTER COLUMN id SET DEFAULT uuidv7();
 

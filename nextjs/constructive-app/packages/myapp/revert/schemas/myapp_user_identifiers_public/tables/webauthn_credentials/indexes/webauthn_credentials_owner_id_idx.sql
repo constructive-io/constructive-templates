@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_user_identifiers_public/tables/webauthn_credentials/indexes/webauthn_credentials_owner_id_idx
+
+
+DROP INDEX myapp_user_identifiers_public.webauthn_credentials_owner_id_idx;
+
+

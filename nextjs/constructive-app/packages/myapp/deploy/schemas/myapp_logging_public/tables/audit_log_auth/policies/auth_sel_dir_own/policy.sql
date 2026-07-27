@@ -10,6 +10,6 @@ CREATE POLICY auth_sel_dir_own ON myapp_logging_public.audit_log_auth
 FOR SELECT
 TO authenticated
 USING (
-  actor_id = jwt_public.current_user_id()
+  actor_id = jwt_public.current_principal_id()
 );
 

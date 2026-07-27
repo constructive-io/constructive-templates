@@ -2,6 +2,6 @@
 
 
 ALTER TABLE myapp_users_public.users 
-  ALTER COLUMN id DROP NOT NULL;
+  ALTER COLUMN id DROP DEFAULT;
 
 

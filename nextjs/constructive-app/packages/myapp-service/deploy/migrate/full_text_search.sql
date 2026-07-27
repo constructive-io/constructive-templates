@@ -1,7 +1,7 @@
 -- Deploy: migrate/full_text_search
 -- made with <3 @ constructive.io
 
--- requires: migrate/check_constraint
+-- requires: migrate/foreign_key_constraint
 
 
 SET session_replication_role TO replica;
@@ -28,11 +28,9 @@ INSERT INTO metaschema_public.full_text_search (
   field_ids,
   weights,
   langs,
-  lang_column,
-  created_at,
-  updated_at
+  lang_column
 ) VALUES
-  ('019eaaf4-aa3b-7922-8bb2-8e3fcedb5d1d', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', '019eaaf4-aa0c-7194-9321-949d0e7e42bc', '019eaaf4-aa39-780f-8e67-fade97f5f563', '{019eaaf4-aa25-70e4-a524-329edc21e274,019eaaf4-aa2f-7b68-ba8e-0188e22cde39}', '{A,B}', '{pg_catalog.simple,pg_catalog.simple}', NULL, '2026-06-09T05:57:01.000Z', '2026-06-09T05:57:01.000Z');
+  ('019fa2a1-5055-75b5-b085-77cf2b8fdbe9', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5022-77c8-9de2-2ef6079855de', '019fa2a1-5053-737a-bf40-59ea3ee68b83', '{019fa2a1-503c-7fc0-a00a-4eb05fdea62f,019fa2a1-5048-7874-b9b6-ecb3b316d78c}', '{A,B}', '{pg_catalog.simple,pg_catalog.simple}', NULL);
 
 
 SET session_replication_role TO DEFAULT;

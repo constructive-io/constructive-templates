@@ -5,7 +5,9 @@
 -- requires: schemas/myapp_users_public/tables/users/table
 -- requires: schemas/myapp_auth_private/tables/sessions/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_auth/table
+-- requires: schemas/myapp_auth_private/tables/auth_user_devices/table
 -- requires: schemas/myapp_user_identifiers_public/tables/emails/table
+-- requires: schemas/myapp_auth_private/tables/app_settings_device/table
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
@@ -24,7 +26,8 @@ CREATE FUNCTION myapp_auth_public.sign_up(
   OUT access_token text,
   OUT access_token_expires_at timestamptz,
   OUT is_verified boolean,
-  OUT totp_enabled boolean
+  OUT totp_enabled boolean,
+  OUT out_device_token text
 ) AS $_PGFN_$
 DECLARE
   v_user myapp_users_public.users;
@@ -40,6 +43,9 @@ DECLARE
   v_remember_me_duration interval := '30 days'::interval;
   v_require_csrf boolean := false;
   v_min_password_length int := 8;
+  v_device_token_hash bytea;
+  v_device_settings myapp_auth_private.app_settings_device;
+  v_new_device_token text;
   v_rate_settings myapp_auth_private.app_settings_rate_limit;
   v_ip_rate_limit myapp_auth_private.auth_ip_rate_limits;
   v_ip_address inet;
@@ -159,6 +165,33 @@ BEGIN
     SELECT v_session_expires_at INTO access_token_expires_at;
     SELECT false INTO is_verified;
     SELECT false INTO totp_enabled;
+    SELECT *
+    FROM myapp_auth_private.app_settings_device
+    LIMIT
+    1 INTO v_device_settings;
+    IF v_device_settings.enable_device_tracking IS TRUE THEN
+      IF sign_up.device_token IS NOT NULL THEN
+        SELECT digest(sign_up.device_token, 'sha256') INTO v_device_token_hash;
+      ELSE
+        SELECT encode(gen_random_bytes(32), 'hex') INTO v_new_device_token;
+        SELECT digest(v_new_device_token, 'sha256') INTO v_device_token_hash;
+      END IF;
+      INSERT INTO myapp_auth_private.auth_user_devices (
+        user_id,
+        device_token_hash,
+        first_seen_ip,
+        last_seen_ip,
+        user_agent,
+        origin,
+        is_approved,
+        approved_at,
+        approval_method
+      )
+      VALUES
+        (v_user.id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin(), true, now(), 'auto');
+    END IF;
+    SELECT
+      COALESCE(v_new_device_token, sign_up.device_token) INTO out_device_token;
     IF v_ip_address IS NOT NULL THEN
       DELETE FROM myapp_auth_private.auth_ip_rate_limits
       WHERE

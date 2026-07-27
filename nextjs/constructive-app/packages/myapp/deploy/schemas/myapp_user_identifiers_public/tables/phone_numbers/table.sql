@@ -1,0 +1,8 @@
+-- Deploy: schemas/myapp_user_identifiers_public/tables/phone_numbers/table
+-- made with <3 @ constructive.io
+
+-- requires: schemas/myapp_user_identifiers_public/schema
+
+
+CREATE TABLE myapp_user_identifiers_public.phone_numbers ();
+

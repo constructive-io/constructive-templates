@@ -17,11 +17,13 @@ CREATE TABLE metaschema_public.check_constraint (
   field_ids uuid[] NOT NULL,
   expr jsonb,
 
+  -- Constraint timing: emit DEFERRABLE / INITIALLY DEFERRED.
+  is_deferrable boolean NOT NULL DEFAULT false,
+  initially_deferred boolean NOT NULL DEFAULT false,
+
   smart_tags jsonb,
 
   category metaschema_public.object_category NOT NULL DEFAULT 'app',
-  module text NULL,
-  scope int NULL,
 
   tags citext[] NOT NULL DEFAULT '{}',
 

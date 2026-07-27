@@ -1,0 +1,7 @@
+-- Revert: schemas/myapp_auth_private/tables/auth_user_devices/columns/last_seen_at/alterations/alt0000000001
+
+
+ALTER TABLE myapp_auth_private.auth_user_devices 
+  ALTER COLUMN last_seen_at DROP NOT NULL;
+
+

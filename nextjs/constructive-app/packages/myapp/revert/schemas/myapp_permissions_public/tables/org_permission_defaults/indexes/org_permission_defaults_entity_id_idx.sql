@@ -1,6 +1,0 @@
--- Revert: schemas/myapp_permissions_public/tables/org_permission_defaults/indexes/org_permission_defaults_entity_id_idx
-
-
-DROP INDEX myapp_permissions_public.org_permission_defaults_entity_id_idx;
-
-

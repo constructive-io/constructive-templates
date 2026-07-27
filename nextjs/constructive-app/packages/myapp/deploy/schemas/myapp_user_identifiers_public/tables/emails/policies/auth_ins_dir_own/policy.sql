@@ -10,6 +10,6 @@ CREATE POLICY auth_ins_dir_own ON myapp_user_identifiers_public.emails
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  owner_id = jwt_public.current_user_id()
+  owner_id = jwt_public.current_principal_id()
 );
 

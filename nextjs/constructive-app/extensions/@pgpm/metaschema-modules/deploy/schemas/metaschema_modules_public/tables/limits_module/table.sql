@@ -7,9 +7,18 @@ BEGIN;
 CREATE TABLE metaschema_modules_public.limits_module (
     id uuid PRIMARY KEY DEFAULT uuidv7(),
     database_id uuid NOT NULL,
+
+    -- Scope-key column name on the generated table(s), recorded by the insert
+    -- trigger via metaschema_generators.scope_key_column(scope, key): database ->
+    -- 'database_id', entity -> the module's key ('entity_id' here), global -> NULL.
+    entity_field text,
     --
     schema_id uuid NOT NULL DEFAULT uuid_nil(),
     private_schema_id uuid NOT NULL DEFAULT uuid_nil(),
+
+  -- Schema name overrides: when set, the trigger uses these instead of hardcoded defaults.
+  public_schema_name text,
+  private_schema_name text,
     ---
     table_id uuid NOT NULL DEFAULT uuid_nil(),
     table_name text NOT NULL DEFAULT '',
@@ -61,16 +70,22 @@ CREATE TABLE metaschema_modules_public.limits_module (
     limit_check_soft_function text NOT NULL DEFAULT '',
     limit_aggregate_check_soft_function text NOT NULL DEFAULT '',
 
-    prefix text NULL,
+    -- Scope: determines the security level for this module instance.
+    scope text NOT NULL DEFAULT 'app',
 
-    membership_type int NOT NULL,
-    -- if this is NOT NULL, then we add entity_id 
-    -- e.g. limits to the app itself are considered global owned by app and no explicit owner
+    -- Table name prefix. Auto-derived from scope by the trigger when empty.
+    prefix text NOT NULL DEFAULT '',
+
+    -- Entity table for RLS (NULL for app-level, entity table for entity-scoped)
     entity_table_id uuid NULL,
 
     -- required tables    
     actor_table_id uuid NOT NULL DEFAULT uuid_nil(),
      
+    -- API routing (configurable per-module)
+    api_name text DEFAULT 'usage',
+    private_api_name text DEFAULT NULL,
+
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES metaschema_public.database (id) ON DELETE CASCADE,
     CONSTRAINT schema_fkey FOREIGN KEY (schema_id) REFERENCES metaschema_public.schema (id) ON DELETE CASCADE,
     CONSTRAINT private_schema_fkey FOREIGN KEY (private_schema_id) REFERENCES metaschema_public.schema (id) ON DELETE CASCADE,

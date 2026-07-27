@@ -8,9 +8,18 @@ CREATE TABLE metaschema_modules_public.events_module (
   id uuid PRIMARY KEY DEFAULT uuidv7(),
   database_id uuid NOT NULL,
 
+
+  -- Scope-key column name on the generated table(s), recorded by the insert
+  -- trigger via metaschema_generators.scope_key_column(scope, key): database ->
+  -- 'database_id', entity -> the module's key ('entity_id' here), global -> NULL.
+  entity_field text,
   --
   schema_id uuid NOT NULL DEFAULT uuid_nil(),
   private_schema_id uuid NOT NULL DEFAULT uuid_nil(),
+
+  -- Schema name overrides: when set, the trigger uses these instead of hardcoded defaults.
+  public_schema_name text,
+  private_schema_name text,
   --
   
   events_table_id uuid NOT NULL DEFAULT uuid_nil(),
@@ -42,7 +51,6 @@ CREATE TABLE metaschema_modules_public.events_module (
   tg_event_bool text NOT NULL DEFAULT '',
   upsert_aggregate text NOT NULL DEFAULT '',
   tg_update_aggregates text NOT NULL DEFAULT '',
-  prune_events text NOT NULL DEFAULT '',
   steps_required text NOT NULL DEFAULT '',
   level_achieved text NOT NULL DEFAULT '',
   tg_check_achievements text NOT NULL DEFAULT '',
@@ -54,16 +62,26 @@ CREATE TABLE metaschema_modules_public.events_module (
   retention text DEFAULT '12 months',
   premake int NOT NULL DEFAULT 2,
 
-  prefix text NULL,
+  -- Scope: determines the security level for this module instance.
+  scope text NOT NULL DEFAULT 'app',
 
-  membership_type int NOT NULL,
-  -- if this is NOT NULL, then we add entity_id 
-  -- e.g. limits to the app itself are considered global owned by app and no explicit owner
+  -- Table name prefix. Auto-derived from scope by the trigger when empty.
+  prefix text NOT NULL DEFAULT '',
+
+  -- Entity table for RLS (NULL for app-level, entity table for entity-scoped)
   entity_table_id uuid NULL,
 
   -- required tables    
   actor_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
+
+  -- Default permissions: permission names auto-granted to new members.
+  -- NULL uses the module's built-in defaults; explicit array overrides them.
+  default_permissions text[] DEFAULT NULL,
+
+  -- API routing (configurable per-module)
+  api_name text DEFAULT 'usage',
+  private_api_name text DEFAULT NULL,
 
   CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES metaschema_public.database (id) ON DELETE CASCADE,
   CONSTRAINT schema_fkey FOREIGN KEY (schema_id) REFERENCES metaschema_public.schema (id) ON DELETE CASCADE,

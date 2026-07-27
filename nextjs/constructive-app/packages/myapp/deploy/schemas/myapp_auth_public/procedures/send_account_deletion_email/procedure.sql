@@ -43,7 +43,7 @@ BEGIN
   IF v_user_rate_limit.last_attempt_at IS NOT NULL AND now() < (v_user_rate_limit.last_attempt_at + v_rate_settings.email_cooldown_period) THEN
     RETURN false;
   END IF;
-  v_deletion_token := encode(gen_random_bytes(7), 'hex');
+  v_deletion_token := encode(gen_random_bytes(16), 'hex');
   PERFORM myapp_store_private.user_secrets_set(v_user_id, 'account_deletion_token', v_deletion_token, 'crypt');
   INSERT INTO myapp_auth_private.auth_rate_limits (
     subject_id,

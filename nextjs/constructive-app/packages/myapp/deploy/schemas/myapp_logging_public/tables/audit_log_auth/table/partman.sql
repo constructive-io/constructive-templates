@@ -17,6 +17,6 @@ INSERT INTO metaschema_public.partition (
   naming_pattern
 )
 VALUES
-  ('515a5fe4-5e2f-4c8e-accf-6b239b5a0b18', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', '019eaaf5-0111-711b-ab29-61002956e7d7', 'range', '019eaaf5-01f0-7861-a5ae-ee5136621f9b', '1 month', '12 months', TRUE, 2, '{parent}_{bounds}')
+  ('b41d33cc-2557-4737-9d65-40a56fb171cf', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-703c-73a4-bcd4-ef0ed194b005', 'range', '019fa2a1-70e7-7803-a305-6394226eb534', '1 month', '12 months', TRUE, 2, '{parent}_{bounds}')
 ON CONFLICT (table_id) DO NOTHING;
 

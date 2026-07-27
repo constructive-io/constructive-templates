@@ -1,7 +1,7 @@
 -- Deploy: migrate/apps
 -- made with <3 @ constructive.io
 
--- requires: migrate/apis
+-- requires: migrate/api_schemas
 
 
 SET session_replication_role TO replica;
@@ -31,7 +31,7 @@ INSERT INTO services_public.apps (
   app_id_prefix,
   play_store_link
 ) VALUES
-  ('019eaaf4-a9f5-7b4d-ba6e-1a09f7917a3c', '019eaaf4-a983-769d-8cf4-acfa48dc2f74', '019eaaf4-a9f5-72d7-857d-5ec9b9a61d8d', 'Myapp', '{"url":"https://constructive.io/brand/constructive.svg","mime":"image/svg+xml"}', NULL, NULL, NULL, NULL);
+  ('019fa2a1-500a-78a4-bd8f-859594614113', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5009-7a3c-8273-4676bbf9bcaa', 'Myapp', '{"url":"https://constructive.io/brand/constructive.svg","mime":"image/svg+xml"}', NULL, NULL, NULL, NULL);
 
 
 SET session_replication_role TO DEFAULT;

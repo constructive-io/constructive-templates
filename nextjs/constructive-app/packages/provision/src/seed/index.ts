@@ -2,8 +2,8 @@
  * seed/index.ts — Seed entry point for the constructive-app (BASE tier)
  *
  * Creates a couple of test users so you can sign in immediately after
- * provisioning. The base auth:email app has no organizations, so this seed
- * does NOT create orgs or org memberships.
+ * provisioning. The base auth:hardened app has no organizations, so this
+ * seed does NOT create orgs or org memberships.
  *
  * B2B OPT-IN: once you provision the org modules and add the registry org
  * blocks (see docs/B2B.md), extend this seed to create organizations and

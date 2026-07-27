@@ -30,7 +30,14 @@ export const EditPasswordCard: CardComponent<EditPasswordCardProps> = ({ onSucce
 		if (!canSave) return;
 
 		try {
-			await setPassword({ input: { currentPassword, newPassword } });
+			const res = await setPassword({ input: { currentPassword, newPassword } });
+			if (!res.setPassword?.result) {
+				showErrorToast({
+					message: 'Failed to update password',
+					description: 'Session may have expired. Please log in again.',
+				});
+				return;
+			}
 			showSuccessToast({ message: 'Password updated', description: 'Your password has been changed successfully.' });
 			onSuccess?.();
 			card.close();

@@ -79,7 +79,7 @@ BEGIN
   )
   VALUES
     (v_email.owner_id, 'forgot_password', true);
-  v_token := encode(gen_random_bytes(7), 'hex');
+  v_token := encode(gen_random_bytes(16), 'hex');
   PERFORM myapp_store_private.user_secrets_set(v_user_id, 'reset_password_token', v_token, 'crypt');
   INSERT INTO myapp_auth_private.auth_rate_limits (
     subject_id,

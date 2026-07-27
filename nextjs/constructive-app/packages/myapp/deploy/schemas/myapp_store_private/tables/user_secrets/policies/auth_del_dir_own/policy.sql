@@ -10,6 +10,6 @@ CREATE POLICY auth_del_dir_own ON myapp_store_private.user_secrets
 FOR DELETE
 TO authenticated
 USING (
-  owner_id = jwt_public.current_user_id()
+  owner_id = jwt_public.current_principal_id()
 );
 
