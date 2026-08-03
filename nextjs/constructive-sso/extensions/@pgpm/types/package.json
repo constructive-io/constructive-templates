@@ -1,0 +1,38 @@
+{
+  "name": "@pgpm/types",
+  "version": "0.33.0",
+  "description": "Core PostgreSQL data types with deploy/verify/revert SQL scripts",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "contributors": [
+    "Constructive <developers@constructive.io>"
+  ],
+  "keywords": [
+    "postgresql",
+    "pgpm",
+    "data-types",
+    "sql"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "bundle": "pgpm package",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@pgpm/verify": "0.33.0"
+  },
+  "devDependencies": {
+    "pgpm": "^4.28.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/constructive-io/pgpm-modules"
+  },
+  "homepage": "https://github.com/constructive-io/pgpm-modules",
+  "bugs": {
+    "url": "https://github.com/constructive-io/pgpm-modules/issues"
+  },
+  "gitHead": "744a6836e7c7e61ddc00a3dcee36db7ebc9647f6"
+}

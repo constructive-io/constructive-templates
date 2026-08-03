@@ -1,0 +1,24 @@
+{
+  "name": "@constructive-app/export",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export:graphql": "tsx src/run-graphql-export.ts",
+    "build": "echo 'No build required'"
+  },
+  "dependencies": {
+    "@constructive-io/fetch": "^1.1.1",
+    "@constructive-io/node": "^0.10.12",
+    "@pgpmjs/core": "^6.24.0",
+    "@pgpmjs/export": "link:../../../../../constructive/pgpm/export/dist",
+    "@pgpmjs/migrate-client": "^0.15.8",
+    "dotenv": "^16.6.1",
+    "pg-cache": "^3.12.0",
+    "pg-env": "^1.16.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

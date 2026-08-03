@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_user_identifiers_private/tables/connected_accounts/indexes/connected_accounts_updated_at_idx
+
+
+DROP INDEX myapp_user_identifiers_private.connected_accounts_updated_at_idx;
+
+

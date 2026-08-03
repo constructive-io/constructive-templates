@@ -1,0 +1,4 @@
+-- Revert: schemas/catalog_public/tables/resource_installations/indexes/resource_installations_updated_at_idx
+
+
+DROP INDEX catalog_public.resource_installations_updated_at_idx;

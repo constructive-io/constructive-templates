@@ -1,0 +1,5 @@
+-- Revert: schemas/platform_routing_public/tables/platform_hostname_bindings/constraints/platform_hostname_bindings_pkey/constraint
+
+
+ALTER TABLE platform_routing_public.platform_hostname_bindings 
+  DROP CONSTRAINT platform_hostname_bindings_pkey RESTRICT;

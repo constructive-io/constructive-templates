@@ -1,0 +1,5 @@
+-- Revert: schemas/platform_routing_public/tables/platform_routes/columns/target_api_id/alterations/alt0000000002
+
+
+ALTER TABLE platform_routing_public.platform_routes 
+  DROP CONSTRAINT platform_routes_target_api_id_target_site_id_target_function_id RESTRICT;

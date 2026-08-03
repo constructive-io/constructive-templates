@@ -1,0 +1,7 @@
+# myapp-service extension
+comment = 'myapp-service extension'
+default_version = '0.0.1'
+module_pathname = '$libdir/myapp-service'
+requires = 'catalog,metaschema-modules,metaschema-schema,pgpm-database-jobs,pgpm-inflection,pgpm-jwt-claims,pgpm-stamps,pgpm-types,pgpm-utils,pgpm-verify,routing,routing-platform,services'
+relocatable = false
+superuser = false
