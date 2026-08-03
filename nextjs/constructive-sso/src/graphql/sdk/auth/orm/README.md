@@ -1,0 +1,1000 @@
+# ORM Client
+
+<p align="center" width="100%">
+  <img height="120" src="https://raw.githubusercontent.com/constructive-io/constructive/refs/heads/main/assets/outline-logo.svg" />
+</p>
+
+<!-- @constructive-io/graphql-codegen - DO NOT EDIT -->
+
+## Setup
+
+```typescript
+import { createClient } from './orm';
+
+const db = createClient({
+  endpoint: 'https://api.example.com/graphql',
+  headers: { Authorization: 'Bearer <token>' },
+});
+```
+
+## Models
+
+| Model | Operations |
+|-------|------------|
+| `principal` | findMany, findOne, create, update, delete |
+| `principalEntity` | findMany, findOne, create, update, delete |
+| `principalScopeOverride` | findMany, findOne, create, update, delete |
+| `email` | findMany, findOne, create, update, delete |
+| `phoneNumber` | findMany, findOne, create, update, delete |
+| `webauthnCredential` | findMany, findOne, create, update, delete |
+| `auditLogAuth` | findMany, findOne, create, update, delete |
+| `identityProvider` | findMany, findOne, create, update, delete |
+| `roleType` | findMany, findOne, create, update, delete |
+| `userConnectedAccount` | findMany, findOne, create, update, delete |
+| `orgApiKeyList` | findMany, findOne, create, update, delete |
+| `user` | findMany, findOne, create, update, delete |
+
+## Table Operations
+
+### `db.principal`
+
+CRUD operations for Principal records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+| `ownerId` | UUID | Yes |
+| `userId` | UUID | Yes |
+| `name` | String | Yes |
+| `useAdminOwner` | Boolean | Yes |
+| `isReadOnly` | Boolean | Yes |
+| `bypassStepUp` | Boolean | Yes |
+
+**Operations:**
+
+```typescript
+// List all principal records
+const items = await db.principal.findMany({ select: { id: true, createdAt: true, updatedAt: true, ownerId: true, userId: true, name: true, useAdminOwner: true, isReadOnly: true, bypassStepUp: true } }).execute();
+
+// Get one by principalId
+const item = await db.principal.findOne({ principalId: '<UUID>', select: { id: true, createdAt: true, updatedAt: true, ownerId: true, userId: true, name: true, useAdminOwner: true, isReadOnly: true, bypassStepUp: true } }).execute();
+
+// Create
+const created = await db.principal.create({ data: { id: '<UUID>', ownerId: '<UUID>', userId: '<UUID>', name: '<String>', useAdminOwner: '<Boolean>', isReadOnly: '<Boolean>', bypassStepUp: '<Boolean>' }, select: { principalId: true } }).execute();
+
+// Update
+const updated = await db.principal.update({ where: { principalId: '<UUID>' }, data: { id: '<UUID>' }, select: { principalId: true } }).execute();
+
+// Delete
+const deleted = await db.principal.delete({ where: { principalId: '<UUID>' } }).execute();
+```
+
+### `db.principalEntity`
+
+CRUD operations for PrincipalEntity records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+| `principalId` | UUID | Yes |
+| `entityId` | UUID | Yes |
+| `ownerId` | UUID | Yes |
+
+**Operations:**
+
+```typescript
+// List all principalEntity records
+const items = await db.principalEntity.findMany({ select: { id: true, createdAt: true, updatedAt: true, principalId: true, entityId: true, ownerId: true } }).execute();
+
+// Get one by id
+const item = await db.principalEntity.findOne({ id: '<UUID>', select: { id: true, createdAt: true, updatedAt: true, principalId: true, entityId: true, ownerId: true } }).execute();
+
+// Create
+const created = await db.principalEntity.create({ data: { principalId: '<UUID>', entityId: '<UUID>', ownerId: '<UUID>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.principalEntity.update({ where: { id: '<UUID>' }, data: { principalId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.principalEntity.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.principalScopeOverride`
+
+CRUD operations for PrincipalScopeOverride records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+| `principalId` | UUID | Yes |
+| `membershipType` | Int | Yes |
+| `allowedMask` | BitString | Yes |
+| `useAdminOwner` | Boolean | Yes |
+| `isActive` | Boolean | Yes |
+| `isReadOnly` | Boolean | Yes |
+
+**Operations:**
+
+```typescript
+// List all principalScopeOverride records
+const items = await db.principalScopeOverride.findMany({ select: { id: true, createdAt: true, updatedAt: true, principalId: true, membershipType: true, allowedMask: true, useAdminOwner: true, isActive: true, isReadOnly: true } }).execute();
+
+// Get one by id
+const item = await db.principalScopeOverride.findOne({ id: '<UUID>', select: { id: true, createdAt: true, updatedAt: true, principalId: true, membershipType: true, allowedMask: true, useAdminOwner: true, isActive: true, isReadOnly: true } }).execute();
+
+// Create
+const created = await db.principalScopeOverride.create({ data: { principalId: '<UUID>', membershipType: '<Int>', allowedMask: '<BitString>', useAdminOwner: '<Boolean>', isActive: '<Boolean>', isReadOnly: '<Boolean>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.principalScopeOverride.update({ where: { id: '<UUID>' }, data: { principalId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.principalScopeOverride.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.email`
+
+CRUD operations for Email records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `ownerId` | UUID | Yes |
+| `email` | ConstructiveInternalTypeEmail | Yes |
+| `isVerified` | Boolean | Yes |
+| `isPrimary` | Boolean | Yes |
+| `name` | String | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+
+**Operations:**
+
+```typescript
+// List all email records
+const items = await db.email.findMany({ select: { id: true, ownerId: true, email: true, isVerified: true, isPrimary: true, name: true, createdAt: true, updatedAt: true } }).execute();
+
+// Get one by id
+const item = await db.email.findOne({ id: '<UUID>', select: { id: true, ownerId: true, email: true, isVerified: true, isPrimary: true, name: true, createdAt: true, updatedAt: true } }).execute();
+
+// Create
+const created = await db.email.create({ data: { ownerId: '<UUID>', email: '<Email>', isVerified: '<Boolean>', isPrimary: '<Boolean>', name: '<String>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.email.update({ where: { id: '<UUID>' }, data: { ownerId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.email.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.phoneNumber`
+
+CRUD operations for PhoneNumber records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `ownerId` | UUID | Yes |
+| `cc` | String | Yes |
+| `number` | String | Yes |
+| `isVerified` | Boolean | Yes |
+| `isPrimary` | Boolean | Yes |
+| `name` | String | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+
+**Operations:**
+
+```typescript
+// List all phoneNumber records
+const items = await db.phoneNumber.findMany({ select: { id: true, ownerId: true, cc: true, number: true, isVerified: true, isPrimary: true, name: true, createdAt: true, updatedAt: true } }).execute();
+
+// Get one by id
+const item = await db.phoneNumber.findOne({ id: '<UUID>', select: { id: true, ownerId: true, cc: true, number: true, isVerified: true, isPrimary: true, name: true, createdAt: true, updatedAt: true } }).execute();
+
+// Create
+const created = await db.phoneNumber.create({ data: { ownerId: '<UUID>', cc: '<String>', number: '<String>', isVerified: '<Boolean>', isPrimary: '<Boolean>', name: '<String>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.phoneNumber.update({ where: { id: '<UUID>' }, data: { ownerId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.phoneNumber.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.webauthnCredential`
+
+CRUD operations for WebauthnCredential records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `ownerId` | UUID | Yes |
+| `credentialId` | String | Yes |
+| `publicKey` | Base64EncodedBinary | Yes |
+| `signCount` | BigInt | Yes |
+| `webauthnUserId` | String | Yes |
+| `transports` | String | Yes |
+| `credentialDeviceType` | String | Yes |
+| `backupEligible` | Boolean | Yes |
+| `backupState` | Boolean | Yes |
+| `name` | String | Yes |
+| `lastUsedAt` | Datetime | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+
+**Operations:**
+
+```typescript
+// List all webauthnCredential records
+const items = await db.webauthnCredential.findMany({ select: { id: true, ownerId: true, credentialId: true, publicKey: true, signCount: true, webauthnUserId: true, transports: true, credentialDeviceType: true, backupEligible: true, backupState: true, name: true, lastUsedAt: true, createdAt: true, updatedAt: true } }).execute();
+
+// Get one by id
+const item = await db.webauthnCredential.findOne({ id: '<UUID>', select: { id: true, ownerId: true, credentialId: true, publicKey: true, signCount: true, webauthnUserId: true, transports: true, credentialDeviceType: true, backupEligible: true, backupState: true, name: true, lastUsedAt: true, createdAt: true, updatedAt: true } }).execute();
+
+// Create
+const created = await db.webauthnCredential.create({ data: { ownerId: '<UUID>', credentialId: '<String>', publicKey: '<Base64EncodedBinary>', signCount: '<BigInt>', webauthnUserId: '<String>', transports: '<String>', credentialDeviceType: '<String>', backupEligible: '<Boolean>', backupState: '<Boolean>', name: '<String>', lastUsedAt: '<Datetime>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.webauthnCredential.update({ where: { id: '<UUID>' }, data: { ownerId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.webauthnCredential.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.auditLogAuth`
+
+CRUD operations for AuditLogAuth records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `createdAt` | Datetime | No |
+| `id` | UUID | No |
+| `event` | String | Yes |
+| `actorId` | UUID | Yes |
+| `origin` | ConstructiveInternalTypeOrigin | Yes |
+| `userAgent` | String | Yes |
+| `ipAddress` | InternetAddress | Yes |
+| `success` | Boolean | Yes |
+
+**Operations:**
+
+```typescript
+// List all auditLogAuth records
+const items = await db.auditLogAuth.findMany({ select: { createdAt: true, id: true, event: true, actorId: true, origin: true, userAgent: true, ipAddress: true, success: true } }).execute();
+
+// Get one by id
+const item = await db.auditLogAuth.findOne({ id: '<UUID>', select: { createdAt: true, id: true, event: true, actorId: true, origin: true, userAgent: true, ipAddress: true, success: true } }).execute();
+
+// Create
+const created = await db.auditLogAuth.create({ data: { event: '<String>', actorId: '<UUID>', origin: '<Origin>', userAgent: '<String>', ipAddress: '<InternetAddress>', success: '<Boolean>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.auditLogAuth.update({ where: { id: '<UUID>' }, data: { event: '<String>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.auditLogAuth.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.identityProvider`
+
+CRUD operations for IdentityProvider records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `slug` | String | Yes |
+| `kind` | String | Yes |
+| `displayName` | String | Yes |
+| `enabled` | Boolean | Yes |
+
+**Operations:**
+
+```typescript
+// List all identityProvider records
+const items = await db.identityProvider.findMany({ select: { slug: true, kind: true, displayName: true, enabled: true } }).execute();
+
+// Get one by id
+const item = await db.identityProvider.findOne({ id: '<UUID>', select: { slug: true, kind: true, displayName: true, enabled: true } }).execute();
+
+// Create
+const created = await db.identityProvider.create({ data: { slug: '<String>', kind: '<String>', displayName: '<String>', enabled: '<Boolean>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.identityProvider.update({ where: { id: '<UUID>' }, data: { slug: '<String>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.identityProvider.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.roleType`
+
+CRUD operations for RoleType records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | Int | No |
+| `name` | String | Yes |
+
+**Operations:**
+
+```typescript
+// List all roleType records
+const items = await db.roleType.findMany({ select: { id: true, name: true } }).execute();
+
+// Get one by id
+const item = await db.roleType.findOne({ id: '<Int>', select: { id: true, name: true } }).execute();
+
+// Create
+const created = await db.roleType.create({ data: { name: '<String>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.roleType.update({ where: { id: '<Int>' }, data: { name: '<String>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.roleType.delete({ where: { id: '<Int>' } }).execute();
+```
+
+### `db.userConnectedAccount`
+
+CRUD operations for UserConnectedAccount records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `ownerId` | UUID | Yes |
+| `service` | String | Yes |
+| `identifier` | String | Yes |
+| `details` | JSON | Yes |
+| `isVerified` | Boolean | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+
+**Operations:**
+
+```typescript
+// List all userConnectedAccount records
+const items = await db.userConnectedAccount.findMany({ select: { id: true, ownerId: true, service: true, identifier: true, details: true, isVerified: true, createdAt: true, updatedAt: true } }).execute();
+
+// Get one by id
+const item = await db.userConnectedAccount.findOne({ id: '<UUID>', select: { id: true, ownerId: true, service: true, identifier: true, details: true, isVerified: true, createdAt: true, updatedAt: true } }).execute();
+
+// Create
+const created = await db.userConnectedAccount.create({ data: { ownerId: '<UUID>', service: '<String>', identifier: '<String>', details: '<JSON>', isVerified: '<Boolean>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.userConnectedAccount.update({ where: { id: '<UUID>' }, data: { ownerId: '<UUID>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.userConnectedAccount.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.orgApiKeyList`
+
+CRUD operations for OrgApiKeyList records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `keyId` | String | Yes |
+| `name` | String | Yes |
+| `principalId` | UUID | Yes |
+| `orgId` | UUID | Yes |
+| `expiresAt` | Datetime | Yes |
+| `revokedAt` | Datetime | Yes |
+| `lastUsedAt` | Datetime | Yes |
+| `mfaLevel` | String | Yes |
+| `accessLevel` | String | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+
+**Operations:**
+
+```typescript
+// List all orgApiKeyList records
+const items = await db.orgApiKeyList.findMany({ select: { id: true, keyId: true, name: true, principalId: true, orgId: true, expiresAt: true, revokedAt: true, lastUsedAt: true, mfaLevel: true, accessLevel: true, createdAt: true, updatedAt: true } }).execute();
+
+// Get one by id
+const item = await db.orgApiKeyList.findOne({ id: '<UUID>', select: { id: true, keyId: true, name: true, principalId: true, orgId: true, expiresAt: true, revokedAt: true, lastUsedAt: true, mfaLevel: true, accessLevel: true, createdAt: true, updatedAt: true } }).execute();
+
+// Create
+const created = await db.orgApiKeyList.create({ data: { keyId: '<String>', name: '<String>', principalId: '<UUID>', orgId: '<UUID>', expiresAt: '<Datetime>', revokedAt: '<Datetime>', lastUsedAt: '<Datetime>', mfaLevel: '<String>', accessLevel: '<String>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.orgApiKeyList.update({ where: { id: '<UUID>' }, data: { keyId: '<String>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.orgApiKeyList.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+### `db.user`
+
+CRUD operations for User records.
+
+**Fields:**
+
+| Field | Type | Editable |
+|-------|------|----------|
+| `id` | UUID | No |
+| `username` | String | Yes |
+| `displayName` | String | Yes |
+| `profilePicture` | ConstructiveInternalTypeImage | Yes |
+| `searchTsv` | FullText | Yes |
+| `type` | Int | Yes |
+| `createdAt` | Datetime | No |
+| `updatedAt` | Datetime | No |
+| `searchTsvRank` | Float | Yes |
+| `displayNameTrgmSimilarity` | Float | Yes |
+| `searchScore` | Float | Yes |
+
+**Operations:**
+
+```typescript
+// List all user records
+const items = await db.user.findMany({ select: { id: true, username: true, displayName: true, profilePicture: true, searchTsv: true, type: true, createdAt: true, updatedAt: true, searchTsvRank: true, displayNameTrgmSimilarity: true, searchScore: true } }).execute();
+
+// Get one by id
+const item = await db.user.findOne({ id: '<UUID>', select: { id: true, username: true, displayName: true, profilePicture: true, searchTsv: true, type: true, createdAt: true, updatedAt: true, searchTsvRank: true, displayNameTrgmSimilarity: true, searchScore: true } }).execute();
+
+// Create
+const created = await db.user.create({ data: { username: '<String>', displayName: '<String>', profilePicture: '<Image>', searchTsv: '<FullText>', type: '<Int>', searchTsvRank: '<Float>', displayNameTrgmSimilarity: '<Float>', searchScore: '<Float>' }, select: { id: true } }).execute();
+
+// Update
+const updated = await db.user.update({ where: { id: '<UUID>' }, data: { username: '<String>' }, select: { id: true } }).execute();
+
+// Delete
+const deleted = await db.user.delete({ where: { id: '<UUID>' } }).execute();
+```
+
+> **Unified Search API fields:** `searchTsv`
+> Fields provided by the Unified Search plugin. Includes full-text search (tsvector/BM25), trigram similarity scores, and the combined searchScore. Computed fields are read-only and cannot be set in create/update operations.
+
+## Custom Operations
+
+### `db.query.currentUserAgent`
+
+currentUserAgent
+
+- **Type:** query
+- **Arguments:** none
+
+```typescript
+const result = await db.query.currentUserAgent().execute();
+```
+
+### `db.query.currentUserId`
+
+currentUserId
+
+- **Type:** query
+- **Arguments:** none
+
+```typescript
+const result = await db.query.currentUserId().execute();
+```
+
+### `db.query.currentIpAddress`
+
+currentIpAddress
+
+- **Type:** query
+- **Arguments:** none
+
+```typescript
+const result = await db.query.currentIpAddress().execute();
+```
+
+### `db.query.requireStepUp`
+
+requireStepUp
+
+- **Type:** query
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `stepUpType` | String |
+
+```typescript
+const result = await db.query.requireStepUp({ stepUpType: '<String>' }).execute();
+```
+
+### `db.query.currentUser`
+
+currentUser
+
+- **Type:** query
+- **Arguments:** none
+
+```typescript
+const result = await db.query.currentUser().execute();
+```
+
+### `db.mutation.sendAccountDeletionEmail`
+
+sendAccountDeletionEmail
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SendAccountDeletionEmailInput (required) |
+
+```typescript
+const result = await db.mutation.sendAccountDeletionEmail({ input: '<SendAccountDeletionEmailInput>' }).execute();
+```
+
+### `db.mutation.signOut`
+
+signOut
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignOutInput (required) |
+
+```typescript
+const result = await db.mutation.signOut({ input: '<SignOutInput>' }).execute();
+```
+
+### `db.mutation.approveDevice`
+
+approveDevice
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ApproveDeviceInput (required) |
+
+```typescript
+const result = await db.mutation.approveDevice({ input: { approvalToken: '<String>' } }).execute();
+```
+
+### `db.mutation.deleteOrgPrincipal`
+
+deleteOrgPrincipal
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | DeleteOrgPrincipalInput (required) |
+
+```typescript
+const result = await db.mutation.deleteOrgPrincipal({ input: { principalId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.disconnectAccount`
+
+disconnectAccount
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | DisconnectAccountInput (required) |
+
+```typescript
+const result = await db.mutation.disconnectAccount({ input: { accountId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.revokeApiKey`
+
+revokeApiKey
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | RevokeApiKeyInput (required) |
+
+```typescript
+const result = await db.mutation.revokeApiKey({ input: { keyId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.revokeSession`
+
+revokeSession
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | RevokeSessionInput (required) |
+
+```typescript
+const result = await db.mutation.revokeSession({ input: { sessionId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.verifyPassword`
+
+verifyPassword
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | VerifyPasswordInput (required) |
+
+```typescript
+const result = await db.mutation.verifyPassword({ input: { password: '<String>' } }).execute();
+```
+
+### `db.mutation.verifyTotp`
+
+verifyTotp
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | VerifyTotpInput (required) |
+
+```typescript
+const result = await db.mutation.verifyTotp({ input: { totpValue: '<String>' } }).execute();
+```
+
+### `db.mutation.checkPassword`
+
+checkPassword
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | CheckPasswordInput (required) |
+
+```typescript
+const result = await db.mutation.checkPassword({ input: { password: '<String>' } }).execute();
+```
+
+### `db.mutation.confirmDeleteAccount`
+
+confirmDeleteAccount
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ConfirmDeleteAccountInput (required) |
+
+```typescript
+const result = await db.mutation.confirmDeleteAccount({ input: { userId: '<UUID>', token: '<String>' } }).execute();
+```
+
+### `db.mutation.revokeOrgApiKey`
+
+revokeOrgApiKey
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | RevokeOrgApiKeyInput (required) |
+
+```typescript
+const result = await db.mutation.revokeOrgApiKey({ input: { keyId: '<UUID>', orgId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.setPassword`
+
+setPassword
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SetPasswordInput (required) |
+
+```typescript
+const result = await db.mutation.setPassword({ input: { currentPassword: '<String>', newPassword: '<String>' } }).execute();
+```
+
+### `db.mutation.verifyEmail`
+
+verifyEmail
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | VerifyEmailInput (required) |
+
+```typescript
+const result = await db.mutation.verifyEmail({ input: { emailId: '<UUID>', token: '<String>' } }).execute();
+```
+
+### `db.mutation.provisionNewUser`
+
+provisionNewUser
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ProvisionNewUserInput (required) |
+
+```typescript
+const result = await db.mutation.provisionNewUser({ input: { email: '<String>', password: '<String>' } }).execute();
+```
+
+### `db.mutation.resetPassword`
+
+resetPassword
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ResetPasswordInput (required) |
+
+```typescript
+const result = await db.mutation.resetPassword({ input: { roleId: '<UUID>', resetToken: '<String>', newPassword: '<String>' } }).execute();
+```
+
+### `db.mutation.createOrgPrincipal`
+
+createOrgPrincipal
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | CreateOrgPrincipalInput (required) |
+
+```typescript
+const result = await db.mutation.createOrgPrincipal({ input: { name: '<String>', orgId: '<UUID>', useAdminOwner: '<Boolean>', isReadOnly: '<Boolean>', bypassStepUp: '<Boolean>' } }).execute();
+```
+
+### `db.mutation.signInCrossOrigin`
+
+signInCrossOrigin
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignInCrossOriginInput (required) |
+
+```typescript
+const result = await db.mutation.signInCrossOrigin({ input: { token: '<String>', credentialKind: '<String>' } }).execute();
+```
+
+### `db.mutation.signUpSms`
+
+signUpSms
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignUpSmsInput (required) |
+
+```typescript
+const result = await db.mutation.signUpSms({ input: { phone: '<String>', code: '<String>', credentialKind: '<String>', rememberMe: '<Boolean>', deviceToken: '<String>' } }).execute();
+```
+
+### `db.mutation.signInSmsOtp`
+
+signInSmsOtp
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignInSmsOtpInput (required) |
+
+```typescript
+const result = await db.mutation.signInSmsOtp({ input: { phone: '<String>', code: '<String>', credentialKind: '<String>', rememberMe: '<Boolean>', deviceToken: '<String>' } }).execute();
+```
+
+### `db.mutation.signUp`
+
+signUp
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignUpInput (required) |
+
+```typescript
+const result = await db.mutation.signUp({ input: '<SignUpInput>' }).execute();
+```
+
+### `db.mutation.signIn`
+
+signIn
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SignInInput (required) |
+
+```typescript
+const result = await db.mutation.signIn({ input: '<SignInInput>' }).execute();
+```
+
+### `db.mutation.linkIdentity`
+
+linkIdentity
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | LinkIdentityInput (required) |
+
+```typescript
+const result = await db.mutation.linkIdentity({ input: { service: '<String>', identifier: '<String>', details: '<JSON>' } }).execute();
+```
+
+### `db.mutation.extendTokenExpires`
+
+extendTokenExpires
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ExtendTokenExpiresInput (required) |
+
+```typescript
+const result = await db.mutation.extendTokenExpires({ input: { amount: '<IntervalInput>' } }).execute();
+```
+
+### `db.mutation.createOrgApiKey`
+
+createOrgApiKey
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | CreateOrgApiKeyInput (required) |
+
+```typescript
+const result = await db.mutation.createOrgApiKey({ input: '<CreateOrgApiKeyInput>' }).execute();
+```
+
+### `db.mutation.createApiKey`
+
+createApiKey
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | CreateApiKeyInput (required) |
+
+```typescript
+const result = await db.mutation.createApiKey({ input: { keyName: '<String>', accessLevel: '<String>', mfaLevel: '<String>', expiresIn: '<IntervalInput>', principalId: '<UUID>' } }).execute();
+```
+
+### `db.mutation.requestCrossOriginToken`
+
+requestCrossOriginToken
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | RequestCrossOriginTokenInput (required) |
+
+```typescript
+const result = await db.mutation.requestCrossOriginToken({ input: { email: '<String>', password: '<String>', origin: '<Origin>', rememberMe: '<Boolean>' } }).execute();
+```
+
+### `db.mutation.sendVerificationEmail`
+
+sendVerificationEmail
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | SendVerificationEmailInput (required) |
+
+```typescript
+const result = await db.mutation.sendVerificationEmail({ input: { email: '<Email>' } }).execute();
+```
+
+### `db.mutation.forgotPassword`
+
+forgotPassword
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ForgotPasswordInput (required) |
+
+```typescript
+const result = await db.mutation.forgotPassword({ input: { email: '<Email>' } }).execute();
+```
+
+### `db.mutation.provisionBucket`
+
+Provision an S3 bucket for a logical bucket in the database.
+Reads the bucket config via RLS, then creates and configures
+the S3 bucket with the appropriate privacy policies, CORS rules,
+and lifecycle settings.
+
+- **Type:** mutation
+- **Arguments:**
+
+  | Argument | Type |
+  |----------|------|
+  | `input` | ProvisionBucketInput (required) |
+
+```typescript
+const result = await db.mutation.provisionBucket({ input: { bucketKey: '<String>', ownerId: '<UUID>' } }).execute();
+```
+
+---
+
+Built by the [Constructive](https://constructive.io) team.
+
+## Disclaimer
+
+AS DESCRIBED IN THE LICENSES, THE SOFTWARE IS PROVIDED "AS IS", AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
+
+No developer or entity involved in creating this software will be liable for any claims or damages whatsoever associated with your use, inability to use, or your interaction with other users of the code, including any direct, indirect, incidental, special, exemplary, punitive or consequential damages, or loss of profits, cryptocurrencies, tokens, or anything else of value.
