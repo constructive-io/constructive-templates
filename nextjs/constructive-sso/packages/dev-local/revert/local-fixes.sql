@@ -643,4 +643,25 @@ LANGUAGE plpgsql VOLATILE;
 COMMENT ON FUNCTION metaschema_modules_public.tg_validate_blueprint_definition IS
     'Trigger function that validates the blueprint definition format on INSERT/UPDATE. Ensures structural correctness: optional membership_types[] with name/prefix and optional boolean flags, tables[] with table_name and optional nodes[], policies[], grants[], and table-level indexes[]/full_text_searches[]/unique_constraints[] (without table_name). Also validates top-level relations[] with $type/source_table/target_table, indexes[] with table_name/column/access_method, full_text_searches[] with table_name/field/sources[], unique_constraints[] with table_name/columns[]. Both table-level and top-level definitions are supported for indexes, FTS, and unique constraints. Rejects malformed definitions before they reach construct_blueprint().';
 
+-- Revert: identity permission patch — drop the trigger + function only.
+-- Granted permissions are left in place (non-destructive revert).
+do $$
+declare
+    v_identifiers_schema text;
+begin
+    select schema_name into v_identifiers_schema
+    from information_schema.schemata
+    where schema_name like '%user_identifiers_private'
+      and schema_name not like 'constructive%'
+    order by schema_name desc
+    limit 1;
+
+    if v_identifiers_schema is not null then
+        execute format('DROP TRIGGER IF EXISTS tg_grant_full_perms_on_identity ON %I.connected_accounts', v_identifiers_schema);
+        execute format('DROP FUNCTION IF EXISTS %I.tg_grant_full_perms_on_identity()', v_identifiers_schema);
+        raise notice 'Dropped identity permission trigger/function in %', v_identifiers_schema;
+    end if;
+end;
+$$;
+
 COMMIT;

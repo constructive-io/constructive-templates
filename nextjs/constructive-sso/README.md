@@ -42,11 +42,12 @@ pgpm admin-users add --database constructive --test --yes
 pgpm deploy --yes --database constructive --package constructive-local
 
 # 2. In the constructive repo (constructive/graphql/server) — GraphQL server
-#    SSO requires OAUTH_STATE_SECRET — source this .env first:
+#    SSO requires OAUTH_ENABLED=true + OAUTH_STATE_SECRET — source this .env first:
 source sandbox-templates/nextjs/constructive-sso/.env
 pnpm install
 PGDATABASE=constructive pnpm dev
-# (or: PGDATABASE=constructive cnc server --port 3000 --origin "*")
+# (or: OAUTH_ENABLED=true PGDATABASE=constructive cnc server --port 3000 --origin "*")
+# NOTE: without OAUTH_ENABLED=true the /auth/* routes are NOT mounted (404).
 
 # 3. In this repo — create the tenant + provision modules
 eval "$(pgpm env)"
@@ -109,7 +110,9 @@ pgpm deploy --package myapp --database constructive --yes
 pgpm deploy --package dev-local --database constructive --yes
 pgpm deploy --package myapp-test-seed --database constructive --yes
 
-# GraphQL server (constructive repo): PGDATABASE=constructive pnpm dev
+# GraphQL server (constructive repo): source .env first, then
+# PGDATABASE=constructive pnpm dev  (or OAUTH_ENABLED=true PGDATABASE=constructive cnc server --port 3000 --origin "*")
+# Without OAUTH_ENABLED=true the /auth/* SSO routes are NOT mounted.
 pnpm codegen
 pnpm dev
 ```
@@ -124,9 +127,9 @@ registrations.
 
 1. **CNC GraphQL server** running from the `feat/oauth-reorg` (or stacked
    `feat/tenant-shared-session-sso`) branch — the OAuth middleware is mounted
-   at `/auth`. **The server must have `OAUTH_STATE_SECRET` in its environment**
-   — source this repo's `.env` first so the var is exported to the server
-   process:
+   at `/auth` only when `OAUTH_ENABLED=true`. **The server must have
+   `OAUTH_ENABLED=true` and `OAUTH_STATE_SECRET` in its environment** — source
+   this repo's `.env` first so the vars are exported to the server process:
    ```bash
    source sandbox-templates/nextjs/constructive-sso/.env
    cd constructive/graphql/server

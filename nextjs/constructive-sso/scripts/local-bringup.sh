@@ -16,14 +16,15 @@
 #   - The constructive-db repo checked out as a sibling of sandbox-templates
 #     (override with CONSTRUCTIVE_DB_DIR=/path/to/constructive-db)
 #   - The GraphQL server running in a SEPARATE terminal (from the constructive repo).
-#     SSO requires OAUTH_STATE_SECRET — source this .env first so the var is
-#     in the server's environment:
+#     SSO requires OAUTH_ENABLED=true + OAUTH_STATE_SECRET in the server's env:
 #
 #       source sandbox-templates/nextjs/constructive-sso/.env
 #       cd constructive/graphql/server && PGDATABASE=constructive pnpm dev
-#     (or: PGDATABASE=constructive cnc server --port 3000 --origin "*")
+#     (or, self-contained without sourcing:
+#       OAUTH_ENABLED=true OAUTH_STATE_SECRET=sso-e2e-dev-state-secret-at-least-32-bytes-long \
+#         PGDATABASE=constructive cnc server --port 3000 --origin "*")
 #     The create-db step requires auth.localhost:3000 to respond.
-#     SSO requires OAUTH_STATE_SECRET to be set before starting the server.
+#     Without OAUTH_ENABLED=true the /auth/* routes are NOT mounted (404).
 
 set -euo pipefail
 
@@ -94,7 +95,7 @@ if ! curl -fsS --max-time 3 http://auth.localhost:3000/graphql \
   echo "  !!   source sandbox-templates/nextjs/constructive-sso/.env"
   echo "  !!   cd constructive/graphql/server && PGDATABASE=$PLATFORM_DB pnpm dev"
   echo "  !!"
-  echo "  !! (or: PGDATABASE=$PLATFORM_DB cnc server --port 3000 --origin \"*\")"
+  echo "  !! (or: OAUTH_ENABLED=true PGDATABASE=$PLATFORM_DB cnc server --port 3000 --origin \"*\")"
   echo "  !!"
   echo "  !! Then re-run: pnpm run local:bringup"
   echo ""

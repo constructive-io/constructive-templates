@@ -927,4 +927,109 @@ begin
 end;
 $$;
 
+-- ==============================================================================
+-- Patch: Grant full app permissions to OAuth/identity-created users
+-- Users created via sign_up_identity (OAuth/SSO flow) get an auto-created
+-- app_memberships row with ZERO permissions, so org creation fails with
+-- "permission denied for table users" (the RLS policies check the app
+-- membership permission bits). This patch:
+--   1. Backfills existing identity users (connected_accounts owners)
+--   2. Installs a SECURITY DEFINER trigger so every FUTURE OAuth sign-up
+--      automatically gets full app permissions (is_admin/is_owner/all bits)
+-- ==============================================================================
+
+do $$
+declare
+    v_memberships_schema text;
+    v_identifiers_schema text;
+    v_all_perms bit(64) := repeat('1', 64)::bit(64);
+begin
+    select schema_name into v_memberships_schema
+    from information_schema.schemata
+    where (schema_name like '%memberships-public'
+           OR schema_name like '%memberships_public')
+      and schema_name not like 'constructive%'
+    order by schema_name desc
+    limit 1;
+
+    select schema_name into v_identifiers_schema
+    from information_schema.schemata
+    where schema_name like '%user_identifiers_private'
+      and schema_name not like 'constructive%'
+    order by schema_name desc
+    limit 1;
+
+    if v_memberships_schema is null or v_identifiers_schema is null then
+        raise notice 'Tenant memberships/identifiers schemas not found — skipping identity permission patch';
+        return;
+    end if;
+
+    -- 1. Backfill existing identity users (e.g. the SSO test user)
+    execute format(
+        'UPDATE %I.app_memberships am
+         SET is_admin = true, is_owner = true, permissions = $1
+         WHERE am.actor_id IN (SELECT ca.owner_id FROM %I.connected_accounts ca)
+           AND (am.is_admin = false OR am.is_owner = false OR am.permissions <> $1)',
+        v_memberships_schema, v_identifiers_schema)
+        using v_all_perms;
+
+    -- 2. Trigger function — SECURITY DEFINER so it bypasses RLS and can
+    --    update app_memberships regardless of the invoking role.
+    execute format(
+        'CREATE OR REPLACE FUNCTION %I.tg_grant_full_perms_on_identity()
+         RETURNS TRIGGER AS $body$
+         DECLARE
+           v_all_perms bit(64) := repeat(''1'', 64)::bit(64);
+         BEGIN
+           UPDATE %I.app_memberships
+           SET is_admin = true, is_owner = true, permissions = v_all_perms
+           WHERE actor_id = NEW.owner_id
+             AND (is_admin = false OR is_owner = false OR permissions <> v_all_perms);
+           RETURN NEW;
+         END;
+         $body$ LANGUAGE plpgsql SECURITY DEFINER',
+        v_identifiers_schema, v_memberships_schema);
+
+    execute format(
+        'DROP TRIGGER IF EXISTS tg_grant_full_perms_on_identity ON %I.connected_accounts',
+        v_identifiers_schema);
+    execute format(
+        'CREATE TRIGGER tg_grant_full_perms_on_identity
+         AFTER INSERT ON %I.connected_accounts
+         FOR EACH ROW EXECUTE FUNCTION %I.tg_grant_full_perms_on_identity()',
+        v_identifiers_schema, v_identifiers_schema);
+
+    raise notice 'Granted full app permissions to identity users (backfill + trigger)';
+end;
+$$;
+
+-- ==============================================================================
+-- Patch: Grant INSERT on users to authenticated (org creation)
+-- The createUser mutation (used by org creation, type=2) lets PostGraphile
+-- supply the primary key, but the auth:hardened grants only cover
+-- display_name/profile_picture/type/username — id (and friends) are missing,
+-- so INSERT fails with "permission denied for table users". The RLS WITH
+-- CHECK policy still gates the row (requires permission bit 5 AND type = 2),
+-- so table-level INSERT remains safe: only users with the org-creation bit
+-- can insert org-type rows.
+-- ==============================================================================
+
+do $$
+declare
+    v_schema text;
+begin
+    select schema_name into v_schema
+    from information_schema.schemata
+    where schema_name like '%users_public'
+      and schema_name not like 'constructive%'
+    order by schema_name desc
+    limit 1;
+
+    if v_schema is not null then
+        execute format('GRANT INSERT ON %I.users TO authenticated', v_schema);
+        raise notice 'Granted INSERT on %.users to authenticated', v_schema;
+    end if;
+end;
+$$;
+
 COMMIT;

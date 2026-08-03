@@ -52,6 +52,21 @@ export function getEndpoint(ctx: SchemaContext = 'admin'): string {
 
 export { getDefaultEndpoint };
 
+/**
+ * Get the FRONTEND app origin (Next.js dev server), e.g.
+ * http://auth-myapp.localhost:3011
+ *
+ * Uses the auth endpoint's HOSTNAME (which has a routing_public binding the
+ * OAuth middleware can resolve) with the port the app is actually served on.
+ * NOT window.location.origin — that breaks when the user opens the app via
+ * http://localhost:3011 (no route binding -> INVALID_REDIRECT_URI).
+ */
+export function getAppOrigin(): string {
+	const authUrl = new URL(getEndpoint('auth'));
+	const port = typeof window !== 'undefined' ? window.location.port : '3011';
+	return `${authUrl.protocol}//${authUrl.hostname}:${port}`;
+}
+
 /** All contexts share the same home path in per-DB mode. */
 export const HOME_PATH = '/';
 
