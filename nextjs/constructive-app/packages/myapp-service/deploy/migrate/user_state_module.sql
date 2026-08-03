@@ -28,7 +28,7 @@ INSERT INTO metaschema_modules_public.user_state_module (
   table_id,
   table_name
 ) VALUES
-  ('019fa2a1-5af9-7021-8cd0-972264f2604f', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'owner_id', '019fa2a1-5af9-72d1-8fba-f96774dd90ce', '019fa2a1-5b1d-7b27-bab2-e3c469e536af', 'user_state');
+  ('019fbc96-ad22-79b3-b6a7-1840d8f162f6', '019fbc96-84d8-7d13-8acc-4c55ad35634c', 'owner_id', '019fbc96-ad22-7c7e-a51b-2988c7c7d29f', '019fbc96-ad5b-7116-9f79-d037fdc40cd9', 'user_state');
 
 
 SET session_replication_role TO DEFAULT;

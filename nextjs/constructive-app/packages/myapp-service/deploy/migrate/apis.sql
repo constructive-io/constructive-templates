@@ -1,7 +1,7 @@
 -- Deploy: migrate/apis
 -- made with <3 @ constructive.io
 
--- requires: migrate/trigger_function
+-- requires: migrate/api_schemas
 
 
 SET session_replication_role TO replica;
@@ -20,25 +20,24 @@ DO $LQLMIGRATION$
   END;
 $LQLMIGRATION$;
 
-INSERT INTO services_public.apis (
+INSERT INTO routing_public.apis (
   id,
-  database_id,
   name,
   role_name,
   anon_role,
-  is_public,
-  labels,
-  annotations
+  is_published,
+  config,
+  database_id
 ) VALUES
-  ('019fa2a1-5001-790c-8dfa-3347bd8f781b', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'admin', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5002-72ae-930b-fa3c13f980d4', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'auth', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5002-75ec-833a-651fda3d74d6', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'api', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5002-78dc-aba5-6416d5eb3aa1', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'usage', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5002-7ba8-9dc9-50d761475f33', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'compute', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5002-7e71-b97c-34cbe0c7cdc7', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'objects', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-5003-71ec-9509-7a1d4fbf22a4', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'agent', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-674d-7187-a86f-9ebcb7cdc736', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'config', 'authenticated', 'anonymous', true, '{}', '{}'),
-  ('019fa2a1-762f-7b91-aeb4-b40200a7b932', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'migrate', 'authenticated', 'anonymous', true, '{}', '{}');
+  ('019fbc96-8532-70ad-82b8-cba1946925a2', 'auth', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-8659-7990-b05a-e190bd1190af', 'admin', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-86ff-77df-af4f-455a6af96d90', 'usage', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-bf35-76f8-a63b-93787a2ed1eb', 'config', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-e51c-7f70-8057-8db4e69e84dd', 'api', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-e51d-718e-b890-fa9c73d0aa3b', 'compute', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-e51d-7252-a9df-57833ad7c082', 'objects', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-e51d-730a-8e3d-923ff1b9266e', 'agent', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
+  ('019fbc96-e54f-71c3-b80e-b3c6c6ed8d82', 'migrate', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c');
 
 
 SET session_replication_role TO DEFAULT;

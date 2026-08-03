@@ -61,7 +61,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_up_identity') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -69,13 +69,13 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_sign_up, true)) THEN
-    RAISE EXCEPTION 'SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   IF NOT (COALESCE(v_settings.allow_identity_sign_up, false)) THEN
-    RAISE EXCEPTION 'IDENTITY_SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('IDENTITY_SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('identity' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
@@ -84,7 +84,7 @@ BEGIN
   WHERE
     trim(sign_up_identity.email) = t.email INTO v_email;
   IF v_email.owner_id IS NOT NULL THEN
-    RAISE EXCEPTION 'ACCOUNT_EXISTS';
+    PERFORM errors.raise_error('ACCOUNT_EXISTS', '{}', 'public');
   END IF;
   v_user_id := myapp_auth_public.provision_new_user(trim(sign_up_identity.email));
   INSERT INTO myapp_user_identifiers_private.connected_accounts (

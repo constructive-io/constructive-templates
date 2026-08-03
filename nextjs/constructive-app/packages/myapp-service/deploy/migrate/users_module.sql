@@ -31,7 +31,7 @@ INSERT INTO metaschema_modules_public.users_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-500d-7302-bee7-f467d2fc2640', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-500d-750e-b14a-d15cb605624f', '019fa2a1-5022-77c8-9de2-2ef6079855de', 'users', '019fa2a1-5065-75d9-bf4c-86d761848b2b', 'role_types', 'auth', NULL);
+  ('019fbc96-8517-7e97-8eef-6dd9df9d59e3', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-8518-71f6-b5dd-e68f7390e1e2', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'users', '019fbc96-8583-7576-a215-4812842342ee', 'role_types', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

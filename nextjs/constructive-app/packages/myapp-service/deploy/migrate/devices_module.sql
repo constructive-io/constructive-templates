@@ -29,7 +29,7 @@ INSERT INTO metaschema_modules_public.devices_module (
   user_devices_table_name,
   device_settings_table_name
 ) VALUES
-  ('019fa2a1-6439-7e87-88b3-11b6a4cb46dc', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-6514-72da-b9d9-3bdb2c772b8c', '019fa2a1-643a-7595-bd9e-8c50e40166bc', 'auth_user_devices', 'app_settings_device');
+  ('019fbc96-bac1-7b9f-97d7-cfc762ecba4a', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-bbf2-7aef-8d13-b34586d8c5f2', '019fbc96-bac2-7190-b634-e54079d7304b', 'auth_user_devices', 'app_settings_device');
 
 
 SET session_replication_role TO DEFAULT;

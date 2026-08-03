@@ -18,13 +18,13 @@ DECLARE
 BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF NOT (EXISTS (SELECT 1
   FROM myapp_auth_private.sessions AS s INNER JOIN myapp_auth_private.session_credentials AS c ON c.session_id = s.id
   WHERE
-    c.id = jwt_private.current_token_id() AND ((c.mfa_level = 'verified' OR s.last_password_verified > (now() - '30 minutes'::interval)) OR s.last_mfa_verified > (now() - '30 minutes'::interval)))) THEN
-    RAISE EXCEPTION 'STEP_UP_REQUIRED';
+    c.id = jwt_private.current_token_id() AND (((c.mfa_level = 'verified' OR s.last_password_verified > (now() - '30 minutes'::interval)) OR s.last_mfa_verified > (now() - '30 minutes'::interval)) OR s.last_idp_verified > (now() - '30 minutes'::interval)))) THEN
+    PERFORM errors.raise_error('STEP_UP_REQUIRED', '{}', 'public');
   END IF;
   SELECT
     EXISTS (SELECT 1
@@ -36,13 +36,13 @@ BEGIN
   WHERE
     owner_id = v_user_id AND id <> disconnect_account.account_id INTO v_other_accounts_count;
   IF NOT (v_has_password) AND v_other_accounts_count = 0 THEN
-    RAISE EXCEPTION 'CANNOT_DISCONNECT_LAST_AUTH_METHOD';
+    PERFORM errors.raise_error('CANNOT_DISCONNECT_LAST_AUTH_METHOD', '{}', 'public');
   END IF;
   DELETE FROM myapp_user_identifiers_private.connected_accounts
   WHERE
     id = disconnect_account.account_id AND owner_id = v_user_id;
   IF NOT (FOUND) THEN
-    RAISE EXCEPTION 'CONNECTED_ACCOUNT_NOT_FOUND';
+    PERFORM errors.raise_error('CONNECTED_ACCOUNT_NOT_FOUND', '{}', 'public');
   END IF;
   INSERT INTO myapp_logging_public.audit_log_auth (
     actor_id,

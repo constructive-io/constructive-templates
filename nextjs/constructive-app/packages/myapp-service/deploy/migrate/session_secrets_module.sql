@@ -28,7 +28,7 @@ INSERT INTO metaschema_modules_public.session_secrets_module (
   table_name,
   sessions_table_id
 ) VALUES
-  ('019fa2a1-613b-7c85-be4d-092ccb74bb65', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-613c-724f-87a1-acb6049c0b8b', 'session_secrets', '019fa2a1-5bbc-7d2a-a42f-af8235516fb4');
+  ('019fbc96-b686-70a4-aa0a-691e961bf027', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-b686-765d-895b-6bf64df652aa', 'session_secrets', '019fbc96-ae3f-7843-8d56-55dc4da7a445');
 
 
 SET session_replication_role TO DEFAULT;

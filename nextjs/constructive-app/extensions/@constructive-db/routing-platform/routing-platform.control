@@ -1,0 +1,5 @@
+# routing-platform extension
+comment = 'Platform-scope routing source tables (platform apis/sites/domains) and routing plane (platform routes/bindings) for the constructive platform'
+default_version = '4.2.0'
+relocatable = false
+requires = 'plpgsql,uuid-ossp,pgpm-stamps,catalog'

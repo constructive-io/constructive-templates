@@ -16,7 +16,7 @@ function Textarea({ className, size = 'default', unstyled = false, ...props }: T
 				cn(
 					!unstyled && [
 						// Base layout
-						'relative inline-flex w-full rounded-lg border border-input bg-background bg-clip-padding text-base shadow-xs transition-shadow',
+						'relative inline-flex w-full rounded-lg border border-input bg-background bg-clip-padding text-base transition-shadow',
 						// Inner shadow highlight
 						'before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)]',
 						'not-has-disabled:not-has-focus-visible:not-has-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)]',

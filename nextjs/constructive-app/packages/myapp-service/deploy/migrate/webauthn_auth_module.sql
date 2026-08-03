@@ -38,7 +38,7 @@ INSERT INTO metaschema_modules_public.webauthn_auth_module (
   resident_key,
   challenge_expiry
 ) VALUES
-  ('019fa2a1-75d3-7086-a144-fcf9ccf6e49b', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-5022-77c8-9de2-2ef6079855de', '019fa2a1-6bd3-7a50-b4af-3c2cb7aee426', '019fa2a1-5bbc-7d2a-a42f-af8235516fb4', '019fa2a1-5c8d-7633-a186-023c9c2285e6', '019fa2a1-613c-724f-87a1-acb6049c0b8b', '019fa2a1-5d87-7ece-8e60-1ad949ecfb19', '', '', '{}', 'none', false, 'required', '00:05:00');
+  ('019fbc96-de88-7899-a088-9c12460ca002', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-c578-7e37-80c4-3ba5549c2b28', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-b686-765d-895b-6bf64df652aa', '019fbc96-b0c6-757d-a948-e13949bc1c55', '', '', '{}', 'none', false, 'required', '00:05:00');
 
 
 SET session_replication_role TO DEFAULT;

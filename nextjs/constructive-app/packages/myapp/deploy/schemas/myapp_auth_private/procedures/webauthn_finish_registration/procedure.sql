@@ -57,7 +57,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'webauthn_finish_registration') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -65,7 +65,7 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_webauthn_sign_up, false)) THEN
-    RAISE EXCEPTION 'WEBAUTHN_SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('WEBAUTHN_SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   PERFORM pg_advisory_xact_lock(hashtext('webauthn_finish_registration'), hashtext(webauthn_finish_registration.user_id::text));
   SELECT *
@@ -73,7 +73,7 @@ BEGIN
   WHERE
     subject_id = webauthn_finish_registration.user_id AND action = 'webauthn_finish_registration' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('ACCOUNT_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   v_session_id := jwt_private.current_session_id();
   DELETE FROM myapp_auth_private.session_secrets AS s
@@ -153,7 +153,7 @@ BEGIN
         ELSE NULL 
       END;
     END IF;
-    RAISE EXCEPTION 'WEBAUTHN_REGISTER_CHALLENGE_NOT_FOUND_OR_EXPIRED';
+    PERFORM errors.raise_error('WEBAUTHN_REGISTER_CHALLENGE_NOT_FOUND_OR_EXPIRED', '{}', 'public');
   END IF;
   INSERT INTO myapp_user_identifiers_public.webauthn_credentials (
     owner_id,

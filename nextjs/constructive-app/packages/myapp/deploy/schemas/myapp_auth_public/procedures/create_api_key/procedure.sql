@@ -29,42 +29,42 @@ DECLARE
 BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF jwt_public.current_principal_id() <> v_user_id THEN
-    RAISE EXCEPTION 'PRINCIPAL_CANNOT_CREATE_API_KEY';
+    PERFORM errors.raise_error('PRINCIPAL_CANNOT_CREATE_API_KEY', '{}', 'public');
   END IF;
   SELECT *
   FROM myapp_auth_private.app_settings_auth
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_api_keys, true)) THEN
-    RAISE EXCEPTION 'API_KEYS_DISABLED';
+    PERFORM errors.raise_error('API_KEYS_DISABLED', '{}', 'public');
   END IF;
   IF create_api_key.access_level <> 'full_access' AND create_api_key.access_level <> 'read_only' THEN
-    RAISE EXCEPTION 'INVALID_ACCESS_LEVEL';
+    PERFORM errors.raise_error('INVALID_ACCESS_LEVEL', '{}', 'public');
   END IF;
   IF create_api_key.mfa_level <> 'none' AND create_api_key.mfa_level <> 'verified' THEN
-    RAISE EXCEPTION 'INVALID_MFA_LEVEL';
+    PERFORM errors.raise_error('INVALID_MFA_LEVEL', '{}', 'public');
   END IF;
   SELECT count(*)
   FROM myapp_auth_private.session_credentials AS c INNER JOIN myapp_auth_private.sessions AS s ON c.session_id = s.id
   WHERE
     (s.user_id = v_user_id AND c.kind = 'api_key') AND c.revoked_at IS NULL INTO v_count;
   IF NOT (v_count < (COALESCE(v_settings.api_key_max_per_user, 10))) THEN
-    RAISE EXCEPTION 'API_KEY_LIMIT_REACHED';
+    PERFORM errors.raise_error('API_KEY_LIMIT_REACHED', '{}', 'public');
   END IF;
   IF NOT (EXISTS (SELECT 1
   FROM myapp_auth_private.sessions AS s INNER JOIN myapp_auth_private.session_credentials AS c ON c.session_id = s.id
   WHERE
-    c.id = jwt_private.current_token_id() AND ((c.mfa_level = 'verified' OR s.last_password_verified > (now() - '30 minutes'::interval)) OR s.last_mfa_verified > (now() - '30 minutes'::interval)))) THEN
-    RAISE EXCEPTION 'STEP_UP_REQUIRED';
+    c.id = jwt_private.current_token_id() AND (((c.mfa_level = 'verified' OR s.last_password_verified > (now() - '30 minutes'::interval)) OR s.last_mfa_verified > (now() - '30 minutes'::interval)) OR s.last_idp_verified > (now() - '30 minutes'::interval)))) THEN
+    PERFORM errors.raise_error('STEP_UP_REQUIRED', '{}', 'public');
   END IF;
   IF create_api_key.principal_id IS NOT NULL AND NOT (EXISTS (SELECT 1
   FROM myapp_auth_public.principals AS p
   WHERE
     (p.user_id = create_api_key.principal_id AND p.owner_id = v_user_id))) THEN
-    RAISE EXCEPTION 'PRINCIPAL_NOT_OWNED';
+    PERFORM errors.raise_error('PRINCIPAL_NOT_OWNED', '{}', 'public');
   END IF;
   v_effective_duration := COALESCE(create_api_key.expires_in, v_settings.api_key_default_duration, '90 days'::interval);
   IF v_settings.api_key_max_duration IS NOT NULL AND v_effective_duration > v_settings.api_key_max_duration THEN

@@ -43,7 +43,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'email_verification') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -62,7 +62,7 @@ BEGIN
   WHERE
     subject_id = v_user_id AND action = 'email_verification' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('ACCOUNT_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   IF v_user_rate_limit.last_attempt_at IS NOT NULL AND (v_user_rate_limit.last_attempt_at + v_verification_expires_interval) < now() THEN
     DELETE FROM myapp_auth_private.auth_rate_limits

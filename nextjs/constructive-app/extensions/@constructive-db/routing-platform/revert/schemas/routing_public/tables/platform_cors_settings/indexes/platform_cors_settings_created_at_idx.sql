@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/platform_cors_settings/indexes/platform_cors_settings_created_at_idx
+
+
+DROP INDEX routing_public.platform_cors_settings_created_at_idx;

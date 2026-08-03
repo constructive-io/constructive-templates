@@ -37,7 +37,7 @@ CREATE TABLE metaschema_modules_public.function_invocation_module (
     private_api_name text,
 
     -- Scope: determines the security level for this module instance.
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     -- Override to create multiple module instances at the same scope.

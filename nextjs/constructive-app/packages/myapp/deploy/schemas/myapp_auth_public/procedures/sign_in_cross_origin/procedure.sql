@@ -51,7 +51,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_in_cross_origin') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT

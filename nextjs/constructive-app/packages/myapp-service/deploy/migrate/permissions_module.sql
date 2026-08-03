@@ -44,7 +44,8 @@ INSERT INTO metaschema_modules_public.permissions_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-5105-731b-8180-e6f45b2dec9d', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', NULL, '019fa2a1-5105-75da-89c6-6d24ad9cdf16', '019fa2a1-5119-7816-ab77-973ecdcdafa4', NULL, NULL, '019fa2a1-5131-7642-b999-a3637fd3f1a5', 'app_permissions', '019fa2a1-5182-755b-a123-1190a88df2cf', 'app_permission_defaults', 64, 'app', 'app', NULL, '019fa2a1-5022-77c8-9de2-2ef6079855de', 'app_permissions_get_padded_mask', 'app_permissions_get_mask', 'app_permissions_get_by_mask', 'app_permissions_get_mask_by_names', 'admin', NULL);
+  ('019fbc96-862f-73f0-9f8e-8121a7830586', '019fbc96-84d8-7d13-8acc-4c55ad35634c', NULL, '019fbc96-862f-76db-9baa-23b094401fe1', '019fbc96-8643-7a6d-8e04-033c76db6ad6', NULL, NULL, '019fbc96-865b-7f26-a4f8-32df18a9e0ae', 'app_permissions', '019fbc96-86b0-7700-97e1-d05bfdc3b002', 'app_permission_defaults', 64, 'app', 'app', NULL, '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'app_permissions_get_padded_mask', 'app_permissions_get_mask', 'app_permissions_get_by_mask', 'app_permissions_get_mask_by_names', 'admin', NULL),
+  ('019fbc96-93c7-74ed-a732-d389f4c5f7e9', '019fbc96-84d8-7d13-8acc-4c55ad35634c', 'entity_id', '019fbc96-862f-76db-9baa-23b094401fe1', '019fbc96-8643-7a6d-8e04-033c76db6ad6', NULL, NULL, '019fbc96-93c9-79f2-8dcb-8d72b5725eaa', 'org_permissions', '019fbc96-943e-7ea4-b55b-ac4ad60ff0e9', 'org_permission_defaults', 64, 'org', 'org', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'org_permissions_get_padded_mask', 'org_permissions_get_mask', 'org_permissions_get_by_mask', 'org_permissions_get_mask_by_names', 'admin', NULL);
 
 
 SET session_replication_role TO DEFAULT;

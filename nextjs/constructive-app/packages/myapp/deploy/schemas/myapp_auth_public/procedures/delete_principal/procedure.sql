@@ -17,20 +17,20 @@ DECLARE
 BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF jwt_public.current_principal_id() <> v_user_id THEN
-    RAISE EXCEPTION 'PRINCIPAL_CANNOT_DELETE_PRINCIPAL';
+    PERFORM errors.raise_error('PRINCIPAL_CANNOT_DELETE_PRINCIPAL', '{}', 'public');
   END IF;
   SELECT owner_id
   FROM myapp_auth_public.principals
   WHERE
     user_id = delete_principal.principal_id INTO v_owner_id;
   IF v_owner_id IS NULL THEN
-    RAISE EXCEPTION 'PRINCIPAL_NOT_FOUND';
+    PERFORM errors.raise_error('PRINCIPAL_NOT_FOUND', '{}', 'public');
   END IF;
   IF v_owner_id <> v_user_id THEN
-    RAISE EXCEPTION 'NOT_OWNER';
+    PERFORM errors.raise_error('NOT_OWNER', '{}', 'public');
   END IF;
   DELETE FROM myapp_users_public.users
   WHERE

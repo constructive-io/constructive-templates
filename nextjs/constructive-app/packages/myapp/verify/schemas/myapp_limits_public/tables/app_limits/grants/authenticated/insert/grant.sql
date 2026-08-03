@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_limits_public/tables/app_limits/grants/authenticated/insert/grant
 
 
-SELECT verify_table_grant('myapp_limits_public.app_limits', 'insert', 'authenticated');
+SELECT verify_table_grant('myapp_limits_public.app_limits', 'INSERT', 'authenticated');
 
 

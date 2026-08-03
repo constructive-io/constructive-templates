@@ -16,8 +16,15 @@ CREATE TABLE metaschema_modules_public.domain_module (
     -- Schema reference (if uuid_nil, resolved from schema name or default)
     schema_id uuid NOT NULL DEFAULT uuid_nil(),
 
+    -- Private schema for generated lifecycle functions (if uuid_nil, resolved
+    -- from private schema name or default)
+    private_schema_id uuid NOT NULL DEFAULT uuid_nil(),
+
     -- Optional schema name override (used when schema_id is not provided)
     public_schema_name text,
+
+    -- Optional private schema name override (used when private_schema_id is not provided)
+    private_schema_name text,
 
     -- Catalog the domains register their exclusive hostname claims into.
     -- Resolved by the insert trigger from the same-database catalog_module
@@ -41,7 +48,7 @@ CREATE TABLE metaschema_modules_public.domain_module (
     private_api_name text,
 
     -- Scope: determines the security level for this module instance.
-    scope text NOT NULL DEFAULT 'database',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     prefix text NOT NULL DEFAULT '',
@@ -64,6 +71,10 @@ CREATE TABLE metaschema_modules_public.domain_module (
         ON DELETE CASCADE,
     CONSTRAINT domain_module_schema_fkey
         FOREIGN KEY (schema_id)
+        REFERENCES metaschema_public.schema (id)
+        ON DELETE CASCADE,
+    CONSTRAINT domain_module_private_schema_fkey
+        FOREIGN KEY (private_schema_id)
         REFERENCES metaschema_public.schema (id)
         ON DELETE CASCADE,
     CONSTRAINT domain_module_catalog_fkey

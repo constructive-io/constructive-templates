@@ -1,0 +1,5 @@
+# catalog extension
+comment = 'Typed global catalog tables (platform scope) and catalog-sync propagation trigger functions for the constructive platform'
+default_version = '4.2.0'
+relocatable = false
+requires = 'plpgsql,pgpm-stamps'

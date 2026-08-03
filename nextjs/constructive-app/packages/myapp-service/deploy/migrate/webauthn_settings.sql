@@ -1,7 +1,7 @@
 -- Deploy: migrate/webauthn_settings
 -- made with <3 @ constructive.io
 
--- requires: migrate/view_rule
+-- requires: migrate/sites
 
 
 SET session_replication_role TO replica;
@@ -20,9 +20,8 @@ DO $LQLMIGRATION$
   END;
 $LQLMIGRATION$;
 
-INSERT INTO services_public.webauthn_settings (
+INSERT INTO routing_public.webauthn_settings (
   id,
-  database_id,
   schema_id,
   credentials_schema_id,
   sessions_schema_id,
@@ -38,9 +37,10 @@ INSERT INTO services_public.webauthn_settings (
   attestation_type,
   require_user_verification,
   resident_key,
-  challenge_expiry_seconds
+  challenge_expiry_seconds,
+  database_id
 ) VALUES
-  ('019fa2a1-7614-768f-920f-e2859410a084', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-6946-7910-96e2-15c6e11fd525', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-6bd3-7a50-b4af-3c2cb7aee426', '019fa2a1-5bbc-7d2a-a42f-af8235516fb4', '019fa2a1-5c8d-7633-a186-023c9c2285e6', '019fa2a1-613c-724f-87a1-acb6049c0b8b', NULL, '', '', '{}', 'none', false, 'required', 300);
+  ('019fbc96-ded4-7615-afc2-65534c18c4dc', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-c1c4-7d76-8017-c296fd0375c5', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-c578-7e37-80c4-3ba5549c2b28', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-b686-765d-895b-6bf64df652aa', NULL, '', '', '{}', 'none', false, 'required', 300, '019fbc96-84d8-7d13-8acc-4c55ad35634c');
 
 
 SET session_replication_role TO DEFAULT;

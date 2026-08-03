@@ -35,7 +35,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'send_sms_otp') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -43,7 +43,7 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_sms_sign_in, false)) THEN
-    RAISE EXCEPTION 'SMS_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('SMS_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', send_sms_otp.phone));
   IF v_sms_otp_secret IS NULL THEN

@@ -80,7 +80,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_in') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -88,16 +88,16 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_password_sign_in, true)) THEN
-    RAISE EXCEPTION 'PASSWORD_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('PASSWORD_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('password' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
   v_require_csrf := COALESCE(v_settings.require_csrf_for_auth, false);
   IF v_require_csrf AND sign_in.csrf_token IS NULL THEN
-    RAISE EXCEPTION 'CSRF_TOKEN_REQUIRED';
+    PERFORM errors.raise_error('CSRF_TOKEN_REQUIRED', '{}', 'public');
   END IF;
   IF sign_in.csrf_token IS NOT NULL THEN
     SELECT s.*
@@ -105,7 +105,7 @@ BEGIN
     WHERE
       ((s.csrf_secret = sign_in.csrf_token AND s.is_anonymous = true) AND s.revoked_at IS NULL) AND s.expires_at > now() INTO v_anon_session;
     IF NOT (FOUND) THEN
-      RAISE EXCEPTION 'INVALID_CSRF_TOKEN';
+      PERFORM errors.raise_error('INVALID_CSRF_TOKEN', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -121,7 +121,7 @@ BEGIN
   WHERE
     subject_id = v_email.owner_id AND action = 'sign_in' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('ACCOUNT_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   SELECT
     membership_status.is_verified,
@@ -131,10 +131,10 @@ BEGIN
   WHERE
     membership_status.actor_id = v_email.owner_id INTO v_user_is_verified, v_user_is_disabled, v_user_is_banned;
   IF v_user_is_disabled IS TRUE OR v_user_is_banned IS TRUE THEN
-    RAISE EXCEPTION 'ACCOUNT_DISABLED';
+    PERFORM errors.raise_error('ACCOUNT_DISABLED', '{}', 'public');
   END IF;
   IF COALESCE(v_settings.enforce_primary_auth_method, true) AND myapp_store_private.user_state_get(v_email.owner_id, 'primary_auth_method') <> 'password' THEN
-    RAISE EXCEPTION 'PRIMARY_AUTH_METHOD_MISMATCH';
+    PERFORM errors.raise_error('PRIMARY_AUTH_METHOD_MISMATCH', '{}', 'public');
   END IF;
   IF myapp_store_private.user_secrets_verify(v_email.owner_id, 'password_hash', sign_in.password) THEN
     DELETE FROM myapp_auth_private.auth_rate_limits

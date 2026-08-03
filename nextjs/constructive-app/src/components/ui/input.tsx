@@ -19,7 +19,7 @@ function Input({ className, size = 'default', unstyled = false, ...props }: Inpu
 				cn(
 					!unstyled && [
 						// Base layout
-						'relative inline-flex w-full rounded-lg border border-input bg-background bg-clip-padding text-base shadow-xs transition-shadow',
+						'relative inline-flex w-full rounded-lg border border-input bg-background bg-clip-padding text-base transition-shadow',
 						// Inner shadow highlight
 						'before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)]',
 						'not-has-disabled:not-has-focus-visible:not-has-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)]',
@@ -43,7 +43,7 @@ function Input({ className, size = 'default', unstyled = false, ...props }: Inpu
 		>
 			<InputPrimitive
 				className={cn(
-					'w-full min-w-0 rounded-[inherit] bg-transparent px-[calc(--spacing(3)-1px)] outline-none',
+					'w-full min-w-0 rounded-[inherit] bg-transparent px-[calc(--spacing(3)-1px)] outline-none pointer-coarse:min-h-11',
 					isFloating
 						? 'h-11 pt-4.5 pb-1 leading-none placeholder:text-transparent sm:h-10'
 						: 'h-8.5 leading-8.5 placeholder:text-muted-foreground/72 sm:h-7.5 sm:leading-7.5',

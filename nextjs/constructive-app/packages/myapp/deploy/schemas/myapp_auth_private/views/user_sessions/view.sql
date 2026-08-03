@@ -16,6 +16,7 @@ CREATE VIEW myapp_auth_private.user_sessions WITH ( security_invoker = true ) AS
   fingerprint_mode,
   last_password_verified,
   last_mfa_verified,
+  last_idp_verified,
   created_at,
   updated_at
 FROM myapp_auth_private.sessions

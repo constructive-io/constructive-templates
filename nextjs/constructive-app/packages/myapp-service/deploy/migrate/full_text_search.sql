@@ -30,7 +30,7 @@ INSERT INTO metaschema_public.full_text_search (
   langs,
   lang_column
 ) VALUES
-  ('019fa2a1-5055-75b5-b085-77cf2b8fdbe9', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5022-77c8-9de2-2ef6079855de', '019fa2a1-5053-737a-bf40-59ea3ee68b83', '{019fa2a1-503c-7fc0-a00a-4eb05fdea62f,019fa2a1-5048-7874-b9b6-ecb3b316d78c}', '{A,B}', '{pg_catalog.simple,pg_catalog.simple}', NULL);
+  ('019fbc96-8570-7f30-9221-884e3c075aec', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-856e-7182-bc0f-63622620e23a', '{019fbc96-8552-7c53-8c92-5ad667e6d165,019fbc96-8561-7835-9a4c-568e906ec2e6}', '{A,B}', '{pg_catalog.simple,pg_catalog.simple}', NULL);
 
 
 SET session_replication_role TO DEFAULT;

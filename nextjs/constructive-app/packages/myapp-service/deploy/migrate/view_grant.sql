@@ -29,11 +29,12 @@ INSERT INTO metaschema_public.view_grant (
   with_grant_option,
   is_grant
 ) VALUES
-  ('019fa2a1-611e-7bcf-9d3e-d46c02de77d9', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6109-767a-8bfc-f1bb29779a76', 'authenticated', 'SELECT', false, true),
-  ('019fa2a1-6137-7de5-a781-fca7217b1ad1', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6123-71cd-865e-c366636985f4', 'authenticated', 'SELECT', false, true),
-  ('019fa2a1-6891-7bda-8fb4-80d4e6c61cc8', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-687b-7da2-9fdd-9d73f5d2db1e', 'authenticated', 'SELECT', false, true),
-  ('019fa2a1-6dfb-73f7-bd90-482827e572a6', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6de2-79f4-af72-b983ba08bf0f', 'authenticated', 'SELECT', false, true),
-  ('019fa2a1-6ff3-7d69-902f-806f2b8c4460', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6fdb-7e46-84b5-0b300d2c6f6e', 'authenticated', 'SELECT', false, true);
+  ('019fbc96-b65a-79ab-ace4-0fe6cdabb823', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b639-7c4f-8e7c-744b5346ac1e', 'authenticated', 'SELECT', false, true),
+  ('019fbc96-b67e-7295-b13a-bd5482335bb9', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b660-7cc4-977a-e31b757ef8b2', 'authenticated', 'SELECT', false, true),
+  ('019fbc96-c0d9-7abd-829b-4797768dae34', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c0ba-7f88-a2dc-e9e346eb1902', 'authenticated', 'SELECT', false, true),
+  ('019fbc96-c885-7694-a172-523202c83b2d', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c862-701b-9ee6-d65f38de3b9a', 'authenticated', 'SELECT', false, true),
+  ('019fbc96-cb53-7cec-88c9-a0f4508e4893', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-cb2f-7488-a3f5-e0f742bd511e', 'authenticated', 'SELECT', false, true),
+  ('019fbc96-dde1-73ae-9aa6-874ac6c05e95', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ddb8-785f-9297-c8f1a1540c35', 'authenticated', 'SELECT', false, true);
 
 
 SET session_replication_role TO DEFAULT;

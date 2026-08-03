@@ -14,7 +14,7 @@ CREATE FUNCTION myapp_auth_public.create_principal(
   IN use_admin_owner boolean DEFAULT true,
   IN entity_ids uuid[] DEFAULT NULL,
   IN is_read_only boolean DEFAULT false,
-  IN bypass_step_up boolean DEFAULT true,
+  IN bypass_step_up boolean DEFAULT false,
   OUT principal_id uuid
 ) RETURNS uuid AS $_PGFN_$
 DECLARE
@@ -24,10 +24,10 @@ DECLARE
 BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF jwt_public.current_principal_id() <> v_user_id THEN
-    RAISE EXCEPTION 'PRINCIPAL_CANNOT_CREATE_PRINCIPAL';
+    PERFORM errors.raise_error('PRINCIPAL_CANNOT_CREATE_PRINCIPAL', '{}', 'public');
   END IF;
   v_principal_user_id := uuidv7();
   INSERT INTO myapp_users_public.users (

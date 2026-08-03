@@ -16,10 +16,10 @@ BEGIN
   v_user_id := jwt_public.current_user_id();
   v_current_session := jwt_private.current_session_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF revoke_session.session_id = v_current_session THEN
-    RAISE EXCEPTION 'CANNOT_REVOKE_CURRENT_SESSION';
+    PERFORM errors.raise_error('CANNOT_REVOKE_CURRENT_SESSION', '{}', 'public');
   END IF;
   DELETE FROM myapp_auth_private.session_credentials
   WHERE
@@ -28,7 +28,7 @@ BEGIN
   WHERE
     id = revoke_session.session_id AND user_id = v_user_id;
   IF NOT (FOUND) THEN
-    RAISE EXCEPTION 'SESSION_NOT_FOUND';
+    PERFORM errors.raise_error('SESSION_NOT_FOUND', '{}', 'public');
   END IF;
   INSERT INTO myapp_logging_public.audit_log_auth (
     actor_id,

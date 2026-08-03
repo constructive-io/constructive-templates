@@ -1,7 +1,7 @@
 -- Deploy: migrate/function
 -- made with <3 @ constructive.io
 
--- requires: migrate/default_privilege
+-- requires: migrate/enum
 
 
 SET session_replication_role TO replica;
@@ -26,12 +26,12 @@ INSERT INTO metaschema_public.function (
   schema_id,
   name
 ) VALUES
-  ('019fa2a1-693d-7319-acdd-6b3cb37d32cc', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', 'authenticate'),
-  ('019fa2a1-693d-7d66-9dc4-264de36f3f9c', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', 'authenticate_strict'),
-  ('019fa2a1-693e-7618-9e7f-71279c10a1fa', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-68d3-7385-938c-1973d9bed8f2', 'current_user'),
-  ('019fa2a1-693e-7ea8-abfa-61083c752dba', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-68d3-7385-938c-1973d9bed8f2', 'current_user_id'),
-  ('019fa2a1-693f-7743-83ab-09ebe35e414f', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-68d3-7385-938c-1973d9bed8f2', 'current_user_agent'),
-  ('019fa2a1-693f-7f8d-8c55-8bab4e44afad', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-68d3-7385-938c-1973d9bed8f2', 'current_ip_address');
+  ('019fbc96-c1bb-7879-8017-2e2e641162e8', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', 'authenticate'),
+  ('019fbc96-c1bc-7a08-9f4c-1d8d09cb642d', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', 'authenticate_strict'),
+  ('019fbc96-c1bd-79da-892e-8cd5eca09e33', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', 'current_user'),
+  ('019fbc96-c1be-79b7-87b6-488196d15260', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', 'current_user_id'),
+  ('019fbc96-c1bf-792e-a755-3bfaba37f1c2', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', 'current_user_agent'),
+  ('019fbc96-c1c0-78ec-abd7-23cd8c34518c', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', 'current_ip_address');
 
 
 SET session_replication_role TO DEFAULT;

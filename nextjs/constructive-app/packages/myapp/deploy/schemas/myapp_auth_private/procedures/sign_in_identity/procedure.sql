@@ -84,7 +84,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_in_identity') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -92,10 +92,10 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_identity_sign_in, false)) THEN
-    RAISE EXCEPTION 'IDENTITY_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('IDENTITY_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('identity' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   IF NOT (EXISTS (SELECT 1
   FROM myapp_auth_private.identity_providers
@@ -110,7 +110,7 @@ BEGIN
     )
     VALUES
       (NULL, 'sign_in_identity_provider_not_configured', false);
-    RAISE EXCEPTION 'IDENTITY_PROVIDER_NOT_CONFIGURED';
+    PERFORM errors.raise_error('IDENTITY_PROVIDER_NOT_CONFIGURED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
@@ -132,10 +132,10 @@ BEGIN
     WHERE
       membership_status.actor_id = v_user_id INTO v_user_is_verified, v_user_is_disabled, v_user_is_banned;
     IF v_user_is_disabled IS TRUE OR v_user_is_banned IS TRUE THEN
-      RAISE EXCEPTION 'ACCOUNT_DISABLED';
+      PERFORM errors.raise_error('ACCOUNT_DISABLED', '{}', 'public');
     END IF;
     IF COALESCE(v_settings.enforce_primary_auth_method, true) AND myapp_store_private.user_state_get(v_user_id, 'primary_auth_method') <> 'identity' THEN
-      RAISE EXCEPTION 'PRIMARY_AUTH_METHOD_MISMATCH';
+      PERFORM errors.raise_error('PRIMARY_AUTH_METHOD_MISMATCH', '{}', 'public');
     END IF;
     INSERT INTO myapp_logging_public.audit_log_auth (
       actor_id,
@@ -197,13 +197,17 @@ BEGIN
       user_id,
       is_anonymous,
       expires_at,
+      last_idp_verified,
+      last_mfa_verified,
       auth_method,
       csrf_secret,
       origin,
       uagent
     )
     VALUES
-      (v_session_id, v_user_id, false, v_session_expires_at, 'identity', v_csrf_secret, jwt_public.current_origin(), jwt_public.current_user_agent());
+      (v_session_id, v_user_id, false, v_session_expires_at, CURRENT_TIMESTAMP, CASE 
+          WHEN COALESCE((sign_in_identity.details->>'mfa_verified')::boolean, false) THEN CURRENT_TIMESTAMP 
+        END, 'identity', v_csrf_secret, jwt_public.current_origin(), jwt_public.current_user_agent());
     v_plaintext_credential := (CASE 
       WHEN sign_in_identity.credential_kind = 'api_key' THEN 'cnc_live_sk_' 
       WHEN sign_in_identity.credential_kind = 'bearer' THEN 'cnc_live_bt_' 
@@ -273,7 +277,7 @@ BEGIN
       )
       VALUES
         (v_existing_user_id, 'sign_in_identity_link_available', true);
-      RAISE EXCEPTION 'IDENTITY_LINK_AVAILABLE';
+      PERFORM errors.raise_error('IDENTITY_LINK_AVAILABLE', '{}', 'public');
     ELSE
       INSERT INTO myapp_logging_public.audit_log_auth (
         actor_id,
@@ -282,7 +286,7 @@ BEGIN
       )
       VALUES
         (NULL, 'sign_in_identity_not_found', false);
-      RAISE EXCEPTION 'IDENTITY_ACCOUNT_NOT_FOUND';
+      PERFORM errors.raise_error('IDENTITY_ACCOUNT_NOT_FOUND', '{}', 'public');
     END IF;
   END IF;
   IF v_ip_address IS NOT NULL THEN

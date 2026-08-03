@@ -43,11 +43,11 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'password_reset') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   IF (reset_password.role_id IS NULL OR reset_password.reset_token IS NULL) OR reset_password.new_password IS NULL THEN
-    RAISE EXCEPTION 'NULL_VALUES_DISALLOWED';
+    PERFORM errors.raise_error('NULL_VALUES_DISALLOWED', '{}', 'public');
   END IF;
   SELECT *
   FROM myapp_users_public.users AS u
@@ -64,7 +64,7 @@ BEGIN
   WHERE
     membership_status.actor_id = reset_password.role_id INTO v_user_is_verified, v_user_is_disabled, v_user_is_banned;
   IF v_user_is_disabled IS TRUE OR v_user_is_banned IS TRUE THEN
-    RAISE EXCEPTION 'ACCOUNT_DISABLED';
+    PERFORM errors.raise_error('ACCOUNT_DISABLED', '{}', 'public');
   END IF;
   PERFORM pg_advisory_xact_lock(hashtext('password_reset'), hashtext(v_user.id::text));
   SELECT *
@@ -72,7 +72,7 @@ BEGIN
   WHERE
     subject_id = v_user.id AND action = 'password_reset' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'PASSWORD_RESET_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('PASSWORD_RESET_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   IF myapp_store_private.user_secrets_verify(v_user.id, 'reset_password_token', reset_password.reset_token) THEN
     PERFORM myapp_store_private.user_secrets_set(v_user.id, 'password_hash', reset_password.new_password, 'crypt');

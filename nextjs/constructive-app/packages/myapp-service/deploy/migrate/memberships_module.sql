@@ -1,7 +1,7 @@
 -- Deploy: migrate/memberships_module
 -- made with <3 @ constructive.io
 
--- requires: migrate/webauthn_settings
+-- requires: migrate/view_rule
 
 
 SET session_replication_role TO replica;
@@ -64,7 +64,8 @@ INSERT INTO metaschema_modules_public.memberships_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-5560-7075-8fe6-1ac7e4dd0e49', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', NULL, '019fa2a1-50aa-7d8f-841d-7965af0951a1', '019fa2a1-5560-76ce-bbf2-797a38176260', NULL, NULL, '019fa2a1-558c-7bc2-b6aa-c20fbc1f8f2a', 'app_memberships', '019fa2a1-5022-77c8-9de2-2ef6079855de', 'app_members', '019fa2a1-55cd-7a92-9979-3b8d9bc899b3', 'app_membership_defaults', NULL, 'app_membership_settings', '019fa2a1-57ac-73c9-bd3e-65e6d7444548', 'app_grants', '019fa2a1-5022-77c8-9de2-2ef6079855de', '019fa2a1-51d7-7525-a82f-f18b7765f445', '019fa2a1-5245-7943-99d6-ab69b0046c4a', '019fa2a1-5131-7642-b999-a3637fd3f1a5', '019fa2a1-5182-755b-a123-1190a88df2cf', '019fa2a1-5607-704a-bacc-b1c2d99357f7', '019fa2a1-56f9-78f0-931f-4812580b70dd', 'app_admin_grants', '019fa2a1-574e-737f-9b1f-25f5eb8d9dd6', 'app_owner_grants', 'app', 'app', NULL, NULL, 'get_organization_id', 'app_memberships_mask_check', 'app_memberships_perm_check', NULL, NULL, NULL, NULL, '019fa2a1-5813-7ca8-bd2f-4f5cde8b71a6', '019fa2a1-5856-7452-ad3a-45b1f4c4fc67', 'admin', NULL);
+  ('019fbc96-8a81-795a-b7ee-26d700ccd3c6', '019fbc96-84d8-7d13-8acc-4c55ad35634c', NULL, '019fbc96-85d4-7f68-b449-545fb41b37d8', '019fbc96-8a81-7f7c-a48a-5a22ff96b8b1', NULL, NULL, '019fbc96-8aa7-7512-9409-53c9aa016b84', 'app_memberships', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'app_members', '019fbc96-8aea-7ad4-a849-ea060bfc84a5', 'app_membership_defaults', NULL, 'app_membership_settings', '019fbc96-8ce4-71cd-ad47-bef8de02e070', 'app_grants', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-8702-7a94-9e81-560580adcaeb', '019fbc96-876c-7f34-b3b2-19c7fbae3f4f', '019fbc96-865b-7f26-a4f8-32df18a9e0ae', '019fbc96-86b0-7700-97e1-d05bfdc3b002', '019fbc96-8b25-77f2-ad95-aa9e09f99650', '019fbc96-8c19-7c0a-9052-1768cd93e552', 'app_admin_grants', '019fbc96-8c78-70da-8715-a89c618f1459', 'app_owner_grants', 'app', 'app', NULL, NULL, 'get_organization_id', 'app_memberships_mask_check', 'app_memberships_perm_check', NULL, NULL, NULL, NULL, '019fbc96-8d4b-7d3e-b20b-ecb9ad31487d', '019fbc96-8d8e-751f-a300-15e48f2b766f', 'admin', NULL),
+  ('019fbc96-99b6-7b5e-85ee-b2b672d3b9a5', '019fbc96-84d8-7d13-8acc-4c55ad35634c', 'entity_id', '019fbc96-85d4-7f68-b449-545fb41b37d8', '019fbc96-8a81-7f7c-a48a-5a22ff96b8b1', NULL, NULL, '019fbc96-99bc-7201-9cda-85df7f4524ad', 'org_memberships', '019fbc96-9d0c-7703-9e77-3ad4e99213ab', 'org_members', '019fbc96-9a0f-7565-9c5b-19990520d73c', 'org_membership_defaults', '019fbc96-9b14-7a84-b273-cc96a45854b8', 'org_membership_settings', '019fbc96-a02d-7797-a968-a4f7aef00b4a', 'org_grants', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-948e-7191-adb1-ab09ac90689e', '019fbc96-9542-74ef-b1d3-8502bfd69283', '019fbc96-93c9-79f2-8dcb-8d72b5725eaa', '019fbc96-943e-7ea4-b55b-ac4ad60ff0e9', '019fbc96-9a64-745c-bc54-f97fa0b95d25', '019fbc96-9de0-7944-9027-6aa06491ef19', 'org_admin_grants', '019fbc96-9e82-73a2-b554-259d21eea97d', 'org_owner_grants', 'org', 'org', '019fbc96-8533-7560-9eea-55dbc7f7fcee', NULL, 'get_organization_id', 'org_memberships_mask_check', 'org_memberships_perm_check', 'org_memberships_mask_ids', 'org_memberships_perm_ids', 'org_memberships_ids', '019fbc96-9f36-7e20-ac14-923b764c3ac4', '019fbc96-a0ea-7e5e-9a0b-1c224ef18e4e', '019fbc96-a17b-7b9b-94d6-a303d8932007', 'admin', NULL);
 
 
 SET session_replication_role TO DEFAULT;

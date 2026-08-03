@@ -18,7 +18,7 @@ BEGIN
   v_token_hash := encode(digest(approve_device.approval_token, 'sha256'), 'hex');
   v_stored_user_id := myapp_store_private.user_state_get(v_token_hash, 'device_approval_user_id');
   IF v_stored_user_id IS NULL THEN
-    RAISE EXCEPTION 'INVALID_TOKEN';
+    PERFORM errors.raise_error('INVALID_TOKEN', '{}', 'public');
   END IF;
   v_stored_device_hash := myapp_store_private.user_state_get(v_token_hash, 'device_approval_device_hash');
   v_created_at := myapp_store_private.user_state_get(v_token_hash, 'device_approval_created_at');
@@ -26,14 +26,14 @@ BEGIN
     PERFORM myapp_store_private.user_state_del(v_token_hash, 'device_approval_user_id');
     PERFORM myapp_store_private.user_state_del(v_token_hash, 'device_approval_device_hash');
     PERFORM myapp_store_private.user_state_del(v_token_hash, 'device_approval_created_at');
-    RAISE EXCEPTION 'EXPIRED_TOKEN';
+    PERFORM errors.raise_error('EXPIRED_TOKEN', '{}', 'public');
   END IF;
   UPDATE myapp_auth_private.auth_user_devices AS ud SET
   is_approved = true, approved_at = now(), approval_method = 'email_link'
   WHERE
     ud.user_id = v_stored_user_id::uuid AND ud.device_token_hash = decode(v_stored_device_hash, 'hex');
   IF NOT (FOUND) THEN
-    RAISE EXCEPTION 'DEVICE_NOT_FOUND';
+    PERFORM errors.raise_error('DEVICE_NOT_FOUND', '{}', 'public');
   END IF;
   PERFORM myapp_store_private.user_state_del(v_token_hash, 'device_approval_user_id');
   PERFORM myapp_store_private.user_state_del(v_token_hash, 'device_approval_device_hash');

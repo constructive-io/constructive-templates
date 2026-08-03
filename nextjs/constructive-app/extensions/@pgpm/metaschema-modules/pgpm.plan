@@ -2,10 +2,7 @@
 %project=metaschema-modules
 %uri=metaschema-modules
 
-schemas/services_private/schema [services:schemas/services_public/tables/site_themes/table] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/services_private/schema
-schemas/services_public/schema 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/services_public/schema
 schemas/metaschema_modules_public/schema 2026-01-04T08:28:00Z devin <devin@cognition.ai> # add schemas/metaschema_modules_public/schema
-schemas/services_public/tables/apis/table [schemas/services_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/services_public/tables/apis/table
 schemas/metaschema_modules_public/tables/connected_accounts_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/connected_accounts_module/table
 schemas/metaschema_modules_public/tables/crypto_addresses_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/crypto_addresses_module/table
 schemas/metaschema_modules_public/tables/crypto_auth_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/crypto_auth_module/table
@@ -21,9 +18,8 @@ schemas/metaschema_modules_public/tables/memberships_module/table [schemas/metas
 schemas/metaschema_modules_public/tables/permissions_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/permissions_module/table
 schemas/metaschema_modules_public/tables/phone_numbers_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/phone_numbers_module/table
 schemas/metaschema_modules_public/tables/profiles_module/table [schemas/metaschema_modules_public/schema] 2026-01-01T00:00:00Z devin <devin@cognition.ai> # add schemas/metaschema_modules_public/tables/profiles_module/table
-schemas/metaschema_modules_public/tables/rls_module/table [schemas/metaschema_modules_public/schema schemas/services_public/tables/apis/table] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/rls_module/table
+schemas/metaschema_modules_public/tables/rls_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/rls_module/table
 schemas/metaschema_modules_public/tables/user_state_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/user_state_module/table
-schemas/services_public/tables/sites/table [schemas/services_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/services_public/tables/sites/table
 schemas/metaschema_modules_public/tables/sessions_module/table [schemas/metaschema_modules_public/schema] 2026-01-24T00:00:00Z devin <devin@cognition.ai> # add schemas/metaschema_modules_public/tables/sessions_module/table
 schemas/metaschema_modules_public/tables/user_auth_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/user_auth_module/table
 schemas/metaschema_modules_public/tables/users_module/table [schemas/metaschema_modules_public/schema] 2017-08-11T08:11:51Z skitch <skitch@5b0c196eeb62> # add schemas/metaschema_modules_public/tables/users_module/table

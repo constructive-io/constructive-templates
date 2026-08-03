@@ -15,17 +15,17 @@ DECLARE
 BEGIN
   v_user_id := jwt_public.current_user_id();
   IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+    PERFORM errors.raise_error('NOT_AUTHENTICATED', '{}', 'public');
   END IF;
   IF jwt_public.current_principal_id() <> v_user_id THEN
-    RAISE EXCEPTION 'PRINCIPAL_CANNOT_REVOKE_API_KEY';
+    PERFORM errors.raise_error('PRINCIPAL_CANNOT_REVOKE_API_KEY', '{}', 'public');
   END IF;
   SELECT sc.session_id
   FROM myapp_auth_private.session_credentials AS sc INNER JOIN myapp_auth_private.sessions AS s ON s.id = sc.session_id
   WHERE
     (sc.id = revoke_api_key.key_id AND sc.kind = 'api_key') AND s.user_id = v_user_id INTO v_session_id;
   IF v_session_id IS NULL THEN
-    RAISE EXCEPTION 'API_KEY_NOT_FOUND';
+    PERFORM errors.raise_error('API_KEY_NOT_FOUND', '{}', 'public');
   END IF;
   DELETE FROM myapp_auth_private.session_credentials
   WHERE

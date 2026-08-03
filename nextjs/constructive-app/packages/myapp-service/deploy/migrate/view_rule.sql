@@ -28,21 +28,24 @@ INSERT INTO metaschema_public.view_rule (
   event,
   action
 ) VALUES
-  ('019fa2a1-6110-799a-b719-2452d272f2ab', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6109-767a-8bfc-f1bb29779a76', '_insert_rule', 'INSERT', 'NOTHING'),
-  ('019fa2a1-6113-7e34-bc1c-501ca1680362', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6109-767a-8bfc-f1bb29779a76', '_update_rule', 'UPDATE', 'NOTHING'),
-  ('019fa2a1-6116-7aed-a959-c67b2f1996cd', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6109-767a-8bfc-f1bb29779a76', '_delete_rule', 'DELETE', 'NOTHING'),
-  ('019fa2a1-612a-7bd1-ab4d-ac8cff0ede0e', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6123-71cd-865e-c366636985f4', '_insert_rule', 'INSERT', 'NOTHING'),
-  ('019fa2a1-612d-782f-aa97-1cdf124f0f22', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6123-71cd-865e-c366636985f4', '_update_rule', 'UPDATE', 'NOTHING'),
-  ('019fa2a1-6130-7666-9843-1030f793a9a8', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6123-71cd-865e-c366636985f4', '_delete_rule', 'DELETE', 'NOTHING'),
-  ('019fa2a1-6882-78a4-9bc8-1fd12f3733e0', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-687b-7da2-9fdd-9d73f5d2db1e', '_insert_rule', 'INSERT', 'NOTHING'),
-  ('019fa2a1-6885-7ea8-8ea8-d03b34a01e72', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-687b-7da2-9fdd-9d73f5d2db1e', '_update_rule', 'UPDATE', 'NOTHING'),
-  ('019fa2a1-6888-7f1e-9825-5096db6c907a', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-687b-7da2-9fdd-9d73f5d2db1e', '_delete_rule', 'DELETE', 'NOTHING'),
-  ('019fa2a1-6dea-71f4-a479-aa5079fb3fd6', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6de2-79f4-af72-b983ba08bf0f', '_insert_rule', 'INSERT', 'NOTHING'),
-  ('019fa2a1-6ded-7bf2-a614-82e77b3c9afe', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6de2-79f4-af72-b983ba08bf0f', '_update_rule', 'UPDATE', 'NOTHING'),
-  ('019fa2a1-6df1-7294-b02a-6caf59eb9b17', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6de2-79f4-af72-b983ba08bf0f', '_delete_rule', 'DELETE', 'NOTHING'),
-  ('019fa2a1-6fe2-7acf-82a0-4713d93c2955', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6fdb-7e46-84b5-0b300d2c6f6e', '_insert_rule', 'INSERT', 'NOTHING'),
-  ('019fa2a1-6fe6-71db-ae6f-da3622331d33', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6fdb-7e46-84b5-0b300d2c6f6e', '_update_rule', 'UPDATE', 'NOTHING'),
-  ('019fa2a1-6fe9-7bcd-a39a-c1438e9fa976', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-6fdb-7e46-84b5-0b300d2c6f6e', '_delete_rule', 'DELETE', 'NOTHING');
+  ('019fbc96-b643-7a58-a886-bfc390bf8ab4', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b639-7c4f-8e7c-744b5346ac1e', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-b648-7472-bc29-1ac576aa75b8', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b639-7c4f-8e7c-744b5346ac1e', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-b64c-793f-b32f-c75123bda920', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b639-7c4f-8e7c-744b5346ac1e', '_delete_rule', 'DELETE', 'NOTHING'),
+  ('019fbc96-b66a-7ae5-9422-8572e44a063b', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b660-7cc4-977a-e31b757ef8b2', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-b66e-786e-a4dd-00397e7cf408', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b660-7cc4-977a-e31b757ef8b2', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-b672-7535-a6bf-c2b7547407fa', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-b660-7cc4-977a-e31b757ef8b2', '_delete_rule', 'DELETE', 'NOTHING'),
+  ('019fbc96-c0c3-7c4d-920d-1ab90fd769f4', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c0ba-7f88-a2dc-e9e346eb1902', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-c0c8-72ae-b058-4c335d0ff463', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c0ba-7f88-a2dc-e9e346eb1902', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-c0cc-7336-b75d-02fef04cc597', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c0ba-7f88-a2dc-e9e346eb1902', '_delete_rule', 'DELETE', 'NOTHING'),
+  ('019fbc96-c86b-7e5f-87b0-723eaa2f09cf', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c862-701b-9ee6-d65f38de3b9a', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-c870-79b1-90d0-3aca9f821bff', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c862-701b-9ee6-d65f38de3b9a', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-c875-7c2c-880e-4546f2c22848', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c862-701b-9ee6-d65f38de3b9a', '_delete_rule', 'DELETE', 'NOTHING'),
+  ('019fbc96-cb37-7b03-a966-7e200162a846', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-cb2f-7488-a3f5-e0f742bd511e', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-cb3c-75da-ab35-4ca112cd8a60', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-cb2f-7488-a3f5-e0f742bd511e', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-cb41-7370-a960-0999b0ef816c', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-cb2f-7488-a3f5-e0f742bd511e', '_delete_rule', 'DELETE', 'NOTHING'),
+  ('019fbc96-ddc5-7027-9c91-c5884a3607ca', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ddb8-785f-9297-c8f1a1540c35', '_insert_rule', 'INSERT', 'NOTHING'),
+  ('019fbc96-ddca-7e9c-aba2-a907c94cb232', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ddb8-785f-9297-c8f1a1540c35', '_update_rule', 'UPDATE', 'NOTHING'),
+  ('019fbc96-ddd0-7925-a418-85fa0f96d33d', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ddb8-785f-9297-c8f1a1540c35', '_delete_rule', 'DELETE', 'NOTHING');
 
 
 SET session_replication_role TO DEFAULT;

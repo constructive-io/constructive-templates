@@ -1,7 +1,7 @@
 -- Deploy: migrate/user_auth_module
 -- made with <3 @ constructive.io
 
--- requires: migrate/sessions_module
+-- requires: migrate/storage_module
 
 
 SET session_replication_role TO replica;
@@ -50,7 +50,7 @@ INSERT INTO metaschema_modules_public.user_auth_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-7000-7603-87ed-c37301ff3e82', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-68d3-7385-938c-1973d9bed8f2', '019fa2a1-69aa-7ba6-a7ef-3303f246936b', '019fa2a1-5022-77c8-9de2-2ef6079855de', '019fa2a1-5b1d-7b27-bab2-e3c469e536af', '019fa2a1-6661-7502-b1a4-7ebfccb37ee9', '019fa2a1-5bbc-7d2a-a42f-af8235516fb4', '019fa2a1-5c8d-7633-a186-023c9c2285e6', '019fa2a1-703c-73a4-bcd4-ef0ed194b005', 'audit_log_auth', 'sign_in', 'sign_up', 'sign_out', 'set_password', 'reset_password', 'forgot_password', 'send_verification_email', 'verify_email', 'verify_password', 'check_password', 'send_account_deletion_email', 'confirm_delete_account', 'sign_in_cross_origin', 'request_cross_origin_token', 'extend_token_expires', 'auth', NULL);
+  ('019fbc96-d3d8-779d-ac2d-370828805a1a', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', '019fbc96-c250-7c44-b81a-baa69ea7f678', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-ad5b-7116-9f79-d037fdc40cd9', '019fbc96-bdd9-7379-be88-17a73f1d5320', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-d430-750d-8b5e-429956001965', 'audit_log_auth', 'sign_in', 'sign_up', 'sign_out', 'set_password', 'reset_password', 'forgot_password', 'send_verification_email', 'verify_email', 'verify_password', 'check_password', 'send_account_deletion_email', 'confirm_delete_account', 'sign_in_cross_origin', 'request_cross_origin_token', 'extend_token_expires', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

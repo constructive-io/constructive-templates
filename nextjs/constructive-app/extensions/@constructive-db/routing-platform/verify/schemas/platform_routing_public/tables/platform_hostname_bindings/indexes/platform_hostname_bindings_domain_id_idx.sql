@@ -1,0 +1,4 @@
+-- Verify: schemas/platform_routing_public/tables/platform_hostname_bindings/indexes/platform_hostname_bindings_domain_id_idx
+
+
+SELECT verify_index('platform_routing_public.platform_hostname_bindings', 'platform_hostname_bindings_domain_id_idx');
