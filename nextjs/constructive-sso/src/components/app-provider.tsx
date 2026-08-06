@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 import { getEndpoint, type SchemaContext } from '@/app-config';
-import { getAuthHeaders } from '@/graphql/execute';
+import { createSdkFetch, getAuthHeaders } from '@/graphql/execute';
 import { configure as configureAdmin } from '@sdk/admin';
 import { configure as configureAuth } from '@sdk/auth';
 import { configure as configureApp } from '@sdk/app';
@@ -15,6 +15,9 @@ import { queryClient } from '@/lib/query-client';
 // Shared SDK configuration factory — binds a schema context to its GraphQL endpoint.
 // The endpoint getter and headers getter ensure changes to Direct Connect / UI overrides
 // are picked up on every request without needing to re-call configure().
+// `fetch` wraps the generated FetchAdapter so requests carry the session cookie + CSRF
+// token (otherwise cross-origin requests run as `anonymous` — see createSdkFetch()).
+const sdkFetch = createSdkFetch();
 function createSdkConfig(ctx: SchemaContext) {
 	return {
 		get endpoint() {
@@ -23,6 +26,7 @@ function createSdkConfig(ctx: SchemaContext) {
 		get headers() {
 			return getAuthHeaders(ctx);
 		},
+		fetch: sdkFetch,
 	};
 }
 

@@ -316,6 +316,43 @@ async function main() {
       console.log('   No memberships schema found - skipping defaults');
     }
 
+    // Members create organizations via the auth API's createUser mutation,
+    // which runs as the `authenticated` role. For that INSERT to pass, mirror
+    // the platform's declarative grants (application/constructive:
+    // .../users/grants/authenticated/insert):
+    //   1. a column-scoped INSERT grant on the users table, and
+    //   2. app_permission_defaults must include create_entity (bit 5) so the
+    //      users INSERT RLS policy (auth_ins_insert_chk: membership &
+    //      create_entity, type = 2) passes for newly signed-up members.
+    const usersSchemaResult = await defaultsPool.query(
+      `SELECT schema_name FROM information_schema.schemata
+       WHERE (schema_name LIKE '%users-public' OR schema_name LIKE '%users_public')
+             AND schema_name LIKE '%${config.databaseName}%'
+       ORDER BY schema_name DESC LIMIT 1`
+    );
+    if (usersSchemaResult.rows.length > 0) {
+      const usersSchema = usersSchemaResult.rows[0].schema_name;
+      await defaultsPool.query(
+        `GRANT INSERT ( type, display_name, profile_picture, username ) ON "${usersSchema}".users TO authenticated`
+      );
+console.log(`   GRANT INSERT (type, display_name, profile_picture, username) ON ${usersSchema}.users TO authenticated`);
+    }
+
+    const permissionsSchemaResult = await defaultsPool.query(
+      `SELECT schema_name FROM information_schema.schemata
+       WHERE (schema_name LIKE '%permissions-public' OR schema_name LIKE '%permissions_public')
+             AND schema_name LIKE '%${config.databaseName}%'
+       ORDER BY schema_name DESC LIMIT 1`
+    );
+    if (permissionsSchemaResult.rows.length > 0) {
+      const permissionsSchema = permissionsSchemaResult.rows[0].schema_name;
+      await defaultsPool.query(
+        `UPDATE "${permissionsSchema}".app_permission_defaults
+         SET permissions = permissions | B'0000000000000000000000000000000000000000000000000000000000010000'`
+      );
+console.log(`   app_permission_defaults: create_entity (bit 5) enabled for new members (${permissionsSchema})`);
+    }
+
     await defaultsPool.end();
   }
 

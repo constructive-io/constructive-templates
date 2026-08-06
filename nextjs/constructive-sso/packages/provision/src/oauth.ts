@@ -244,9 +244,25 @@ export async function provisionOAuth(pgDatabase: string): Promise<void> {
       AS $$ SELECT * FROM "${authSchema}".sign_in_identity(
         service, identifier, details, email, credential_kind, remember_me, device_token
       ) $$;
+
+      -- The OAuth callback runs pre-auth as the anonymous role (no token
+      -- exists yet), so anonymous must have EXECUTE on these wrappers.
+      -- The private functions get this via the platform's declare_anon_execute
+      -- mechanism; these hand-written wrappers must grant it explicitly,
+      -- otherwise the callback fails with
+      -- 'permission denied for function sign_up_identity'.
+      GRANT EXECUTE ON FUNCTION "${publicSchema}".sign_up_identity(
+        service text, identifier text, email text, details jsonb,
+        credential_kind text, remember_me boolean, device_token text
+      ) TO anonymous;
+
+      GRANT EXECUTE ON FUNCTION "${publicSchema}".sign_in_identity(
+        service text, identifier text, details jsonb, email text,
+        credential_kind text, remember_me boolean, device_token text
+      ) TO anonymous;
     `;
     await pool.query(identityFnSql);
-    console.log(`   Created sign_up_identity/sign_in_identity wrappers in ${publicSchema}`);
+    console.log(`   Created sign_up_identity/sign_in_identity wrappers in ${publicSchema} (EXECUTE granted to anonymous)`);
 
   } catch (err: any) {
     try { await pool.query('ROLLBACK'); } catch { /* already committed or no tx */ }

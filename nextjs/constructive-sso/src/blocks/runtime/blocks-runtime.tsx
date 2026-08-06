@@ -30,7 +30,7 @@ import { type ReactNode, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 
 import { getEndpoint, type SchemaContext } from '@/app-config';
-import { getAuthHeaders } from '@/graphql/execute';
+import { createSdkFetch, getAuthHeaders } from '@/graphql/execute';
 import type { OrmClientConfig } from '@/generated/auth';
 import { configure as configureAuth } from '@/generated/auth';
 import { configure as configureAdmin } from '@/generated/admin';
@@ -52,6 +52,9 @@ const CONFIGURERS: Record<BlocksNamespace, ConfigureFn> = {
 	app: configureApp
 };
 
+/** Session-aware fetch for the generated SDK clients. */
+const sdkFetch = createSdkFetch();
+
 /**
  * Shared SDK configuration factory — binds a namespace to its GraphQL
  * endpoint. The endpoint getter and headers getter ensure changes to
@@ -66,7 +69,10 @@ function createNamespaceConfig(ns: BlocksNamespace): OrmClientConfig {
 		},
 		get headers() {
 			return getAuthHeaders(ctx);
-		}
+		},
+		// The generated FetchAdapter omits credentials/CSRF; without them
+		// cross-origin requests run as `anonymous`. See createSdkFetch().
+		fetch: sdkFetch,
 	};
 }
 

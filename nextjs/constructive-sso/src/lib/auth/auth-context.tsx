@@ -9,7 +9,7 @@ import { useLogout } from '@/lib/gql/hooks/auth';
 import { reconfigureSdkClients } from '@/components/app-provider';
 import { initEnvOverridesSync } from '@/lib/runtime/env-sync';
 import { useAuth, useAuthActions } from '@/store/app-store';
-import type { UserProfile } from '@/store/auth-slice';
+import type { ApiToken, UserProfile } from '@/store/auth-slice';
 
 import type { LoginFormData } from './schemas';
 import { TokenManager } from './token-manager';
@@ -81,6 +81,47 @@ async function trySessionAuth(
 }
 
 /**
+ * OAuth implicit-style handoff: the OAuth middleware redirects back with the
+ * access token in the URL fragment (#access_token=...&user_id=...). Store it
+ * exactly like password login does so every SDK context can authenticate with
+ * a Bearer header on ANY API host (session cookies are host-only and only
+ * reach the auth host). Returns true when a fragment token was consumed.
+ */
+function consumeOAuthFragment(
+	authActions: ReturnType<typeof useAuthActions>,
+): boolean {
+	if (typeof window === 'undefined') return false;
+	const hash = window.location.hash;
+	if (!hash || !hash.includes('access_token')) return false;
+
+	const params = new URLSearchParams(hash.replace(/^#/, ''));
+	const accessToken = params.get('access_token');
+	const userId = params.get('user_id');
+	const expiresAt = params.get('access_token_expires_at');
+	if (!accessToken || !userId || !expiresAt) return false;
+
+	const token: ApiToken = {
+		id: params.get('id') ?? userId,
+		userId,
+		accessToken,
+		accessTokenExpiresAt: expiresAt,
+	};
+
+	// Mirror password login (session semantics — no remember me).
+	TokenManager.setToken(token, false, 'admin');
+	reconfigureSdkClients();
+	authActions.setAuthenticated(
+		{ id: userId, email: params.get('email') ?? '' },
+		token,
+		false,
+	);
+
+	// Strip the fragment so the token doesn't linger in the URL/history.
+	history.replaceState(null, '', window.location.pathname + window.location.search);
+	return true;
+}
+
+/**
  * Initialize auth state.
  * Checks token storage and updates the auth slice accordingly.
  * When no localStorage token exists, falls back to cookie-based session
@@ -89,6 +130,11 @@ async function trySessionAuth(
 async function initializeAuth(
 	authActions: ReturnType<typeof useAuthActions>,
 ) {
+	// OAuth redirect handoff (fragment token) takes precedence over stored tokens.
+	if (consumeOAuthFragment(authActions)) {
+		return;
+	}
+
 	const { token, rememberMe } = TokenManager.getToken('admin');
 
 	if (!token) {

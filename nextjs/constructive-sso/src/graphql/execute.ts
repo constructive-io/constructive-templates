@@ -28,6 +28,30 @@ export function getCsrfToken(): string | null {
 	return match ? decodeURIComponent(match[1]) : null;
 }
 
+/**
+ * Fetch wrapper for the generated SDK ORM clients.
+ *
+ * The generated FetchAdapter sends neither `credentials` nor the CSRF
+ * header, so cross-origin requests (app on :3011 vs API on :3000) drop the
+ * session cookie and run as `anonymous` — causing spurious
+ * "permission denied for table users" errors. This mirrors the request
+ * shape of executeInContext() (session cookie + CSRF token).
+ */
+export function createSdkFetch(): typeof globalThis.fetch {
+	return (input, init) => {
+		const headers = new Headers(init?.headers);
+		const csrfToken = getCsrfToken();
+		if (csrfToken) {
+			headers.set('x-csrf-token', csrfToken);
+		}
+		return fetch(input, {
+			...init,
+			credentials: 'include',
+			headers,
+		});
+	};
+}
+
 // ============================================================================
 // Type Inference
 // ============================================================================
