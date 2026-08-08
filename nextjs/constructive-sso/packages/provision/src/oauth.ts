@@ -32,6 +32,40 @@ export async function provisionOAuth(pgDatabase: string): Promise<void> {
   const pool = new Pool({ database: pgDatabase });
   try {
     // -----------------------------------------------------------------------
+    // Provider configuration — env-driven, mock defaults for local dev.
+    //
+    // Real providers: export these before running `pnpm run provision`, e.g.
+    //   OAUTH_CLIENT_ID=... OAUTH_CLIENT_SECRET=... \
+    //   OAUTH_AUTHORIZE_URL=https://accounts.google.com/o/oauth2/v2/auth \
+    //   OAUTH_TOKEN_URL=https://oauth2.googleapis.com/token \
+    //   OAUTH_USERINFO_URL=https://openidconnect.googleapis.com/v1/userinfo \
+    //   pnpm run provision
+    //
+    // The GraphQL server reads ONLY the DB rows (identity_providers + the
+    // rotated secret); these env vars exist to inject credentials at setup
+    // time without hardcoding them in source.
+    // -----------------------------------------------------------------------
+    const oauthProvider = {
+      slug: process.env.OAUTH_PROVIDER ?? 'google',
+      clientId: process.env.OAUTH_CLIENT_ID ?? 'constructive-sso-local-client',
+      clientSecret: process.env.OAUTH_CLIENT_SECRET ?? 'constructive-sso-local-secret',
+      authorizationUrl: process.env.OAUTH_AUTHORIZE_URL ?? 'http://localhost:4010/authorize',
+      tokenUrl: process.env.OAUTH_TOKEN_URL ?? 'http://localhost:4010/token',
+      userinfoUrl: process.env.OAUTH_USERINFO_URL ?? 'http://localhost:4010/userinfo',
+      pkceEnabled: (process.env.OAUTH_PKCE_ENABLED ?? 'true') !== 'false',
+      scopes: (process.env.OAUTH_SCOPES ?? 'openid,email,profile')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    };
+    const isMockProvider = oauthProvider.clientId.startsWith('constructive-sso-local');
+    if (isMockProvider) {
+      console.log(`   Using MOCK OAuth provider (${oauthProvider.authorizationUrl}) — set OAUTH_CLIENT_ID/URLs for a real provider`);
+    } else {
+      console.log(`   Using REAL OAuth provider ${oauthProvider.slug} (${oauthProvider.authorizationUrl})`);
+    }
+
+    // -----------------------------------------------------------------------
     // A. Upsert identity_providers row
     //
     // The mock OAuth server (oauth2-mock-server) provides a real authorization
@@ -60,13 +94,13 @@ export async function provisionOAuth(pgDatabase: string): Promise<void> {
         scopes, pkce_enabled
       )
       VALUES (
-        'google', 'oidc', 'Google', true,
-        'constructive-sso-local-client',
-        'http://localhost:4010/authorize',
-        'http://localhost:4010/token',
-        'http://localhost:4010/userinfo',
-        ARRAY['openid', 'email', 'profile'],
-        true
+        '${oauthProvider.slug}', 'oidc', 'Google', true,
+        '${oauthProvider.clientId}',
+        '${oauthProvider.authorizationUrl}',
+        '${oauthProvider.tokenUrl}',
+        '${oauthProvider.userinfoUrl}',
+        ARRAY[${oauthProvider.scopes.map((s) => `'${s}'`).join(', ')}],
+        ${oauthProvider.pkceEnabled}
       )
       ON CONFLICT (slug) DO UPDATE SET
         kind = EXCLUDED.kind,
@@ -108,34 +142,44 @@ export async function provisionOAuth(pgDatabase: string): Promise<void> {
     // -----------------------------------------------------------------------
     await pool.query(
       `SELECT "${authSchema}".rotate_identity_provider_app_secret($1, $2)`,
-      [resolvedProviderId, 'constructive-sso-local-secret'],
+      [resolvedProviderId, oauthProvider.clientSecret],
     );
     console.log('   Client secret rotated via rotate_identity_provider_app_secret');
 
     // -----------------------------------------------------------------------
     // B. Update app_settings_auth for cookie-based SSO
     //
-    // cookie_domain is LEFT EMPTY (host-only cookie) — this is critical.
-    // A Domain=localhost cookie is NOT sent by browsers (or curl) to
-    // subdomains like auth-myapp.localhost: the cookie spec's domain-match
-    // for the special 'localhost' host is broken in Chrome/Edge/curl.
-    // With a host-only cookie, the cookie set on auth-myapp.localhost:3000
-    // is sent to ANY port on auth-myapp.localhost — so the Next.js app must
-    // be accessed at http://auth-myapp.localhost:3011 (not localhost:3011)
-    // for the session to hydrate.
+    // Local dev: cookie_domain is left empty (host-only) because a
+    // Domain=localhost cookie is NOT sent by browsers to subdomains like
+    // auth-myapp.localhost (the cookie spec's domain-match for the special
+    // 'localhost' host is broken in Chrome/Edge/curl). A host-only cookie set
+    // on auth-myapp.localhost:3000 is sent to ANY port on that host, so the
+    // app is served at http://auth-myapp.localhost:3011.
+    //
+    // Production: set COOKIE_DOMAIN='.<real-domain>' so the session cookie
+    // covers every subdomain (works on real domains), COOKIE_SECURE=true
+    // (HTTPS), and OAUTH_REQUIRE_VERIFIED_EMAIL=true.
     // -----------------------------------------------------------------------
+    const cookieSecure = (process.env.COOKIE_SECURE ?? 'false') === 'true';
+    const cookieDomain = process.env.COOKIE_DOMAIN ?? '';
+    const requireVerifiedEmail =
+      (process.env.OAUTH_REQUIRE_VERIFIED_EMAIL ?? 'false') === 'true';
+
     await pool.query(
       `UPDATE "${authSchema}".app_settings_auth
-       SET cookie_secure = false,
+       SET cookie_secure = ${cookieSecure},
            cookie_samesite = 'lax',
-           cookie_domain = '',
+           cookie_domain = '${cookieDomain}',
            allow_identity_sign_in = true,
            allow_identity_sign_up = true,
-           oauth_require_verified_email = false`,
+           oauth_require_verified_email = ${requireVerifiedEmail}`,
     );
     console.log('   app_settings_auth configured for cookie-based SSO');
-    console.log('   cookie_domain= (host-only), cookie_secure=false, allow_identity_sign_in=true');
-    console.log('   NOTE: access the app at http://auth-{db}.localhost:3011 (NOT localhost:3011)');
+    console.log(`   cookie_secure=${cookieSecure}, cookie_domain=${cookieDomain || '(host-only)'}, allow_identity_sign_in=true`);
+    if (requireVerifiedEmail) {
+      console.log('   oauth_require_verified_email = true (verified emails only)');
+    }
+    console.log('   NOTE (local dev): access the app at http://auth-{db}.localhost:3011');
 
     // -----------------------------------------------------------------------
     // C. Grant anonymous access to identity providers for the login screen
