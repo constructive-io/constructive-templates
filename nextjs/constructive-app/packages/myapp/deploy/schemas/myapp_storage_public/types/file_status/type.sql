@@ -4,5 +4,5 @@
 -- requires: schemas/myapp_storage_public/schema
 
 
-CREATE TYPE myapp_storage_public.file_status AS ENUM ( 'requested', 'uploaded', 'processed' );
+CREATE TYPE myapp_storage_public.file_status AS ENUM ( 'requested', 'uploaded', 'processed', 'rejected', 'expired' );
 

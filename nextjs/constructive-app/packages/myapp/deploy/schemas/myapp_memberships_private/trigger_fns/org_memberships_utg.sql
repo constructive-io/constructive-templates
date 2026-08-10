@@ -6,23 +6,23 @@
 
 CREATE FUNCTION myapp_memberships_private.org_memberships_utg() RETURNS TRIGGER AS $_PGFN_$
 DECLARE
-  bitlen int := bit_length(NEW.permissions);
+  bitlen int := bit_length(NEW.capabilities);
 BEGIN
   IF NEW.is_owner IS true THEN
-    new.is_admin := true;
-    new.is_approved := true;
-    new.is_disabled := false;
-    new.is_banned := false;
-    new.is_read_only := false;
+    NEW.is_admin := true;
+    NEW.is_approved := true;
+    NEW.is_disabled := false;
+    NEW.is_banned := false;
+    NEW.is_read_only := false;
   END IF;
   IF NEW.is_admin IS true THEN
-    new.is_read_only := false;
+    NEW.is_read_only := false;
   END IF;
-  new.is_active := (NEW.is_approved IS true AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
+  NEW.is_active := (NEW.is_approved IS true AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
   IF NEW.is_admin IS true OR NEW.is_owner IS true THEN
-    new.permissions := lpad('', bitlen::int, '1');
+    NEW.capabilities := lpad('', bitlen::int, '1');
   ELSE
-    new.permissions := NEW.granted;
+    NEW.capabilities := NEW.granted;
   END IF;
   RETURN NEW;
 END;

@@ -15,7 +15,7 @@ BEGIN
     IF NEW.email IS NULL OR NEW.multiple IS TRUE THEN
       RAISE EXCEPTION 'PROFILE_ASSIGNMENT_REQUIRES_EMAIL_INVITE';
     END IF;
-    SELECT p.permissions
+    SELECT p.capabilities
     FROM myapp_profiles_public.app_profiles AS p
     WHERE
       p.id = NEW.profile_id INTO v_profile_perms;
@@ -23,9 +23,9 @@ BEGIN
       RAISE EXCEPTION 'PROFILE_NOT_FOUND';
     END IF;
     IF NOT (myapp_memberships_private.app_memberships_perm_check('assign_profiles', NEW.sender_id) IS TRUE) THEN
-      RAISE EXCEPTION 'ASSIGN_PROFILES_PERMISSION_REQUIRED';
+      RAISE EXCEPTION 'ASSIGN_PROFILES_CAPABILITY_REQUIRED';
     END IF;
-    SELECT m.permissions
+    SELECT m.capabilities
     FROM myapp_memberships_public.app_memberships AS m
     WHERE
       m.actor_id = NEW.sender_id INTO v_inviter_perms;
@@ -33,7 +33,7 @@ BEGIN
       RAISE EXCEPTION 'MEMBERSHIP_NOT_FOUND';
     END IF;
     IF (v_profile_perms & (~v_inviter_perms)) <> (v_inviter_perms & (~v_inviter_perms)) THEN
-      RAISE EXCEPTION 'PROFILE_EXCEEDS_PERMISSIONS';
+      RAISE EXCEPTION 'PROFILE_EXCEEDS_CAPABILITIES';
     END IF;
   END IF;
   RETURN NEW;

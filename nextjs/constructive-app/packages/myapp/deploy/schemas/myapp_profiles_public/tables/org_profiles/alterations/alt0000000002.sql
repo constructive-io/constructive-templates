@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_profiles_public/tables/org_profiles/table
 
 
-COMMENT ON TABLE myapp_profiles_public.org_profiles IS E'Named permission bundles (roles) that group multiple permissions into reusable profiles';
+COMMENT ON TABLE myapp_profiles_public.org_profiles IS E'Named capability bundles (roles) that group multiple capabilities into reusable profiles';
 

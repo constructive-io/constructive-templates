@@ -4,16 +4,22 @@ let pg: PgTestClient;
 let teardown: () => Promise<void>;
 
 const TABLES: Record<string, string[]> = {
-  'catalog_public': [
+  'catalog_private': [
     'apis',
     'apps',
+    'bindings',
+    'buckets',
     'domains',
     'functions',
     'namespaces',
     'resource_definitions',
     'resource_installations',
     'resources',
-    'sites'
+    'sites',
+    'sites_app_links',
+    'sites_deep_links',
+    'sites_error_pages',
+    'sites_web_config'
   ]
 };
 

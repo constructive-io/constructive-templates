@@ -34,7 +34,7 @@ BEGIN
       INSERT INTO myapp_memberships_private.org_memberships_sprt (
         is_owner,
         is_admin,
-        permissions,
+        capabilities,
         actor_id,
         entity_id,
         is_read_only
@@ -42,7 +42,7 @@ BEGIN
       SELECT
         false,
         NEW.is_admin AND COALESCE(o.use_admin_owner, p.use_admin_owner),
-        NEW.permissions & (COALESCE(o.allowed_mask, (repeat('1', bit_length(NEW.permissions)))::varbit)),
+        NEW.capabilities & (COALESCE(o.allowed_mask, (repeat('1', bit_length(NEW.capabilities)))::varbit)),
         p.user_id,
         NEW.entity_id,
         (NEW.is_read_only OR p.is_read_only) OR COALESCE(o.is_read_only, false)
@@ -50,7 +50,7 @@ BEGIN
       WHERE
         p.owner_id = NEW.actor_id AND o.is_active IS NOT FALSE
       ON CONFLICT (actor_id, entity_id) DO UPDATE SET
-      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, permissions = EXCLUDED.permissions, is_read_only = EXCLUDED.is_read_only;
+      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, capabilities = EXCLUDED.capabilities, is_read_only = EXCLUDED.is_read_only;
     EXCEPTION
       WHEN undefined_table THEN
         SELECT NULL;

@@ -1,7 +1,7 @@
 -- Deploy: migrate/phone_numbers_module
 -- made with <3 @ constructive.io
 
--- requires: migrate/permissions_module
+-- requires: migrate/membership_types_module
 
 
 SET session_replication_role TO replica;
@@ -31,7 +31,7 @@ INSERT INTO metaschema_modules_public.phone_numbers_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-c3e8-7561-b652-15dcdd8824a6', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c1c4-7d76-8017-c296fd0375c5', '019fbc96-c208-7fd4-a19a-6650fdd93969', '019fbc96-c3eb-7e52-a614-bb88613a1b4d', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'phone_numbers', 'auth', NULL);
+  ('019feb75-8a81-7ea1-93c0-e79f0d309f5c', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-8a0e-7a45-8898-85dfd6f8e078', '019feb75-8a17-7f4e-89e7-80c6ce5095d1', '019feb75-8a82-79e3-8a0d-c9114b559299', '019feb75-78e2-720e-82dc-c3ed84264ce8', 'phone_numbers', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

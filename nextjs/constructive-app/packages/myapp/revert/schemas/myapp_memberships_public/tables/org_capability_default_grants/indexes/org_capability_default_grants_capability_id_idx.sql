@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_memberships_public/tables/org_capability_default_grants/indexes/org_capability_default_grants_capability_id_idx
+
+
+DROP INDEX myapp_memberships_public.org_capability_default_grants_capability_id_idx;
+
+

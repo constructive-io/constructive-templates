@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_auth_public/tables/principal_entities/table
 
 
-SELECT verify_table('myapp_auth_public.principal_entities');
+SELECT assert_table('myapp_auth_public.principal_entities'::regclass, false, NULL);
 
 

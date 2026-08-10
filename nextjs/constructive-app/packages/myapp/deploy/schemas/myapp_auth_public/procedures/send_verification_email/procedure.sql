@@ -57,7 +57,7 @@ BEGIN
     DELETE FROM myapp_auth_private.auth_rate_limits
     WHERE
       subject_id = v_email.owner_id AND action = 'email_verification_request';
-    PERFORM myapp_store_private.user_secrets_del(v_email.owner_id, ARRAY[verification_token_name]);
+    PERFORM myapp_store_private.user_secrets_del(v_email.owner_id, verification_token_name);
     RETURN false;
   END IF;
   v_user_id := v_email.owner_id;

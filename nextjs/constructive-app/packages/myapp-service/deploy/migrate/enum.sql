@@ -32,7 +32,8 @@ INSERT INTO metaschema_public.enum (
   category,
   tags
 ) VALUES
-  ('019fbc96-e176-7a20-a698-dfd59f378755', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ded7-7d8d-9998-193c21acc329', 'file_status', NULL, 'File lifecycle status: requested (presigned URL generated), uploaded (file in S3), processed (MIME verified, resized, etc.)', '{requested,uploaded,processed}', NULL, 'module', '{}');
+  ('019feb75-92ed-7ced-9de5-2d567b43070e', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-92b6-7057-b8de-bd46f3aaef00', 'bucket_type', NULL, 'Bucket access kind: public (CDN-served), private (presigned GET), temp (staging uploads)', '{public,private,temp}', NULL, 'module', '{}'),
+  ('019feb75-9325-71d6-91ae-86b7dc44a7e6', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-92b6-7057-b8de-bd46f3aaef00', 'file_status', NULL, 'File lifecycle status: requested (presigned URL generated), uploaded (file in S3, validated), processed (resized, extracted, etc.), rejected (content failed validation), expired (bytes never arrived)', '{requested,uploaded,processed,rejected,expired}', NULL, 'module', '{}');
 
 
 SET session_replication_role TO DEFAULT;

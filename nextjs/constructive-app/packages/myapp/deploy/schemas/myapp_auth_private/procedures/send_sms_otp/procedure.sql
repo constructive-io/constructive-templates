@@ -45,13 +45,13 @@ BEGIN
   IF NOT (COALESCE(v_settings.allow_sms_sign_in, false)) THEN
     PERFORM errors.raise_error('SMS_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
-  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', send_sms_otp.phone));
+  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g')));
   IF v_sms_otp_secret IS NULL THEN
     v_sms_otp_secret := concat('\x', encode(gen_random_bytes(20), 'hex'));
-    PERFORM myapp_store_private.user_state_set(uuid_nil(), concat('sms_otp:', send_sms_otp.phone), v_sms_otp_secret);
+    PERFORM myapp_store_private.user_state_set(uuid_nil(), concat('sms_otp:', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g')), v_sms_otp_secret);
   END IF;
   v_code := totp.generate(v_sms_otp_secret, 600, 6, now(), 'sha1', 'raw');
-  PERFORM app_jobs.add_job('sms:send_verification_code', json_build_object('sms_type', 'sms_otp_code', 'phone', send_sms_otp.phone, 'code', v_code));
+  PERFORM app_jobs.add_job('sms:send_verification_code', json_build_object('sms_type', 'sms_otp_code', 'phone', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g'), 'code', v_code));
   IF v_ip_address IS NOT NULL THEN
     DELETE FROM myapp_auth_private.auth_ip_rate_limits
     WHERE

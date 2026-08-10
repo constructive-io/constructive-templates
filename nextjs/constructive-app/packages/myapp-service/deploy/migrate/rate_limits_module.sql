@@ -31,7 +31,7 @@ INSERT INTO metaschema_modules_public.rate_limits_module (
   ip_rate_limits_table_name,
   rate_limits_table_name
 ) VALUES
-  ('019fbc96-b75f-7d24-8f86-ac503a0871bb', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-b760-738f-a87f-3b906bd93536', '019fbc96-b8f2-702a-b172-48e604ef0185', '019fbc96-b9e0-730a-84ef-3247bb074a9a', 'app_settings_rate_limit', 'auth_ip_rate_limits', 'auth_rate_limits');
+  ('019feb75-880d-7713-9905-d71e936d3c5f', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-8695-7e24-8b0b-8db166cbaf4a', '019feb75-880d-7cf9-99a9-511154d59d7f', '019feb75-8846-7b3d-84c7-196f76f0ae39', '019feb75-886c-70f1-ac1c-d171bba694aa', 'app_settings_rate_limit', 'auth_ip_rate_limits', 'auth_rate_limits');
 
 
 SET session_replication_role TO DEFAULT;

@@ -1,6 +1,10 @@
 {
-    "packages": [
-        "packages/*",
-        "extensions/*"
-    ]
+  "packages": [
+    "packages/*",
+    "extensions/*"
+  ],
+  "dependencies": {
+    "@constructive-db/routing": "6.1.0",
+    "@constructive-db/routing-platform": "5.1.0"
+  }
 }

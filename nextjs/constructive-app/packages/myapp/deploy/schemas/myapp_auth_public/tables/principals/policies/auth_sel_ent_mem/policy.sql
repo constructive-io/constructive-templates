@@ -13,6 +13,6 @@ USING (
   owner_id IN (SELECT org_sprt.entity_id
   FROM myapp_memberships_private.org_memberships_sprt AS org_sprt
   WHERE
-      org_sprt.actor_id = jwt_public.current_principal_id() AND org_sprt.is_admin IS TRUE)
+      org_sprt.actor_id = ((SELECT jwt_public.current_principal_id())) AND org_sprt.is_admin IS TRUE)
 );
 

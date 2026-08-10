@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_auth_public/procedures/delete_principal/procedure
 
 
-SELECT verify_function('myapp_auth_public.delete_principal');
+SELECT assert_function('myapp_auth_public.delete_principal(uuid)'::regprocedure, 'boolean'::regtype, false, true, 'VOLATILE');
 
 

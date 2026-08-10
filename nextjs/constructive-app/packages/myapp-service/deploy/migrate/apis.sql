@@ -29,15 +29,15 @@ INSERT INTO routing_public.apis (
   config,
   database_id
 ) VALUES
-  ('019fbc96-8532-70ad-82b8-cba1946925a2', 'auth', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-8659-7990-b05a-e190bd1190af', 'admin', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-86ff-77df-af4f-455a6af96d90', 'usage', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-bf35-76f8-a63b-93787a2ed1eb', 'config', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e51c-7f70-8057-8db4e69e84dd', 'api', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e51d-718e-b890-fa9c73d0aa3b', 'compute', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e51d-7252-a9df-57833ad7c082', 'objects', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e51d-730a-8e3d-923ff1b9266e', 'agent', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e54f-71c3-b80e-b3c6c6ed8d82', 'migrate', 'authenticated', 'anonymous', true, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c');
+  ('019feb75-78e1-7197-a9bd-7f9075c774b2', 'auth', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-797a-7084-aa15-4fa0cfa05f39', 'admin', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-79c5-7aca-bac5-7e2c2ebb0400', 'usage', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-8966-7142-a594-0faf10ac7cd3', 'config', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9402-7b4f-b836-399f826c4fb0', 'api', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9402-7ce7-9a76-1ac03513c5f0', 'compute', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9402-7d94-a3f7-065838d00cec', 'objects', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9402-7e3e-a71f-bd6bb963e246', 'agent', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-b40f-7c2a-b4b0-fe1bf220facd', 'migrate', 'authenticated', 'anonymous', true, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6');
 
 
 SET session_replication_role TO DEFAULT;

@@ -10,6 +10,6 @@ CREATE POLICY auth_ins_own ON myapp_memberships_public.org_memberships
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  actor_id = jwt_public.current_principal_id()
+  actor_id = ((SELECT jwt_public.current_principal_id()))
 );
 

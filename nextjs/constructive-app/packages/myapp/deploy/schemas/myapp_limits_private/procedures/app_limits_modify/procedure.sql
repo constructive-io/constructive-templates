@@ -32,7 +32,7 @@ BEGIN
     (app_limits_modify.limitname, 0, max_default, app_limits_modify.user_id)
   ON CONFLICT ON CONSTRAINT app_limits_name_actor_id_key DO NOTHING;
   UPDATE myapp_limits_public.app_limits SET
-  max = max + app_limits_modify.delta
+  max = max + app_limits_modify.delta, purchased_credits = purchased_credits + app_limits_modify.delta
   WHERE
     name = app_limits_modify.limitname AND actor_id = app_limits_modify.user_id;
   RETURN true;

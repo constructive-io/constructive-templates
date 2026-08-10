@@ -34,7 +34,7 @@ BEGIN
       INSERT INTO myapp_memberships_private.org_memberships_sprt (
         is_owner,
         is_admin,
-        permissions,
+        capabilities,
         actor_id,
         entity_id,
         is_read_only
@@ -42,7 +42,7 @@ BEGIN
       SELECT
         m.is_owner,
         m.is_admin,
-        m.permissions,
+        m.capabilities,
         m.actor_id,
         m.entity_id,
         m.is_read_only
@@ -50,7 +50,7 @@ BEGIN
       WHERE
         m.actor_id = NEW.actor_id AND m.is_active IS TRUE
       ON CONFLICT (actor_id, entity_id) DO UPDATE SET
-      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, permissions = EXCLUDED.permissions, is_read_only = EXCLUDED.is_read_only;
+      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, capabilities = EXCLUDED.capabilities, is_read_only = EXCLUDED.is_read_only;
       INSERT INTO myapp_memberships_public.org_members (
         is_admin,
         actor_id,
@@ -75,7 +75,7 @@ BEGIN
       INSERT INTO myapp_memberships_private.org_memberships_sprt (
         is_owner,
         is_admin,
-        permissions,
+        capabilities,
         actor_id,
         entity_id,
         is_read_only
@@ -83,7 +83,7 @@ BEGIN
       SELECT
         m.is_owner,
         m.is_admin,
-        m.permissions,
+        m.capabilities,
         m.actor_id,
         m.entity_id,
         m.is_read_only
@@ -91,7 +91,7 @@ BEGIN
       WHERE
         m.actor_id = NEW.actor_id AND m.is_active IS TRUE
       ON CONFLICT (actor_id, entity_id) DO UPDATE SET
-      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, permissions = EXCLUDED.permissions, is_read_only = EXCLUDED.is_read_only;
+      is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, capabilities = EXCLUDED.capabilities, is_read_only = EXCLUDED.is_read_only;
       INSERT INTO myapp_memberships_public.org_members (
         is_admin,
         actor_id,

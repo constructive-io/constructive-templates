@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_capabilities_public/procedures/app_capabilities_get_mask_by_names/procedure
+
+
+DROP FUNCTION myapp_capabilities_public.app_capabilities_get_mask_by_names ( citext[] );
+
+

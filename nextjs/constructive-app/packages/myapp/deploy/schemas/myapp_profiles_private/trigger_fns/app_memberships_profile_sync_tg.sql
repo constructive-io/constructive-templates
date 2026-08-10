@@ -3,25 +3,27 @@
 
 -- requires: schemas/myapp_profiles_private/schema
 -- requires: schemas/myapp_profiles_public/tables/app_profiles/table
+-- requires: schemas/myapp_profiles_public/tables/app_membership_profiles/table
 
 
 CREATE FUNCTION myapp_profiles_private.app_memberships_profile_sync_tg() RETURNS TRIGGER AS $_PGFN_$
 DECLARE
-  v_profile_permissions bit(64);
+  v_profile_capabilities bit(64);
 BEGIN
   IF NEW.is_admin IS TRUE OR NEW.is_owner IS TRUE THEN
     RETURN NEW;
   END IF;
-  IF NEW.profile_id IS NOT NULL THEN
-    SELECT permissions
-    FROM myapp_profiles_public.app_profiles
+  v_profile_capabilities := (SELECT bit_or(p.capabilities)
+  FROM myapp_profiles_public.app_profiles AS p
+  WHERE
+    EXISTS (SELECT 1
+    FROM myapp_profiles_public.app_membership_profiles AS mp
     WHERE
-      id = NEW.profile_id INTO v_profile_permissions;
-    IF FOUND AND v_profile_permissions IS NOT NULL THEN
-      new.permissions := NEW.granted | v_profile_permissions;
-    ELSE
-      new.permissions := NEW.granted;
-    END IF;
+        mp.membership_id = NEW.id AND mp.profile_id = p.id));
+  IF v_profile_capabilities IS NOT NULL THEN
+    NEW.capabilities := NEW.granted | v_profile_capabilities;
+  ELSE
+    NEW.capabilities := NEW.granted;
   END IF;
   RETURN NEW;
 END;

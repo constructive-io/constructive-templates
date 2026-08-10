@@ -30,25 +30,27 @@ INSERT INTO metaschema_modules_public.profiles_module (
   private_schema_name,
   table_id,
   table_name,
-  profile_permissions_table_id,
-  profile_permissions_table_name,
+  profile_capabilities_table_id,
+  profile_capabilities_table_name,
   profile_grants_table_id,
   profile_grants_table_name,
   profile_definition_grants_table_id,
   profile_definition_grants_table_name,
+  membership_profiles_table_id,
+  membership_profiles_table_name,
   profile_templates_table_id,
   profile_templates_table_name,
   scope,
   prefix,
   entity_table_id,
   actor_table_id,
-  permissions_table_id,
+  capabilities_table_id,
   memberships_table_id,
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-8e33-7c2e-a240-71ec252dacc9', '019fbc96-84d8-7d13-8acc-4c55ad35634c', NULL, '019fbc96-8e34-7092-8399-48a2a3e2d57a', '019fbc96-8e55-7985-8a70-cd6ede5e4c5c', NULL, NULL, '019fbc96-8e7e-7b0d-8c4a-b7c306b27a4e', 'app_profiles', '019fbc96-8f0f-7a36-991e-55003b1a091b', 'app_profile_permissions', '019fbc96-8f6f-7dbc-bda7-38e596c2f2a8', 'app_profile_grants', '019fbc96-8fe6-75fe-811a-e81911dcf9c4', 'app_profile_definition_grants', '019fbc96-9098-7c7b-a3d2-0a6ca2ae13dd', 'app_profile_templates', 'app', 'app', NULL, '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-865b-7f26-a4f8-32df18a9e0ae', '019fbc96-8aa7-7512-9409-53c9aa016b84', 'admin', NULL),
-  ('019fbc96-a290-7431-97e1-22e068795469', '019fbc96-84d8-7d13-8acc-4c55ad35634c', 'entity_id', '019fbc96-8e34-7092-8399-48a2a3e2d57a', '019fbc96-8e55-7985-8a70-cd6ede5e4c5c', NULL, NULL, '019fbc96-a293-7833-9a15-03f67f8888d1', 'org_profiles', '019fbc96-a37a-7979-a78d-aec6597cf407', 'org_profile_permissions', '019fbc96-a401-7297-aa81-80e925299b67', 'org_profile_grants', '019fbc96-a4bb-72dd-a78e-bc606ec1fa92', 'org_profile_definition_grants', '019fbc96-a5ab-7844-9c3f-26f638f94b2d', 'org_profile_templates', 'org', 'org', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-93c9-79f2-8dcb-8d72b5725eaa', '019fbc96-99bc-7201-9cda-85df7f4524ad', 'admin', NULL);
+  ('019feb75-7ca3-72af-a4e7-7b4b46b8421e', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', NULL, '019feb75-7ca3-764e-895e-58b77d9a5f1d', '019feb75-7cac-7b80-82dd-d18a956a7fdc', NULL, NULL, '019feb75-7cbc-7f64-80c7-6d62d91becf3', 'app_profiles', '019feb75-7cea-7eb1-916e-f55daf9eb5a8', 'app_profile_capabilities', '019feb75-7d06-7774-b81f-cba5ab585933', 'app_profile_grants', '019feb75-7d2a-7ec3-b6b1-f48a662aae14', 'app_profile_definition_grants', '019feb75-7d53-712f-8ea5-88ad311bf62b', 'app_membership_profiles', '019feb75-7d9f-7c4a-8d87-de64c404c98f', 'app_profile_templates', 'app', 'app', NULL, '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-797b-7fe2-bec7-40f720b33f6b', '019feb75-7b6d-72f4-9506-d4f1cf2023b7', 'admin', NULL),
+  ('019feb75-8319-7704-8056-017d29440008', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', 'entity_id', '019feb75-7ca3-764e-895e-58b77d9a5f1d', '019feb75-7cac-7b80-82dd-d18a956a7fdc', NULL, NULL, '019feb75-831c-7cc1-b679-81c2a7b7fb3e', 'org_profiles', '019feb75-834e-7791-852a-6787b1c99790', 'org_profile_capabilities', '019feb75-836b-76bc-ab70-3f1198fcc4de', 'org_profile_grants', '019feb75-8398-75f1-8bf9-a5b1d207d637', 'org_profile_definition_grants', '019feb75-83c4-7884-89b2-49df42951434', 'org_membership_profiles', '019feb75-840b-7395-9b85-b717d612a64d', 'org_profile_templates', 'org', 'org', '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-7ee2-77cd-aa83-c4d0fcd1a585', '019feb75-80eb-77cb-b434-9214851f2d3f', 'admin', NULL);
 
 
 SET session_replication_role TO DEFAULT;

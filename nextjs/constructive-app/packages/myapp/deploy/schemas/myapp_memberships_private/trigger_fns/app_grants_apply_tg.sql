@@ -9,12 +9,12 @@ CREATE FUNCTION myapp_memberships_private.app_grants_apply_tg() RETURNS TRIGGER 
 BEGIN
   IF NEW.is_grant IS TRUE THEN
     UPDATE myapp_memberships_public.app_memberships SET
-    granted = granted | NEW.permissions
+    granted = granted | NEW.capabilities
     WHERE
       actor_id = NEW.actor_id;
   ELSE
     UPDATE myapp_memberships_public.app_memberships SET
-    granted = granted & (~NEW.permissions)
+    granted = granted & (~NEW.capabilities)
     WHERE
       actor_id = NEW.actor_id;
   END IF;

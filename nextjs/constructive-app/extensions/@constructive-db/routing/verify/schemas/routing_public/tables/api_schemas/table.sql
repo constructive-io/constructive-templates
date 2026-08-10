@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/api_schemas/table
 
 
-SELECT verify_table('routing_public.api_schemas');
+SELECT assert_table(CAST('routing_public.api_schemas' AS regclass), false, NULL);

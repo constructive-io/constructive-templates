@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_memberships_public/tables/org_membership_settings/columns/invite_profile_assignment_mode/column
 
 
-COMMENT ON COLUMN myapp_memberships_public.org_membership_settings.invite_profile_assignment_mode IS E'Controls how profile assignment on invites is validated: strict (permission + subset check), permission_only (permission only), or subset_only (subset check only)';
+COMMENT ON COLUMN myapp_memberships_public.org_membership_settings.invite_profile_assignment_mode IS E'Controls how profile assignment on invites is validated: strict (capability + subset check), capability_only (capability only), or subset_only (subset check only)';
 

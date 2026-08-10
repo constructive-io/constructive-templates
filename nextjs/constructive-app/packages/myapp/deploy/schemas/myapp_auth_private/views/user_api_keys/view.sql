@@ -18,5 +18,5 @@ CREATE VIEW myapp_auth_private.user_api_keys WITH ( security_invoker = true ) AS
   sc.updated_at
 FROM myapp_auth_private.session_credentials AS sc INNER JOIN myapp_auth_private.sessions AS s ON s.id = sc.session_id
 WHERE
-  sc.kind = 'api_key' AND s.user_id = jwt_public.current_user_id();
+  sc.kind = 'api_key' AND s.user_id = ((SELECT jwt_public.current_user_id()));
 

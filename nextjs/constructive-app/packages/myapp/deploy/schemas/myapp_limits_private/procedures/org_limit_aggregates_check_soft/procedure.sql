@@ -2,6 +2,7 @@
 -- made with <3 @ constructive.io
 
 -- requires: schemas/myapp_limits_private/schema
+-- requires: schemas/myapp_limits_public/tables/org_limit_defaults/table
 -- requires: schemas/myapp_limits_public/tables/org_limit_aggregates/table
 
 
@@ -13,7 +14,16 @@ DECLARE
   rec myapp_limits_public.org_limit_aggregates;
 BEGIN
   UPDATE myapp_limits_public.org_limit_aggregates AS l SET
-  num = 0, period_credits = 0, max = plan_max + purchased_credits, window_start = pg_catalog.now()
+  num = 0, period_credits = 0, max = CASE 
+    WHEN (COALESCE(l.plan_max, (SELECT d.max
+  FROM myapp_limits_public.org_limit_defaults AS d
+  WHERE
+      d.name = l.name), 0)) < 0 THEN -1 
+    ELSE (COALESCE(l.plan_max, (SELECT d.max
+  FROM myapp_limits_public.org_limit_defaults AS d
+  WHERE
+      d.name = l.name), 0)) + l.purchased_credits 
+  END, window_start = pg_catalog.now()
   WHERE
     (l.name = org_limit_aggregates_check_soft.limitname AND l.entity_id = org_limit_aggregates_check_soft.entity_id) AND (l.window_duration IS NOT NULL AND (l.window_start + l.window_duration) <= pg_catalog.now());
   SELECT *

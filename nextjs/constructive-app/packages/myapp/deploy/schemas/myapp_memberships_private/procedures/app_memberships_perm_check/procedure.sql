@@ -3,7 +3,7 @@
 
 -- requires: schemas/myapp_memberships_private/schema
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
--- requires: schemas/myapp_permissions_public/tables/app_permissions/table
+-- requires: schemas/myapp_capabilities_public/tables/app_capabilities/table
 
 
 CREATE FUNCTION myapp_memberships_private.app_memberships_perm_check(
@@ -12,8 +12,8 @@ CREATE FUNCTION myapp_memberships_private.app_memberships_perm_check(
 ) RETURNS boolean AS $_PGFN_$
 SELECT
   EXISTS (SELECT 1
-  FROM myapp_memberships_public.app_memberships AS m, myapp_permissions_public.app_permissions AS p
+  FROM myapp_memberships_public.app_memberships AS m, myapp_capabilities_public.app_capabilities AS p
   WHERE
-    (p.name = perm AND (m.permissions & p.bitstr) = p.bitstr) AND m.actor_id = app_memberships_perm_check.actor_id)
+    (p.name = perm AND (m.capabilities & p.bitstr) = p.bitstr) AND m.actor_id = app_memberships_perm_check.actor_id)
 $_PGFN_$ LANGUAGE sql STABLE SECURITY DEFINER;
 

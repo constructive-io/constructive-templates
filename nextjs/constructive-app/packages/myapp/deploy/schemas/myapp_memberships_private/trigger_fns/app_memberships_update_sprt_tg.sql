@@ -10,13 +10,13 @@ DECLARE
   v_num_updated int;
 BEGIN
   IF NEW.is_owner IS true THEN
-    new.is_admin := true;
-    new.is_approved := true;
-    new.is_verified := true;
-    new.is_disabled := false;
-    new.is_banned := false;
+    NEW.is_admin := true;
+    NEW.is_approved := true;
+    NEW.is_verified := true;
+    NEW.is_disabled := false;
+    NEW.is_banned := false;
   END IF;
-  new.is_active := ((NEW.is_approved IS true AND NEW.is_verified IS true) AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
+  NEW.is_active := ((NEW.is_approved IS true AND NEW.is_verified IS true) AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
   IF NEW.is_active IS FALSE THEN
     DELETE FROM myapp_memberships_private.app_memberships_sprt
     WHERE
@@ -25,16 +25,16 @@ BEGIN
     INSERT INTO myapp_memberships_private.app_memberships_sprt (
       is_owner,
       is_admin,
-      permissions,
+      capabilities,
       actor_id
     )
     VALUES
       (NEW.is_owner, NEW.is_admin, CASE 
-          WHEN (NEW.is_owner IS TRUE OR NEW.is_admin IS TRUE) AND (NEW.permissions IS NULL OR NEW.permissions = (lpad('', (bit_length(NEW.permissions))::int, '0'))::pg_catalog.varbit) THEN (lpad('', (bit_length(NEW.permissions))::int, '1'))::pg_catalog.varbit 
-          ELSE NEW.permissions 
+          WHEN (NEW.is_owner IS TRUE OR NEW.is_admin IS TRUE) AND (NEW.capabilities IS NULL OR NEW.capabilities = (lpad('', (bit_length(NEW.capabilities))::int, '0'))::pg_catalog.varbit) THEN (lpad('', (bit_length(NEW.capabilities))::int, '1'))::pg_catalog.varbit 
+          ELSE NEW.capabilities 
         END, NEW.actor_id)
     ON CONFLICT (actor_id) DO UPDATE SET
-    is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, permissions = EXCLUDED.permissions;
+    is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin, capabilities = EXCLUDED.capabilities;
   END IF;
   RETURN NEW;
 END;

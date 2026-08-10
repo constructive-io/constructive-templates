@@ -6,9 +6,9 @@
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/actor_id/column
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/is_admin/column
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/is_owner/column
--- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/permissions/column
+-- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/capabilities/column
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/is_read_only/column
 
 
-CREATE INDEX org_memberships_sprts_actor_id_idx ON myapp_memberships_private.org_memberships_sprt USING BTREE ( actor_id ) INCLUDE ( permissions, is_owner, is_admin, is_read_only );
+CREATE INDEX org_memberships_sprts_actor_id_idx ON myapp_memberships_private.org_memberships_sprt USING BTREE ( actor_id ) INCLUDE ( capabilities, is_owner, is_admin, is_read_only );
 

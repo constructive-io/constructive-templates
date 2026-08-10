@@ -32,7 +32,7 @@ BEGIN
     (org_limit_aggregates_modify.limitname, 0, max_default, org_limit_aggregates_modify.entity_id)
   ON CONFLICT ON CONSTRAINT org_limit_aggregates_name_entity_id_key DO NOTHING;
   UPDATE myapp_limits_public.org_limit_aggregates SET
-  max = max + org_limit_aggregates_modify.delta
+  max = max + org_limit_aggregates_modify.delta, purchased_credits = purchased_credits + org_limit_aggregates_modify.delta
   WHERE
     name = org_limit_aggregates_modify.limitname AND org_limit_aggregates.entity_id = org_limit_aggregates_modify.entity_id;
   RETURN true;

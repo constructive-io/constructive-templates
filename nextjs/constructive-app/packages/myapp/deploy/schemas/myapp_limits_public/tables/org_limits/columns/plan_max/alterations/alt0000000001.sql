@@ -2,10 +2,8 @@
 -- made with <3 @ constructive.io
 
 -- requires: schemas/myapp_limits_public/schema
--- requires: schemas/myapp_limits_public/tables/org_limits/table
 -- requires: schemas/myapp_limits_public/tables/org_limits/columns/plan_max/column
 
 
-ALTER TABLE myapp_limits_public.org_limits 
-  ALTER COLUMN plan_max SET DEFAULT 0;
+COMMENT ON COLUMN myapp_limits_public.org_limits.plan_max IS E'Ceiling pinned for this actor by the active plan via apply_plan(). NULL means the ceiling follows the tenant default in the default-limits table, so raising a default reaches rows that already exist. Window reset does not change this value.';
 

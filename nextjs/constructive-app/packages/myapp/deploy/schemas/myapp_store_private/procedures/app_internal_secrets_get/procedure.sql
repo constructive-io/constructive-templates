@@ -8,7 +8,8 @@
 CREATE FUNCTION myapp_store_private.app_internal_secrets_get(
   IN secret_name text,
   IN namespace_id uuid,
-  IN default_value text DEFAULT NULL
+  IN default_value text DEFAULT NULL,
+  IN realm text DEFAULT NULL
 ) RETURNS text AS $_PGFN_$
 DECLARE
   v_secret myapp_store_private.app_internal_secrets;
@@ -16,7 +17,13 @@ BEGIN
   SELECT *
   FROM myapp_store_private.app_internal_secrets AS s
   WHERE
-    (s.namespace_id = app_internal_secrets_get.namespace_id AND s.name = app_internal_secrets_get.secret_name) AND s.retired_at IS NULL INTO v_secret;
+    s.realm = app_internal_secrets_get.realm AND ((s.namespace_id = app_internal_secrets_get.namespace_id AND s.name = app_internal_secrets_get.secret_name) AND s.retired_at IS NULL) INTO v_secret;
+  IF NOT (FOUND) OR v_secret IS NULL THEN
+    SELECT *
+    FROM myapp_store_private.app_internal_secrets AS s
+    WHERE
+      s.realm IS NULL AND ((s.namespace_id = app_internal_secrets_get.namespace_id AND s.name = app_internal_secrets_get.secret_name) AND s.retired_at IS NULL) INTO v_secret;
+  END IF;
   IF NOT (FOUND) OR v_secret IS NULL THEN
     RETURN app_internal_secrets_get.default_value;
   END IF;

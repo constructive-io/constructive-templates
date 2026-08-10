@@ -78,7 +78,7 @@ BEGIN
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
-  v_sms_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', sign_up_sms.phone));
+  v_sms_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g')));
   IF v_sms_secret IS NULL THEN
     PERFORM errors.raise_error('INVALID_CODE', '{}', 'public');
   END IF;
@@ -89,7 +89,7 @@ BEGIN
   SELECT *
   FROM myapp_user_identifiers_public.phone_numbers AS pn
   WHERE
-    pn.number = sign_up_sms.phone INTO v_phone;
+    pn.number = regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g') INTO v_phone;
   IF v_phone.owner_id IS NOT NULL THEN
     PERFORM errors.raise_error('ACCOUNT_EXISTS', '{}', 'public');
   END IF;
@@ -100,7 +100,7 @@ BEGIN
     number
   )
   VALUES
-    (v_user_id, '+', sign_up_sms.phone);
+    (v_user_id, '+', regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g'));
   PERFORM myapp_store_private.user_state_set(v_user_id, 'primary_auth_method', 'sms'::text);
   v_csrf_secret := encode(gen_random_bytes(32), 'hex');
   v_session_id := uuidv7();

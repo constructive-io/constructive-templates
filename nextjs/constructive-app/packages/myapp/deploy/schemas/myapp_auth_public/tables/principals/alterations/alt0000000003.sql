@@ -6,6 +6,5 @@
 
 
 COMMENT ON TABLE myapp_auth_public.principals IS E'@behavior -insert -update -delete
-@has_guard
 Scoped sub-identities (API keys and agents) with precomputed SPRT';
 

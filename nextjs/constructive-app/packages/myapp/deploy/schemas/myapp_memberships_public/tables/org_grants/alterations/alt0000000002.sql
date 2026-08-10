@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_memberships_public/tables/org_grants/table
 
 
-COMMENT ON TABLE myapp_memberships_public.org_grants IS 'Records of individual permission grants and revocations for members via bitmask';
+COMMENT ON TABLE myapp_memberships_public.org_grants IS 'Records of individual capability grants and revocations for members via bitmask';
 

@@ -10,6 +10,6 @@
 CREATE TRIGGER app_profiles_cascade_trg
 AFTER UPDATE ON myapp_profiles_public.app_profiles
 FOR EACH ROW
-WHEN (OLD.permissions IS DISTINCT FROM NEW.permissions)
+WHEN (OLD.capabilities IS DISTINCT FROM NEW.capabilities)
 EXECUTE PROCEDURE myapp_profiles_private.app_profiles_cascade_tg ( );
 

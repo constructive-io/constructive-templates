@@ -10,6 +10,6 @@ CREATE POLICY auth_sel_sender ON myapp_invites_public.org_claimed_invites
 FOR SELECT
 TO authenticated
 USING (
-  sender_id = jwt_public.current_principal_id()
+  sender_id = ((SELECT jwt_public.current_principal_id()))
 );
 

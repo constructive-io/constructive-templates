@@ -10,6 +10,6 @@ CREATE POLICY auth_sel_own ON myapp_limits_public.org_limits
 FOR SELECT
 TO authenticated
 USING (
-  actor_id = jwt_public.current_principal_id()
+  actor_id = ((SELECT jwt_public.current_principal_id()))
 );
 

@@ -1,6 +1,0 @@
--- Revert: schemas/myapp_memberships_public/tables/app_permission_default_permissions/triggers/app_permission_default_permissions_recompute_trg
-
-
-DROP TRIGGER app_permission_default_permissions_recompute_trg ON myapp_memberships_public.app_permission_default_permissions;
-
-

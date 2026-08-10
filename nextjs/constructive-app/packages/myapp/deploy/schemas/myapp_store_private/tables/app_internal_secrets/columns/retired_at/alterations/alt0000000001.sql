@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_store_private/tables/app_internal_secrets/columns/retired_at/column
 
 
-COMMENT ON COLUMN myapp_store_private.app_internal_secrets.retired_at IS E'When this secret version was retired by rotation. NULL = active. Only one active secret per (namespace_id, name) is allowed via partial unique index.';
+COMMENT ON COLUMN myapp_store_private.app_internal_secrets.retired_at IS E'When this secret version was retired by rotation. NULL = active. Only one active secret per (namespace_id, name, realm) is allowed via partial unique index (NULLS NOT DISTINCT on realm).';
 

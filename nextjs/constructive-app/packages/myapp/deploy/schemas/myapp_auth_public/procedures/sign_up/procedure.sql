@@ -11,6 +11,7 @@
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
+-- requires: schemas/myapp_users_public/tables/user_settings_security/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
@@ -117,6 +118,15 @@ BEGIN
       (v_user.id, trim(sign_up.email))
     RETURNING * INTO v_email;
     PERFORM myapp_store_private.user_secrets_set(v_user.id, 'password_hash', trim(sign_up.password), 'crypt');
+    INSERT INTO myapp_users_public.user_settings_security (
+      owner_id,
+      totp_enabled,
+      email_mfa_enabled,
+      sms_mfa_enabled,
+      backup_codes_count
+    )
+    VALUES
+      (v_user.id, false, false, false, 0);
     PERFORM myapp_store_private.user_state_set(v_user.id, 'primary_auth_method', 'password'::text);
     IF v_anon_session.id IS NOT NULL THEN
       UPDATE myapp_auth_private.sessions SET

@@ -31,7 +31,7 @@ INSERT INTO metaschema_modules_public.webauthn_credentials_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-c574-7f2f-a0d5-b6711329b82a', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c1c4-7d76-8017-c296fd0375c5', '019fbc96-c208-7fd4-a19a-6650fdd93969', '019fbc96-c578-7e37-80c4-3ba5549c2b28', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'webauthn_credentials', 'auth', NULL);
+  ('019feb75-8ad2-7a38-a427-d7de46121037', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-8a0e-7a45-8898-85dfd6f8e078', '019feb75-8a17-7f4e-89e7-80c6ce5095d1', '019feb75-8ad3-74a3-a82a-14d661c634a7', '019feb75-78e2-720e-82dc-c3ed84264ce8', 'webauthn_credentials', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

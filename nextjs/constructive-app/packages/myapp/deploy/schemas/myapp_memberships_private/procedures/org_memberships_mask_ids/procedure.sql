@@ -11,6 +11,6 @@ CREATE FUNCTION myapp_memberships_private.org_memberships_mask_ids(
 SELECT array_agg(m.entity_id)
 FROM myapp_memberships_public.org_memberships AS m
 WHERE
-  (m.permissions & mask) = mask AND m.actor_id = jwt_public.current_user_id()
+  (m.capabilities & mask) = mask AND m.actor_id = jwt_public.current_user_id()
 $_PGFN_$ LANGUAGE sql STABLE SECURITY DEFINER;
 

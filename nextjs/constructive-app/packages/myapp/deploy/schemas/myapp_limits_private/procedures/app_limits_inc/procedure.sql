@@ -31,13 +31,28 @@ BEGIN
     (app_limits_inc.limitname, 0, max_default, app_limits_inc.actor_id)
   ON CONFLICT ON CONSTRAINT app_limits_name_actor_id_key DO NOTHING;
   UPDATE myapp_limits_public.app_limits AS l SET
-  num = 0, period_credits = 0, max = plan_max + purchased_credits, window_start = pg_catalog.now()
+  num = 0, period_credits = 0, max = CASE 
+    WHEN (COALESCE(l.plan_max, (SELECT d.max
+  FROM myapp_limits_public.app_limit_defaults AS d
+  WHERE
+      d.name = l.name), 0)) < 0 THEN -1 
+    ELSE (COALESCE(l.plan_max, (SELECT d.max
+  FROM myapp_limits_public.app_limit_defaults AS d
+  WHERE
+      d.name = l.name), 0)) + l.purchased_credits 
+  END, window_start = pg_catalog.now()
   WHERE
     (l.name = app_limits_inc.limitname AND l.actor_id = app_limits_inc.actor_id) AND (l.window_duration IS NOT NULL AND (l.window_start + l.window_duration) <= pg_catalog.now());
   UPDATE myapp_limits_public.app_limits AS l SET
   num = num + app_limits_inc.amount
   WHERE
-    (l.name = app_limits_inc.limitname AND l.actor_id = app_limits_inc.actor_id) AND (l.max < 0 OR l.max >= (l.num + app_limits_inc.amount));
+    (l.name = app_limits_inc.limitname AND l.actor_id = app_limits_inc.actor_id) AND ((CASE 
+        WHEN (COALESCE(l.plan_max, max_default, 0)) < 0 THEN -1 
+        ELSE ((COALESCE(l.plan_max, max_default, 0)) + l.purchased_credits) + (COALESCE(l.period_credits, 0)) 
+      END) < 0 OR (CASE 
+        WHEN (COALESCE(l.plan_max, max_default, 0)) < 0 THEN -1 
+        ELSE ((COALESCE(l.plan_max, max_default, 0)) + l.purchased_credits) + (COALESCE(l.period_credits, 0)) 
+      END) >= (l.num + app_limits_inc.amount));
   IF FOUND THEN
     RETURN true;
   ELSE

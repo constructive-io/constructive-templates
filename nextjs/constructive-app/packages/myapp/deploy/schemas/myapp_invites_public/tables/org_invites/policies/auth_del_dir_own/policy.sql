@@ -10,6 +10,6 @@ CREATE POLICY auth_del_dir_own ON myapp_invites_public.org_invites
 FOR DELETE
 TO authenticated
 USING (
-  sender_id = jwt_public.current_principal_id()
+  sender_id = ((SELECT jwt_public.current_principal_id()))
 );
 

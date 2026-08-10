@@ -10,6 +10,6 @@ CREATE POLICY auth_ins_dir_own ON myapp_invites_public.app_invites
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  sender_id = jwt_public.current_principal_id()
+  sender_id = ((SELECT jwt_public.current_principal_id()))
 );
 

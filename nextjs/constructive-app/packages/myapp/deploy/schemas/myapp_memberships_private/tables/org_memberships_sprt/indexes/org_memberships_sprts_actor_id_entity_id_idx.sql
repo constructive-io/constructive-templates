@@ -5,8 +5,8 @@
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/table
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/actor_id/column
 -- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/entity_id/column
--- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/permissions/column
+-- requires: schemas/myapp_memberships_private/tables/org_memberships_sprt/columns/capabilities/column
 
 
-CREATE UNIQUE INDEX org_memberships_sprts_actor_id_entity_id_idx ON myapp_memberships_private.org_memberships_sprt USING BTREE ( actor_id, entity_id ) INCLUDE ( permissions );
+CREATE UNIQUE INDEX org_memberships_sprts_actor_id_entity_id_idx ON myapp_memberships_private.org_memberships_sprt USING BTREE ( actor_id, entity_id ) INCLUDE ( capabilities );
 

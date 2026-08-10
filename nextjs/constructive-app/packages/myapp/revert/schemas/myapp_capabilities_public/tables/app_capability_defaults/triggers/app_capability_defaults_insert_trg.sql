@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_capabilities_public/tables/app_capability_defaults/triggers/app_capability_defaults_insert_trg
+
+
+DROP TRIGGER app_capability_defaults_insert_trg ON myapp_capabilities_public.app_capability_defaults;
+
+

@@ -21,20 +21,20 @@ BEGIN
     FROM myapp_memberships_public.org_membership_settings AS s
     WHERE
       s.entity_id = NEW.entity_id INTO v_mode;
-    SELECT p.permissions
+    SELECT p.capabilities
     FROM myapp_profiles_public.org_profiles AS p
     WHERE
       p.id = NEW.profile_id INTO v_profile_perms;
     IF NOT (FOUND) THEN
       RAISE EXCEPTION 'PROFILE_NOT_FOUND';
     END IF;
-    IF v_mode = 'strict' OR v_mode = 'permission_only' THEN
+    IF v_mode = 'strict' OR v_mode = 'capability_only' THEN
       IF NOT (myapp_memberships_private.org_memberships_perm_check('assign_profiles', NEW.entity_id, NEW.sender_id) IS TRUE) THEN
-        RAISE EXCEPTION 'ASSIGN_PROFILES_PERMISSION_REQUIRED';
+        RAISE EXCEPTION 'ASSIGN_PROFILES_CAPABILITY_REQUIRED';
       END IF;
     END IF;
     IF v_mode = 'strict' OR v_mode = 'subset_only' THEN
-      SELECT m.permissions
+      SELECT m.capabilities
       FROM myapp_memberships_public.org_memberships AS m
       WHERE
         m.actor_id = NEW.sender_id AND m.entity_id = NEW.entity_id INTO v_inviter_perms;
@@ -42,7 +42,7 @@ BEGIN
         RAISE EXCEPTION 'MEMBERSHIP_NOT_FOUND';
       END IF;
       IF (v_profile_perms & (~v_inviter_perms)) <> (v_inviter_perms & (~v_inviter_perms)) THEN
-        RAISE EXCEPTION 'PROFILE_EXCEEDS_PERMISSIONS';
+        RAISE EXCEPTION 'PROFILE_EXCEEDS_CAPABILITIES';
       END IF;
     END IF;
   END IF;

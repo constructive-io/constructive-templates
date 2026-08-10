@@ -31,7 +31,7 @@ INSERT INTO metaschema_modules_public.connected_accounts_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-c73a-71fd-94c6-307678f059ae', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c1c4-7d76-8017-c296fd0375c5', '019fbc96-c208-7fd4-a19a-6650fdd93969', '019fbc96-c73d-7bb7-945b-3e60ebd7f19a', '019fbc96-8533-7560-9eea-55dbc7f7fcee', 'connected_accounts', 'auth', NULL);
+  ('019feb75-8b41-7e2e-9296-9fd498a62799', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-8a0e-7a45-8898-85dfd6f8e078', '019feb75-8a17-7f4e-89e7-80c6ce5095d1', '019feb75-8b42-77a4-83be-695a8efb04b9', '019feb75-78e2-720e-82dc-c3ed84264ce8', 'connected_accounts', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

@@ -10,7 +10,7 @@ BEGIN
     name,
     slug,
     description,
-    permissions,
+    capabilities,
     is_default,
     entity_id
   )
@@ -18,7 +18,7 @@ BEGIN
     t.name,
     t.slug,
     t.description,
-    t.permissions,
+    t.capabilities,
     t.is_default,
     NEW.id
   FROM myapp_profiles_public.org_profile_templates AS t;

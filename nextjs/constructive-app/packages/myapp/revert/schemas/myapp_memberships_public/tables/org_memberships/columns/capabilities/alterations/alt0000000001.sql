@@ -1,0 +1,7 @@
+-- Revert: schemas/myapp_memberships_public/tables/org_memberships/columns/capabilities/alterations/alt0000000001
+
+
+ALTER TABLE myapp_memberships_public.org_memberships 
+  ALTER COLUMN capabilities DROP NOT NULL;
+
+

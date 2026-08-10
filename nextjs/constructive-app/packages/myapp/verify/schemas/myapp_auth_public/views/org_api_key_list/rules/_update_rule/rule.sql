@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_auth_public/views/org_api_key_list/rules/_update_rule/rule
 
 
-SELECT verify_view('myapp_auth_public.org_api_key_list');
+SELECT assert_view_rule('myapp_auth_public.org_api_key_list'::regclass, '_update_rule', 'UPDATE');
 
 

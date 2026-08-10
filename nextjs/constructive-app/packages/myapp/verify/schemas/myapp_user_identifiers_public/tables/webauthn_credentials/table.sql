@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_user_identifiers_public/tables/webauthn_credentials/table
 
 
-SELECT verify_table('myapp_user_identifiers_public.webauthn_credentials');
+SELECT assert_table('myapp_user_identifiers_public.webauthn_credentials'::regclass, false, NULL);
 
 

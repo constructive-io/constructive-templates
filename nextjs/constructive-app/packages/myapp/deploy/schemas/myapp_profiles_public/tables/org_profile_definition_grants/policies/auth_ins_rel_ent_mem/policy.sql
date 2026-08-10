@@ -13,6 +13,6 @@ WITH CHECK (
   profile_id IN (SELECT obj.id
   FROM myapp_memberships_private.org_memberships_sprt AS org_sprt INNER JOIN myapp_profiles_public.org_profiles AS obj ON org_sprt.entity_id = obj.entity_id
   WHERE
-      org_sprt.actor_id = jwt_public.current_principal_id() AND (org_sprt.permissions & '0000000000000000000000000000000000000000000000000000000001000000') = '0000000000000000000000000000000000000000000000000000000001000000')
+      org_sprt.actor_id = ((SELECT jwt_public.current_principal_id())) AND (org_sprt.capabilities & '0000000000000000000000000000000000000000000000000000000001000000') = '0000000000000000000000000000000000000000000000000000000001000000')
 );
 

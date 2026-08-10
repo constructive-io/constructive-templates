@@ -1,7 +1,7 @@
 -- Deploy: migrate/webauthn_settings
 -- made with <3 @ constructive.io
 
--- requires: migrate/sites
+-- requires: migrate/route_bindings
 
 
 SET session_replication_role TO replica;
@@ -40,7 +40,7 @@ INSERT INTO routing_public.webauthn_settings (
   challenge_expiry_seconds,
   database_id
 ) VALUES
-  ('019fbc96-ded4-7615-afc2-65534c18c4dc', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-c1c4-7d76-8017-c296fd0375c5', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-ae06-75fc-96c3-df2484d13ce6', '019fbc96-c578-7e37-80c4-3ba5549c2b28', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-b686-765d-895b-6bf64df652aa', NULL, '', '', '{}', 'none', false, 'required', 300, '019fbc96-84d8-7d13-8acc-4c55ad35634c');
+  ('019feb75-92b3-7651-b9ec-9c330f7501ac', '019feb75-8695-7e24-8b0b-8db166cbaf4a', '019feb75-8a0e-7a45-8898-85dfd6f8e078', '019feb75-8695-7e24-8b0b-8db166cbaf4a', '019feb75-8695-7e24-8b0b-8db166cbaf4a', '019feb75-8ad3-74a3-a82a-14d661c634a7', '019feb75-869f-77e5-b1bd-2954e3f87b89', '019feb75-86dd-7d4b-9a7a-f22c7ff73486', '019feb75-87d7-70dd-9516-54c0ecf94600', NULL, '', '', '{}', 'none', false, 'required', 300, '019feb75-7843-7bd5-a19f-88c4cbec0ee6');
 
 
 SET session_replication_role TO DEFAULT;

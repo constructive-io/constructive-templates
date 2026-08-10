@@ -50,7 +50,7 @@ INSERT INTO metaschema_modules_public.user_auth_module (
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-d3d8-779d-ac2d-370828805a1a', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', '019fbc96-c250-7c44-b81a-baa69ea7f678', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-ad5b-7116-9f79-d037fdc40cd9', '019fbc96-bdd9-7379-be88-17a73f1d5320', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-d430-750d-8b5e-429956001965', 'audit_log_auth', 'sign_in', 'sign_up', 'sign_out', 'set_password', 'reset_password', 'forgot_password', 'send_verification_email', 'verify_email', 'verify_password', 'check_password', 'send_account_deletion_email', 'confirm_delete_account', 'sign_in_cross_origin', 'request_cross_origin_token', 'extend_token_expires', 'auth', NULL);
+  ('019feb75-8d96-7849-908f-510f5e5e49a1', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-89de-7d6c-a0e8-f04fbeb7d8d9', '019feb75-8a23-70f0-bc0a-c082a8c80fda', '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-8662-7462-bd4b-d8dee032dcdd', '019feb75-891b-7bcd-9ed3-1fc29a40c6cd', '019feb75-869f-77e5-b1bd-2954e3f87b89', '019feb75-86dd-7d4b-9a7a-f22c7ff73486', '019feb75-8da3-75f1-b809-0a4c23d44795', 'audit_log_auth', 'sign_in', 'sign_up', 'sign_out', 'set_password', 'reset_password', 'forgot_password', 'send_verification_email', 'verify_email', 'verify_password', 'check_password', 'send_account_deletion_email', 'confirm_delete_account', 'sign_in_cross_origin', 'request_cross_origin_token', 'extend_token_expires', 'auth', NULL);
 
 
 SET session_replication_role TO DEFAULT;

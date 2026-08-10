@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_user_identifiers_public/tables/phone_numbers/columns/number/column
 
 
-COMMENT ON COLUMN myapp_user_identifiers_public.phone_numbers.number IS 'The phone number without country code';
+COMMENT ON COLUMN myapp_user_identifiers_public.phone_numbers.number IS E'The full number in E.164 form, country calling code included (e.g. +15551234567). This is the value SMS sign-in and MFA match, so it is unique across the table and constrained to that shape.';
 

@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_memberships_public/tables/org_grants/columns/is_grant/column
 
 
-COMMENT ON COLUMN myapp_memberships_public.org_grants.is_grant IS E'True to grant the permissions, false to revoke them';
+COMMENT ON COLUMN myapp_memberships_public.org_grants.is_grant IS E'True to grant the capabilities, false to revoke them';
 

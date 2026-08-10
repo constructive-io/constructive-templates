@@ -1,6 +1,0 @@
--- Verify: schemas/myapp_memberships_public/tables/org_permission_default_permissions/indexes/org_permission_default_permissions_entity_id_idx
-
-
-SELECT verify_index('myapp_memberships_public.org_permission_default_permissions', 'org_permission_default_permissions_entity_id_idx');
-
-

@@ -1,4 +1,0 @@
--- Revert: schemas/catalog_public/tables/resource_definitions/indexes/resource_definitions_updated_at_idx
-
-
-DROP INDEX catalog_public.resource_definitions_updated_at_idx;

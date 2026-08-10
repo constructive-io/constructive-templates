@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_memberships_public/tables/org_memberships/columns/granted/column
 
 
-COMMENT ON COLUMN myapp_memberships_public.org_memberships.granted IS E'Bitmask of permissions directly granted to this member (not from profiles)';
+COMMENT ON COLUMN myapp_memberships_public.org_memberships.granted IS E'Bitmask of capabilities directly granted to this member (not from profiles)';
 

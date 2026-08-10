@@ -10,6 +10,6 @@ CREATE POLICY auth_upd_dir_own ON myapp_invites_public.app_invites
 FOR UPDATE
 TO authenticated
 USING (
-  sender_id = jwt_public.current_principal_id()
+  sender_id = ((SELECT jwt_public.current_principal_id()))
 );
 

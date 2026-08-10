@@ -35,15 +35,15 @@ INSERT INTO routing_public.domains (
   config,
   database_id
 ) VALUES
-  ('019fbc96-e513-773a-8ddd-de1113e2cde6', 'admin-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-72a0-bb61-4a536b7225c3', 'auth-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-7522-9c71-e95ca5a7b504', 'api-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-775b-9a0c-49e151c573f1', 'usage-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-7983-9bd8-bb1f7d106111', 'compute-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-7b65-ad0d-59e0d5dddeaa', 'config-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-7d6e-81ea-3a7d5112713b', 'objects-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-e514-7ee2-879a-41fa73ca8be2', 'agent-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c'),
-  ('019fbc96-fb7a-7ecc-a0f4-8f55384dfb4a', 'migrate-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019fbc96-84d8-7d13-8acc-4c55ad35634c');
+  ('019feb75-93ff-7511-abb5-c4110a0d5abb', 'admin-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-93ff-7f96-bf4d-b2c46b9acee8', 'auth-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-71e8-868d-9f6b33211c1d', 'api-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-73fe-bbc9-e1d4da7b04b6', 'usage-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-7601-8113-e4d028e45bcb', 'compute-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-7835-99f2-1cd51bf8d106', 'config-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-7acd-a43b-b81000ff25f3', 'objects-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-9400-7c4e-ba3c-b356c58848bb', 'agent-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6'),
+  ('019feb75-be29-7996-a9fb-191bf253a037', 'migrate-myapp.localhost', false, false, NULL, 'unverified', NULL, 'none', NULL, NULL, false, NULL, '019feb75-7843-7bd5-a19f-88c4cbec0ee6');
 
 
 SET session_replication_role TO DEFAULT;

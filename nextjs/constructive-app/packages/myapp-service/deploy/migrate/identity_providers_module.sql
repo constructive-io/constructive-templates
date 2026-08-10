@@ -36,7 +36,7 @@ INSERT INTO metaschema_modules_public.identity_providers_module (
   prefix,
   entity_table_id
 ) VALUES
-  ('019fbc96-c88c-7ae8-8d8c-cb17d2052731', '019fbc96-84d8-7d13-8acc-4c55ad35634c', NULL, '019fbc96-c130-7558-9bec-78482a963cfe', '019fbc96-ae06-75fc-96c3-df2484d13ce6', NULL, NULL, '019fbc96-c88d-7ba5-bce4-cfcf39ec99a4', 'identity_providers', 'auth', NULL, 'app', 'app', NULL);
+  ('019feb75-8b7d-7c7d-a8a5-de7c495348e9', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', NULL, '019feb75-89de-7d6c-a0e8-f04fbeb7d8d9', '019feb75-8695-7e24-8b0b-8db166cbaf4a', NULL, NULL, '019feb75-8b7e-7a85-9b53-09c3e40fc17e', 'identity_providers', 'auth', NULL, 'app', 'app', NULL);
 
 
 SET session_replication_role TO DEFAULT;

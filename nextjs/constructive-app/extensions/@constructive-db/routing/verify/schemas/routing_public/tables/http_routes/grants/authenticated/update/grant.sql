@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/http_routes/grants/authenticated/update/grant
 
 
-SELECT verify_table_grant('routing_public.http_routes', 'UPDATE', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.http_routes' AS regclass), 'authenticated', 'UPDATE', NULL, true);

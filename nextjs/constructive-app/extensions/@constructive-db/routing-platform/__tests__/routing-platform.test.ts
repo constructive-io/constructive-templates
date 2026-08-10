@@ -4,17 +4,13 @@ let pg: PgTestClient;
 let teardown: () => Promise<void>;
 
 const TABLES: Record<string, string[]> = {
-  'platform_routing_private': [
-    
-  ],
+  'platform_routing_private': [],
   'platform_routing_public': [
     'platform_hostname_bindings',
     'platform_route_bindings',
     'platform_routes'
   ],
-  'routing_private': [
-    
-  ],
+  'routing_private': [],
   'routing_public': [
     'platform_api_schemas',
     'platform_api_settings',
@@ -23,10 +19,18 @@ const TABLES: Record<string, string[]> = {
     'platform_domain_events',
     'platform_domain_verifications',
     'platform_domains',
+    'platform_email_identities',
+    'platform_email_provider_accounts',
+    'platform_email_site_identities',
     'platform_managed_domains',
+    'platform_pages',
+    'platform_site_app_links',
+    'platform_site_deep_links',
+    'platform_site_error_pages',
     'platform_site_metadata',
     'platform_site_modules',
     'platform_site_themes',
+    'platform_site_web_configs',
     'platform_sites'
   ]
 };

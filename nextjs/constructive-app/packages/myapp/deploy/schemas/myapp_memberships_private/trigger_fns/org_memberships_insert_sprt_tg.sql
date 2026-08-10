@@ -12,13 +12,13 @@ DECLARE
   has_active_parent boolean;
 BEGIN
   IF NEW.is_owner IS true THEN
-    new.is_admin := true;
-    new.is_approved := true;
-    new.is_disabled := false;
-    new.is_banned := false;
-    new.is_read_only := false;
+    NEW.is_admin := true;
+    NEW.is_approved := true;
+    NEW.is_disabled := false;
+    NEW.is_banned := false;
+    NEW.is_read_only := false;
   END IF;
-  new.is_active := (NEW.is_approved IS true AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
+  NEW.is_active := (NEW.is_approved IS true AND NEW.is_disabled IS false) AND NEW.is_banned IS false;
   IF NEW.is_active IS TRUE THEN
     SELECT
       EXISTS (SELECT 1
@@ -29,15 +29,15 @@ BEGIN
       INSERT INTO myapp_memberships_private.org_memberships_sprt (
         is_owner,
         is_admin,
-        permissions,
+        capabilities,
         actor_id,
         entity_id,
         is_read_only
       )
       VALUES
         (NEW.is_owner, NEW.is_admin, CASE 
-            WHEN (NEW.is_owner IS TRUE OR NEW.is_admin IS TRUE) AND (NEW.permissions IS NULL OR NEW.permissions = (lpad('', (bit_length(NEW.permissions))::int, '0'))::pg_catalog.varbit) THEN (lpad('', (bit_length(NEW.permissions))::int, '1'))::pg_catalog.varbit 
-            ELSE NEW.permissions 
+            WHEN (NEW.is_owner IS TRUE OR NEW.is_admin IS TRUE) AND (NEW.capabilities IS NULL OR NEW.capabilities = (lpad('', (bit_length(NEW.capabilities))::int, '0'))::pg_catalog.varbit) THEN (lpad('', (bit_length(NEW.capabilities))::int, '1'))::pg_catalog.varbit 
+            ELSE NEW.capabilities 
           END, NEW.actor_id, NEW.entity_id, NEW.is_read_only);
       INSERT INTO myapp_memberships_public.org_members (
         is_admin,

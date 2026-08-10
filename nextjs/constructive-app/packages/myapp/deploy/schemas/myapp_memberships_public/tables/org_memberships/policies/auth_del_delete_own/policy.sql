@@ -10,6 +10,6 @@ CREATE POLICY auth_del_delete_own ON myapp_memberships_public.org_memberships
 FOR DELETE
 TO authenticated
 USING (
-  actor_id = jwt_public.current_principal_id() AND is_banned IS FALSE
+  actor_id = ((SELECT jwt_public.current_principal_id())) AND is_banned IS FALSE
 );
 

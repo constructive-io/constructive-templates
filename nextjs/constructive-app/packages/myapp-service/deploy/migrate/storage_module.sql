@@ -59,11 +59,11 @@ INSERT INTO metaschema_modules_public.storage_module (
   has_confirm_upload,
   confirm_upload_delay,
   file_events_table_id,
-  default_permissions,
+  default_capabilities,
   api_name,
   private_api_name
 ) VALUES
-  ('019fbc96-ded6-75fe-b37f-9d85aad8088f', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-ded7-7d8d-9998-193c21acc329', '019fbc96-df2f-79b3-963a-81da5c02e36c', 'storage_public', 'storage_private', '019fbc96-df8c-7b8f-b346-12f61ba2c1ea', '019fbc96-e17f-7451-b63a-298e84a64979', NULL, 'app_buckets', 'app_files', 'app', 'app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{}', false, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, false, false, false, false, '00:00:30', NULL, '{}', NULL, NULL);
+  ('019feb75-92b4-7459-98ce-cf0a16021cc2', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-92b6-7057-b8de-bd46f3aaef00', '019feb75-92c0-733c-80f8-574ce7b97940', 'storage_public', 'storage_private', '019feb75-92cb-7779-a574-9f45714317cb', '019feb75-9326-7582-bae6-2409b3215b5d', NULL, 'app_buckets', 'app_files', 'app', 'app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{}', false, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, false, false, false, false, '00:00:30', NULL, '{}', NULL, NULL);
 
 
 SET session_replication_role TO DEFAULT;

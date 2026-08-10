@@ -6,5 +6,5 @@
 
 
 ALTER TABLE myapp_storage_public.app_buckets 
-  ADD COLUMN type text;
+  ADD COLUMN type myapp_storage_public.bucket_type;
 

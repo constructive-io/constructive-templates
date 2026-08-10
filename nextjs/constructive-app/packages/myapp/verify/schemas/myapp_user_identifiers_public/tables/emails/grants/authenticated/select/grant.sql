@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_user_identifiers_public/tables/emails/grants/authenticated/select/grant
 
 
-SELECT verify_table_grant('myapp_user_identifiers_public.emails', 'SELECT', 'authenticated');
+SELECT assert_table_grant('myapp_user_identifiers_public.emails'::regclass, 'authenticated', 'SELECT', NULL, true);
 
 

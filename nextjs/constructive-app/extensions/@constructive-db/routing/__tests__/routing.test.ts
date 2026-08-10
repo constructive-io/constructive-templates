@@ -13,16 +13,24 @@ const TABLES: Record<string, string[]> = {
     'domain_events',
     'domain_verifications',
     'domains',
+    'email_identities',
+    'email_provider_accounts',
+    'email_site_identities',
     'hostname_bindings',
     'http_routes',
     'managed_domains',
+    'pages',
     'pubkey_settings',
     'rls_settings',
     'route_bindings',
     'routes',
+    'site_app_links',
+    'site_deep_links',
+    'site_error_pages',
     'site_metadata',
     'site_modules',
     'site_themes',
+    'site_web_configs',
     'sites',
     'webauthn_settings'
   ]
@@ -31,7 +39,7 @@ const TABLES: Record<string, string[]> = {
 // Schema + grants smoke test: proves the exported plane deploys and that its
 // tables exist with schema USAGE granted. The only procedures shipped are the
 // routing read-path resolvers; the only triggers are the catalog-sync
-// propagation attachments (their trigger fns live in catalog_public).
+// propagation attachments (their trigger fns live in catalog_private).
 describe('routing schema + grants', () => {
   beforeAll(async () => {
     ({ pg, teardown } = await getConnections());

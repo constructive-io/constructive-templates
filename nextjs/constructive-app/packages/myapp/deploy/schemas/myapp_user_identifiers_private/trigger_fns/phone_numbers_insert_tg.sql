@@ -15,7 +15,7 @@ BEGIN
   WHERE
     e.owner_id = NEW.owner_id AND is_primary IS TRUE INTO v_primary_field;
   IF NOT (FOUND) THEN
-    new.is_primary := true;
+    NEW.is_primary := true;
   END IF;
   SELECT
     EXISTS (SELECT 1

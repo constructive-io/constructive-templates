@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_auth_public/procedures/reset_password/procedure
 
 
-SELECT verify_function('myapp_auth_public.reset_password');
+SELECT assert_function('myapp_auth_public.reset_password(uuid, text, text)'::regprocedure, 'boolean'::regtype, false, true, 'VOLATILE');
 
 

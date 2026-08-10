@@ -10,6 +10,6 @@ CREATE POLICY auth_upd_dir_own ON myapp_user_identifiers_private.connected_accou
 FOR UPDATE
 TO authenticated
 USING (
-  owner_id = jwt_public.current_principal_id()
+  owner_id = ((SELECT jwt_public.current_principal_id()))
 );
 

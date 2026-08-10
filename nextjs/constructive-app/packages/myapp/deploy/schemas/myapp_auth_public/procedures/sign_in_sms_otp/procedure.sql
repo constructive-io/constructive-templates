@@ -83,7 +83,7 @@ BEGIN
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
-  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', sign_in_sms_otp.phone));
+  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(sign_in_sms_otp.phone, '[^+0-9]', '', 'g')));
   IF v_sms_otp_secret IS NULL THEN
     IF v_ip_address IS NOT NULL THEN
       INSERT INTO myapp_auth_private.auth_ip_rate_limits (
@@ -182,7 +182,7 @@ BEGIN
   SELECT *
   FROM myapp_user_identifiers_public.phone_numbers AS pn
   WHERE
-    pn.number = sign_in_sms_otp.phone INTO v_phone;
+    pn.number = regexp_replace(sign_in_sms_otp.phone, '[^+0-9]', '', 'g') INTO v_phone;
   IF v_phone.owner_id IS NULL THEN
     PERFORM errors.raise_error('ACCOUNT_NOT_FOUND', '{}', 'public');
   END IF;

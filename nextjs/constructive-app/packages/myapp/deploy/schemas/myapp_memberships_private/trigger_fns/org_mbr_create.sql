@@ -4,7 +4,7 @@
 -- requires: schemas/myapp_memberships_private/schema
 -- requires: schemas/myapp_memberships_public/tables/org_memberships/table
 -- requires: schemas/myapp_memberships_public/tables/org_membership_defaults/table
--- requires: schemas/myapp_permissions_public/tables/org_permission_defaults/table
+-- requires: schemas/myapp_capabilities_public/tables/org_capability_defaults/table
 
 
 CREATE FUNCTION myapp_memberships_private.org_mbr_create() RETURNS TRIGGER AS $_PGFN_$
@@ -32,12 +32,12 @@ BEGIN
     )
     VALUES
       (NEW.id);
-    INSERT INTO myapp_permissions_public.org_permission_defaults (
-      permissions,
+    INSERT INTO myapp_capabilities_public.org_capability_defaults (
+      capabilities,
       entity_id
     )
     VALUES
-      (myapp_permissions_public.org_permissions_get_mask_by_names(ARRAY['send_approved_invites', 'create_invites']::citext[]), NEW.id);
+      (myapp_capabilities_public.org_capabilities_get_mask_by_names(ARRAY['send_approved_invites', 'create_invites']::citext[]), NEW.id);
   END IF;
   RETURN NEW;
 END;

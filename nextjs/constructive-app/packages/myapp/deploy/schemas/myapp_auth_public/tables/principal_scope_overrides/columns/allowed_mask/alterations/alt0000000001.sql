@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_auth_public/tables/principal_scope_overrides/columns/allowed_mask/column
 
 
-COMMENT ON COLUMN myapp_auth_public.principal_scope_overrides.allowed_mask IS E'Optional permission mask; AND-masked with parent permissions during cascade. NULL means no extra mask.';
+COMMENT ON COLUMN myapp_auth_public.principal_scope_overrides.allowed_mask IS E'Optional capability mask; AND-masked with parent capabilities during cascade. NULL means no extra mask.';
 

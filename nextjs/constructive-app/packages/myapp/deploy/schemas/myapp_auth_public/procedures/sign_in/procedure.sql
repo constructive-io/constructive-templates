@@ -12,6 +12,7 @@
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
+-- requires: schemas/myapp_users_public/tables/user_settings_security/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
@@ -51,6 +52,7 @@ DECLARE
   v_session_expires_at timestamptz;
   v_mfa_enabled boolean := false;
   v_mfa_challenge_token text;
+  v_security_settings myapp_users_public.user_settings_security;
   v_device_token_hash bytea;
   v_device myapp_auth_private.auth_user_devices;
   v_device_settings myapp_auth_private.app_settings_device;
@@ -175,92 +177,113 @@ BEGIN
         SELECT digest(v_new_device_token, 'sha256') INTO v_device_token_hash;
       END IF;
     END IF;
-    IF v_device_settings.require_device_approval IS TRUE AND v_device_approved IS NOT TRUE THEN
-      IF v_device.id IS NULL THEN
-        INSERT INTO myapp_auth_private.auth_user_devices (
-          user_id,
-          device_token_hash,
-          first_seen_ip,
-          last_seen_ip,
-          user_agent,
-          origin
-        )
-        VALUES
-          (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
-      END IF;
-      SELECT true INTO device_approval_required;
+    SELECT *
+    FROM myapp_users_public.user_settings_security AS uss
+    WHERE
+      uss.owner_id = v_email.owner_id INTO v_security_settings;
+    v_mfa_enabled := (COALESCE(v_security_settings.totp_enabled, false) OR COALESCE(v_security_settings.email_mfa_enabled, false)) OR COALESCE(v_security_settings.sms_mfa_enabled, false);
+    IF v_mfa_enabled IS TRUE AND v_device_trusted IS NOT TRUE THEN
+      v_mfa_challenge_token := encode(gen_random_bytes(24), 'hex');
+      PERFORM myapp_store_private.user_state_set(v_email.owner_id, 'mfa_challenge_token', v_mfa_challenge_token);
+      PERFORM myapp_store_private.user_state_set(v_email.owner_id, 'mfa_challenge_created_at', (now())::text);
       SELECT v_email.owner_id INTO user_id;
+      SELECT true INTO mfa_required;
+      SELECT v_mfa_challenge_token INTO mfa_challenge_token;
+      SELECT v_user_is_verified INTO is_verified;
+      SELECT
+        COALESCE(v_security_settings.totp_enabled, false) INTO totp_enabled;
+      SELECT
+        COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
+      RETURN;
+    ELSE
+      IF v_device_settings.require_device_approval IS TRUE AND v_device_approved IS NOT TRUE THEN
+        IF v_device.id IS NULL THEN
+          INSERT INTO myapp_auth_private.auth_user_devices (
+            user_id,
+            device_token_hash,
+            first_seen_ip,
+            last_seen_ip,
+            user_agent,
+            origin
+          )
+          VALUES
+            (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
+        END IF;
+        SELECT true INTO device_approval_required;
+        SELECT v_email.owner_id INTO user_id;
+        SELECT
+          COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
+        RETURN;
+      END IF;
+      v_csrf_secret := encode(gen_random_bytes(32), 'hex');
+      v_session_id := uuidv7();
+      IF sign_in.remember_me IS TRUE THEN
+        v_session_expires_at := now() + v_remember_me_duration;
+      ELSE
+        v_session_expires_at := now() + v_default_session_duration;
+      END IF;
+      INSERT INTO myapp_auth_private.sessions (
+        id,
+        user_id,
+        is_anonymous,
+        expires_at,
+        last_password_verified,
+        auth_method,
+        csrf_secret,
+        origin,
+        uagent
+      )
+      VALUES
+        (v_session_id, v_email.owner_id, false, v_session_expires_at, CURRENT_TIMESTAMP, 'password', v_csrf_secret, jwt_public.current_origin(), jwt_public.current_user_agent());
+      v_plaintext_credential := (CASE 
+        WHEN sign_in.credential_kind = 'api_key' THEN 'cnc_live_sk_' 
+        WHEN sign_in.credential_kind = 'bearer' THEN 'cnc_live_bt_' 
+        WHEN sign_in.credential_kind = 'access_token' THEN 'cnc_live_at_' 
+        WHEN sign_in.credential_kind = 'mfa_challenge' THEN 'cnc_live_mfa_' 
+        WHEN sign_in.credential_kind = 'one_time' THEN 'cnc_live_ot_' 
+        WHEN sign_in.credential_kind = 'webauthn' THEN 'cnc_live_wa_' 
+        ELSE 'cnc_live_tk_' 
+      END) || translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_');
+      v_credential_id := uuid_generate_v5(uuid_ns_url(), v_plaintext_credential);
+      INSERT INTO myapp_auth_private.session_credentials (
+        id,
+        session_id,
+        kind,
+        secret_hash,
+        expires_at
+      )
+      VALUES
+        (v_credential_id, v_session_id, sign_in.credential_kind, digest(v_plaintext_credential, 'sha256'), v_session_expires_at);
+      SELECT v_credential_id INTO id;
+      SELECT v_email.owner_id INTO user_id;
+      SELECT v_plaintext_credential INTO access_token;
+      SELECT v_session_expires_at INTO access_token_expires_at;
+      SELECT v_user_is_verified INTO is_verified;
+      SELECT false INTO mfa_required;
+      SELECT false INTO totp_enabled;
+      IF v_device_settings.enable_device_tracking IS TRUE THEN
+        IF v_device.id IS NOT NULL THEN
+          UPDATE myapp_auth_private.auth_user_devices AS ud SET
+          last_seen_at = now(), last_seen_ip = v_ip_address, user_agent = jwt_public.current_user_agent()
+          WHERE
+            ud.id = v_device.id;
+        ELSE
+          INSERT INTO myapp_auth_private.auth_user_devices (
+            user_id,
+            device_token_hash,
+            first_seen_ip,
+            last_seen_ip,
+            user_agent,
+            origin
+          )
+          VALUES
+            (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
+        END IF;
+      END IF;
       SELECT
         COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
       RETURN;
     END IF;
-    v_csrf_secret := encode(gen_random_bytes(32), 'hex');
-    v_session_id := uuidv7();
-    IF sign_in.remember_me IS TRUE THEN
-      v_session_expires_at := now() + v_remember_me_duration;
-    ELSE
-      v_session_expires_at := now() + v_default_session_duration;
-    END IF;
-    INSERT INTO myapp_auth_private.sessions (
-      id,
-      user_id,
-      is_anonymous,
-      expires_at,
-      last_password_verified,
-      auth_method,
-      csrf_secret,
-      origin,
-      uagent
-    )
-    VALUES
-      (v_session_id, v_email.owner_id, false, v_session_expires_at, CURRENT_TIMESTAMP, 'password', v_csrf_secret, jwt_public.current_origin(), jwt_public.current_user_agent());
-    v_plaintext_credential := (CASE 
-      WHEN sign_in.credential_kind = 'api_key' THEN 'cnc_live_sk_' 
-      WHEN sign_in.credential_kind = 'bearer' THEN 'cnc_live_bt_' 
-      WHEN sign_in.credential_kind = 'access_token' THEN 'cnc_live_at_' 
-      WHEN sign_in.credential_kind = 'mfa_challenge' THEN 'cnc_live_mfa_' 
-      WHEN sign_in.credential_kind = 'one_time' THEN 'cnc_live_ot_' 
-      WHEN sign_in.credential_kind = 'webauthn' THEN 'cnc_live_wa_' 
-      ELSE 'cnc_live_tk_' 
-    END) || translate(encode(gen_random_bytes(24), 'base64'), '+/=', '-_');
-    v_credential_id := uuid_generate_v5(uuid_ns_url(), v_plaintext_credential);
-    INSERT INTO myapp_auth_private.session_credentials (
-      id,
-      session_id,
-      kind,
-      secret_hash,
-      expires_at
-    )
-    VALUES
-      (v_credential_id, v_session_id, sign_in.credential_kind, digest(v_plaintext_credential, 'sha256'), v_session_expires_at);
-    SELECT v_credential_id INTO id;
-    SELECT v_email.owner_id INTO user_id;
-    SELECT v_plaintext_credential INTO access_token;
-    SELECT v_session_expires_at INTO access_token_expires_at;
-    SELECT v_user_is_verified INTO is_verified;
-    SELECT false INTO mfa_required;
-    SELECT false INTO totp_enabled;
-    IF v_device_settings.enable_device_tracking IS TRUE THEN
-      IF v_device.id IS NOT NULL THEN
-        UPDATE myapp_auth_private.auth_user_devices AS ud SET
-        last_seen_at = now(), last_seen_ip = v_ip_address, user_agent = jwt_public.current_user_agent()
-        WHERE
-          ud.id = v_device.id;
-      ELSE
-        INSERT INTO myapp_auth_private.auth_user_devices (
-          user_id,
-          device_token_hash,
-          first_seen_ip,
-          last_seen_ip,
-          user_agent,
-          origin
-        )
-        VALUES
-          (v_email.owner_id, v_device_token_hash, v_ip_address, v_ip_address, jwt_public.current_user_agent(), jwt_public.current_origin());
-      END IF;
-    END IF;
-    SELECT
-      COALESCE(v_new_device_token, sign_in.device_token) INTO out_device_token;
     IF v_ip_address IS NOT NULL THEN
       DELETE FROM myapp_auth_private.auth_ip_rate_limits
       WHERE

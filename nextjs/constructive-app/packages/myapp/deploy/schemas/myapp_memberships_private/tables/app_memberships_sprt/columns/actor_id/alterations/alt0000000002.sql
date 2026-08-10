@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_memberships_private/tables/app_memberships_sprt/columns/actor_id/column
 
 
-COMMENT ON COLUMN myapp_memberships_private.app_memberships_sprt.actor_id IS 'References the user whose permissions are being resolved';
+COMMENT ON COLUMN myapp_memberships_private.app_memberships_sprt.actor_id IS 'References the user whose capabilities are being resolved';
 

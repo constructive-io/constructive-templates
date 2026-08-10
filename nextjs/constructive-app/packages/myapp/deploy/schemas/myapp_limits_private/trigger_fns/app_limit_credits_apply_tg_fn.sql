@@ -19,12 +19,30 @@ BEGIN
   END IF;
   IF NEW.credit_type = 'permanent' THEN
     UPDATE myapp_limits_public.app_limits SET
-    purchased_credits = purchased_credits + NEW.amount, max = ((plan_max + purchased_credits) + NEW.amount) + period_credits
+    purchased_credits = purchased_credits + NEW.amount, max = ((CASE 
+      WHEN (COALESCE(app_limits.plan_max, (SELECT d.max
+    FROM myapp_limits_public.app_limit_defaults AS d
+    WHERE
+        d.name = app_limits.name), 0)) < 0 THEN -1 
+      ELSE (COALESCE(app_limits.plan_max, (SELECT d.max
+    FROM myapp_limits_public.app_limit_defaults AS d
+    WHERE
+        d.name = app_limits.name), 0)) + app_limits.purchased_credits 
+    END) + NEW.amount) + period_credits
     WHERE
       name = v_limit_name AND actor_id = NEW.actor_id;
   ELSE
     UPDATE myapp_limits_public.app_limits SET
-    period_credits = period_credits + NEW.amount, max = (plan_max + purchased_credits) + (period_credits + NEW.amount)
+    period_credits = period_credits + NEW.amount, max = (CASE 
+      WHEN (COALESCE(app_limits.plan_max, (SELECT d.max
+    FROM myapp_limits_public.app_limit_defaults AS d
+    WHERE
+        d.name = app_limits.name), 0)) < 0 THEN -1 
+      ELSE (COALESCE(app_limits.plan_max, (SELECT d.max
+    FROM myapp_limits_public.app_limit_defaults AS d
+    WHERE
+        d.name = app_limits.name), 0)) + app_limits.purchased_credits 
+    END) + (period_credits + NEW.amount)
     WHERE
       name = v_limit_name AND actor_id = NEW.actor_id;
   END IF;

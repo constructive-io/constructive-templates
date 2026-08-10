@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_invites_public/tables/org_invites/grants/authenticated/select/grant
 
 
-SELECT verify_table_grant('myapp_invites_public.org_invites', 'SELECT', 'authenticated');
+SELECT assert_table_grant('myapp_invites_public.org_invites'::regclass, 'authenticated', 'SELECT', NULL, true);
 
 

@@ -40,7 +40,7 @@ INSERT INTO metaschema_modules_public.principal_auth_module (
   revoke_org_api_key_function,
   api_name
 ) VALUES
-  ('019fbc96-d947-7c91-b954-7bc85c03877d', '019fbc96-84d8-7d13-8acc-4c55ad35634c', '019fbc96-c130-7558-9bec-78482a963cfe', '019fbc96-d949-70f9-ae75-050b81c28f49', '019fbc96-dab8-77ea-88cc-6c09b415cd93', '019fbc96-dbf8-7743-a147-16f1aad029b3', '019fbc96-8533-7560-9eea-55dbc7f7fcee', '019fbc96-ae3f-7843-8d56-55dc4da7a445', '019fbc96-af80-75e3-9b05-4a449fcabc73', '019fbc96-d430-750d-8b5e-429956001965', 'principals', 'create_principal', 'delete_principal', 'create_org_principal', 'delete_org_principal', 'create_org_api_key', 'revoke_org_api_key', 'auth');
+  ('019feb75-9148-75bb-8495-8cc7d6b4ee3f', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-89de-7d6c-a0e8-f04fbeb7d8d9', '019feb75-9149-78eb-8455-bb07f20208c6', '019feb75-9184-707a-8a09-d8870969fe13', '019feb75-91bb-7f0a-9d9d-fd451ffa01f4', '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-869f-77e5-b1bd-2954e3f87b89', '019feb75-86dd-7d4b-9a7a-f22c7ff73486', '019feb75-8da3-75f1-b809-0a4c23d44795', 'principals', 'create_principal', 'delete_principal', 'create_org_principal', 'delete_org_principal', 'create_org_api_key', 'revoke_org_api_key', 'auth');
 
 
 SET session_replication_role TO DEFAULT;

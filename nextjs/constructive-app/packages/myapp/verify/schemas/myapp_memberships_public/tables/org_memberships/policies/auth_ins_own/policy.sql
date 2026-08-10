@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_memberships_public/tables/org_memberships/policies/auth_ins_own/policy
 
 
-SELECT verify_policy('auth_ins_own', 'myapp_memberships_public.org_memberships');
+SELECT assert_policy('myapp_memberships_public.org_memberships'::regclass, 'auth_ins_own', 'INSERT', true, false, true);
 
 
