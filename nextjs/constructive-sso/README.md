@@ -196,27 +196,44 @@ pnpm dev
 
 ### Using real OAuth providers
 
-To use real GitHub or Google OAuth instead of the mock server, update the
-`identity_providers` rows in the database (via SQL or by modifying
-`packages/provision/src/oauth.ts`):
+The provision step is env-driven (see `packages/provision/src/oauth.ts`). Set the
+`OAUTH_*` vars in `.env` (or export them) before running `pnpm run provision`.
+The defaults point at the local mock OAuth server (:4010).
 
-```sql
--- Point Google at real Google OAuth endpoints
-UPDATE myapp_auth_private.identity_providers
-  SET authorization_url = 'https://accounts.google.com/o/oauth2/v2/auth',
-      token_url         = 'https://oauth2.googleapis.com/token',
-      userinfo_url      = 'https://openidconnect.googleapis.com/v1/userinfo',
-      client_id         = '<your-google-client-id>'
-WHERE slug = 'google';
+Real Google example (`.env`):
 
--- Rotate the real client secret
-SELECT myapp_auth_private.rotate_identity_provider_app_secret(
-  (SELECT id FROM myapp_auth_private.identity_providers WHERE slug = 'google'),
-  '<your-google-client-secret>'
-);
+```
+OAUTH_PROVIDER=google
+OAUTH_CLIENT_ID=<your-google-client-id>
+OAUTH_CLIENT_SECRET=<your-google-client-secret>
+OAUTH_AUTHORIZE_URL=https://accounts.google.com/o/oauth2/v2/auth
+OAUTH_TOKEN_URL=https://oauth2.googleapis.com/token
+OAUTH_USERINFO_URL=https://openidconnect.googleapis.com/v1/userinfo
+OAUTH_PKCE_ENABLED=true
+OAUTH_SCOPES=openid,email,profile
 ```
 
-Real OAuth app callback URL: `http://auth-myapp.localhost:3000/auth/google/callback`
+Then re-run `pnpm run provision` (upserts the row + re-rotates the secret,
+creates the localhost -> auth API routing alias) and restart the CNC server so
+the module loader cache refreshes.
+
+**Real-Google flow uses `localhost:3000`** (Google only allows plain-HTTP
+redirect URIs on the exact host `localhost`):
+
+1. Register in the Google Cloud Console:
+   `http://localhost:3000/auth/google/callback`
+2. `.env` must set `NEXT_PUBLIC_AUTH_ENDPOINT=http://localhost:3000/graphql`
+   (provision creates the routing alias so `localhost:3000` resolves to this
+   tenant's auth API).
+3. Access the app at `http://localhost:3011` (NOT `auth-myapp.localhost:3011`)
+   — the host-only session cookie set on `localhost:3000` is sent to
+   `localhost:3011` automatically.
+
+> CAUTION: Google rejects non-HTTPS redirect URIs whose host is not exactly
+> `localhost` (e.g. `auth-myapp.localhost`) with "doesn't comply with Google's
+> OAuth 2.0 policy" / `invalid_request`. Keep the flow on `localhost:3000`,
+> or fall back to the mock provider (set
+> `OAUTH_CLIENT_ID=constructive-sso-local-client`).
 
 ## Debugging
 

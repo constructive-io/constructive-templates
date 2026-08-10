@@ -308,6 +308,56 @@ export async function provisionOAuth(pgDatabase: string): Promise<void> {
     await pool.query(identityFnSql);
     console.log(`   Created sign_up_identity/sign_in_identity wrappers in ${publicSchema} (EXECUTE granted to anonymous)`);
 
+    // -----------------------------------------------------------------------
+    // E. Bare-localhost domain alias for real Google OAuth callbacks
+    //
+    // Google only allows plain-HTTP redirect URIs on the EXACT host
+    // 'localhost' (https required for any other host). The registered Google
+    // redirect URI is therefore http://localhost:3000/auth/google/callback,
+    // but the CNC OAuth middleware builds the callback from the request's
+    // Host header (auth-{db}.localhost). To make real-Google SSO work, the
+    // whole OAuth flow must run through localhost:3000, which means the
+    // routing plane must resolve 'localhost' to THIS tenant's auth API.
+    //
+    // This mirrors the SSO plan's 'bare-localhost alias row annotated
+    // purpose=local-google-oauth-callback'.
+    // -----------------------------------------------------------------------
+    const authHostname = `auth-${dbName}.localhost`;
+
+    // NOTE: each statement must be its own query — node-postgres' extended
+    // query protocol (used when parameters are present) rejects multiple
+    // commands in one prepared statement.
+    // 1. Create the bare-localhost domain row for this tenant (if absent)
+    await pool.query(
+      `INSERT INTO routing_public.domains (database_id, hostname, managed)
+       SELECT $1::uuid, 'localhost', false
+       WHERE NOT EXISTS (
+         SELECT 1 FROM routing_public.domains WHERE hostname = 'localhost'
+       )`,
+      [config.databaseId],
+    );
+
+    // 2. Link localhost -> this tenant's auth API, reusing the target API
+    //    from the existing auth-{db}.localhost route. Only creates the
+    //    route when the localhost domain actually belongs to this tenant.
+    await pool.query(
+      `INSERT INTO routing_public.routes (domain_id, target_api_id, database_id, path, is_active)
+       SELECT d.id, r.target_api_id, $1::uuid, '/', true
+       FROM routing_public.domains d
+       JOIN routing_public.routes r
+         ON r.database_id = $1::uuid
+       JOIN routing_public.domains ad
+         ON ad.id = r.domain_id AND ad.hostname = $2
+       WHERE d.hostname = 'localhost'
+         AND d.database_id = $1::uuid
+         AND NOT EXISTS (
+           SELECT 1 FROM routing_public.routes WHERE domain_id = d.id
+         )`,
+      [config.databaseId, authHostname],
+    );
+    console.log('   localhost -> auth API alias created for real Google OAuth callback');
+    console.log('   NOTE: set NEXT_PUBLIC_AUTH_ENDPOINT=http://localhost:3000/graphql in .env and access the app at localhost:3011');
+
   } catch (err: any) {
     try { await pool.query('ROLLBACK'); } catch { /* already committed or no tx */ }
     throw new Error(`OAuth provisioning failed: ${err.message}`);
