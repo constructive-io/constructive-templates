@@ -1,0 +1,10 @@
+-- Deploy: schemas/myapp_auth_private/tables/app_settings_auth/columns/allowed_auth_methods/alterations/alt0000000002
+-- made with <3 @ constructive.io
+
+-- requires: schemas/myapp_auth_private/schema
+-- requires: schemas/myapp_auth_private/tables/app_settings_auth/columns/allowed_auth_methods/column
+
+
+COMMENT ON COLUMN myapp_auth_private.app_settings_auth.allowed_auth_methods IS E'@has_guard
+Array of allowed auth methods (e.g. password, identity, magic_link, sms, email_otp). NULL means all methods are allowed.';
+

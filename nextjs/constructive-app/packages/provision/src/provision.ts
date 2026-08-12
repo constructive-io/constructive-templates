@@ -79,14 +79,14 @@ async function main() {
   const metaschemaClient = createMetaschemaClient();
 
   // Find the 'api' API for this database via direct SQL (superuser) to bypass
-  // the same RLS issue that breaks services_public.apis GraphQL lookups here.
+  // the same RLS issue that breaks routing_public.apis GraphQL lookups here.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let appApi: any;
   const appApiLookupPool = new Pool({ database: PG_DATABASE });
   try {
     const appApiRes = await appApiLookupPool.query(
-      `SELECT id, name, is_public AS "isPublic", role_name AS "roleName"
-       FROM services_public.apis
+      `SELECT id, name, is_published AS "isPublic", role_name AS "roleName"
+       FROM routing_public.apis
        WHERE database_id = $1 AND name = 'api'`,
       [config.databaseId]
     );
@@ -106,7 +106,7 @@ async function main() {
     try {
       const attachedRes = await attachedPool.query(
         `SELECT s.schema_name
-         FROM services_public.api_schemas aps
+         FROM routing_public.api_schemas aps
          JOIN metaschema_public.schema s ON s.id = aps.schema_id
          WHERE aps.api_id = $1`,
         [appApiId]
@@ -153,7 +153,7 @@ async function main() {
         for (const schema of schemasToAttach) {
           try {
             await attachPool.query(
-              `INSERT INTO services_public.api_schemas (database_id, api_id, schema_id)
+              `INSERT INTO routing_public.api_schemas (database_id, api_id, schema_id)
                VALUES ($1, $2, $3)
                ON CONFLICT (api_id, schema_id) DO NOTHING`,
               [config.databaseId, appApiId, schema.id]
@@ -204,9 +204,9 @@ async function main() {
       const dupRes = await dedupPool.query(
         `WITH api_schemas AS (
            SELECT s.schema_name
-           FROM services_public.api_schemas aps
+           FROM routing_public.api_schemas aps
            JOIN metaschema_public.schema s ON s.id = aps.schema_id
-           JOIN services_public.apis a ON a.id = aps.api_id
+           JOIN routing_public.apis a ON a.id = aps.api_id
            WHERE a.name = 'api' AND a.database_id = $1
          ),
          schema_functions AS (
@@ -286,7 +286,7 @@ async function main() {
   // constructive_memberships_private pointing to {dbname}_memberships_private)
   // is intentionally NOT ported: it only matters for org-scope RLS joins and
   // storage_module uploads, neither of which the auth:hardened no-org surface
-  // provisions. All services_public writes in these scripts use direct SQL
+  // provisions. All routing_public writes in these scripts use direct SQL
   // (superuser), bypassing that RLS.
   if (pgAvailable) {
     console.log('\n  Local-dev patches: handled by pgpm migration (dev-local). Run: pgpm deploy dev-local');
@@ -341,7 +341,7 @@ async function main() {
   //   E.  Create migrate-{dbName} domain entry
   //   F.  Flush the GraphQL server cache
 
-  // The metaschema tables (metaschema_public.schema, services_public.domains,
+  // The metaschema tables (metaschema_public.schema, routing_public.domains,
   // etc.) live in the ONE physical platform DB alongside the tenant schemas
   // (schema-based tenancy). PG_DATABASE is that physical DB.
   const MIGRATE_DB = PG_DATABASE;
@@ -410,7 +410,7 @@ async function main() {
   // The administrator role has BYPASSRLS which would defeat the filtering.
   //
   // Use direct SQL (superuser) for both lookup and update because the
-  // services_public.apis RLS policy hardcodes "constructive_memberships_private"
+  // routing_public.apis RLS policy hardcodes "constructive_memberships_private"
   // and cannot resolve the admin's org membership until the dev-local
   // schema alias workaround is in place. Even then, GraphQL JWT
   // context may not match the membership actor_id during this provisioning step.
@@ -419,8 +419,8 @@ async function main() {
   const migrateLookupPool = new Pool({ database: MIGRATE_DB });
   try {
     const migrateApiRes = await migrateLookupPool.query(
-      `SELECT id, name, is_public AS "isPublic", role_name AS "roleName"
-       FROM services_public.apis
+      `SELECT id, name, is_published AS "isPublic", role_name AS "roleName"
+       FROM routing_public.apis
        WHERE database_id = $1 AND name = 'migrate'`,
       [config.databaseId]
     );
@@ -431,7 +431,7 @@ async function main() {
 
   // The migrate API row is created during create-db.ts bootstrap (SQL INSERT
   // as superuser, bypassing RLS). Here we only UPDATE it via direct SQL.
-  // INSERT on services_public.apis is intentionally blocked by RLS for
+  // INSERT on routing_public.apis is intentionally blocked by RLS for
   // authenticated users — the policy requires manage_services in the
   // platform-level org_memberships_sprt.
   if (!migrateApi) {
@@ -452,8 +452,8 @@ async function main() {
       const migrateUpdatePool = new Pool({ database: MIGRATE_DB });
       try {
         await migrateUpdatePool.query(
-          `UPDATE services_public.apis
-           SET is_public = true, role_name = 'authenticated'
+          `UPDATE routing_public.apis
+           SET is_published = true, role_name = 'authenticated'
            WHERE id = $1`,
           [migrateApi.id]
         );
@@ -475,7 +475,7 @@ async function main() {
     try {
       // Check if already linked
       const existing = await linkPool.query(
-        `SELECT id FROM services_public.api_schemas
+        `SELECT id FROM routing_public.api_schemas
          WHERE api_id = $1 AND schema_id = $2`,
         [migrateApi.id, ddlAuditSchemaId]
       );
@@ -485,7 +485,7 @@ async function main() {
       } else {
         console.log('   Linking ddl_audit_public schema to migrate API...');
         await linkPool.query(
-          `INSERT INTO services_public.api_schemas (database_id, api_id, schema_id)
+          `INSERT INTO routing_public.api_schemas (database_id, api_id, schema_id)
            VALUES ($1, $2, $3)
            ON CONFLICT (api_id, schema_id) DO NOTHING`,
           [config.databaseId, migrateApi.id, ddlAuditSchemaId]
@@ -506,27 +506,25 @@ async function main() {
 
   // Step E: Create migrate domain entry (migrate-{dbName})
   if (migrateApi) {
-    const domain = 'localhost';
-    const subdomain = `migrate-${config.databaseName}`;
-    console.log(`   Creating ${subdomain}.${domain} domain entry...`);
+    const migrateHostname = `migrate-${config.databaseName}.localhost`;
+    console.log(`   Creating ${migrateHostname} domain entry...`);
     let domainCreated = false;
     try {
       await withRetry(() =>
         metaschemaClient.domain.create({
           data: {
             databaseId: config.databaseId!,
-            apiId: migrateApi.id,
-            domain: domain,
-            subdomain: subdomain,
-          },
+            hostname: migrateHostname,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
           select: { id: true },
         }).unwrap()
       );
-      console.log(`   Created domain: ${subdomain}.${domain} → migrate API`);
+      console.log(`   Created domain: ${migrateHostname} → migrate API`);
       domainCreated = true;
     } catch (err: any) {
       if (err.message?.includes('already exists') || err.message?.includes('duplicate') || err.message?.includes('unique constraint')) {
-        console.log(`   ${subdomain}.${domain} domain already exists`);
+        console.log(`   ${migrateHostname} domain already exists`);
         domainCreated = true;
       } else {
         console.warn(`   Could not create migrate domain via GraphQL: ${err.message}`);
@@ -539,18 +537,47 @@ async function main() {
         const domainPool = new Pool({ database: MIGRATE_DB });
         try {
           await domainPool.query(
-            `INSERT INTO services_public.domains (database_id, api_id, subdomain, domain)
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO routing_public.domains (database_id, hostname)
+             VALUES ($1, $2)
              ON CONFLICT DO NOTHING`,
-            [config.databaseId, migrateApi.id, subdomain, domain]
+            [config.databaseId, migrateHostname]
           );
-          console.log(`   Created domain: ${subdomain}.${domain} → migrate API (via SQL)`);
+          console.log(`   Created domain: ${migrateHostname} → migrate API (via SQL)`);
           domainCreated = true;
         } finally {
           await domainPool.end();
         }
       } catch (sqlErr: any) {
         console.warn(`   Could not create migrate domain via SQL: ${sqlErr.message}`);
+      }
+    }
+
+    // Always create the route from domain to migrate API via SQL.
+    // The GraphQL domain.create only creates the domain — routing is a separate
+    // table (routing_public.routes) that must be linked regardless of which path
+    // created the domain.
+    if (domainCreated && pgAvailable) {
+      try {
+        const routePool = new Pool({ database: MIGRATE_DB });
+        try {
+          await routePool.query(
+            `INSERT INTO routing_public.routes (database_id, domain_id, target_api_id)
+             SELECT $1, d.id, $2
+             FROM routing_public.domains d
+             WHERE d.hostname = $3 AND d.database_id = $1
+               AND NOT EXISTS (
+                 SELECT 1 FROM routing_public.routes r
+                 WHERE r.domain_id = d.id AND r.target_api_id = $2
+               )
+             ON CONFLICT DO NOTHING`,
+            [config.databaseId, migrateApi.id, migrateHostname]
+          );
+          console.log(`   Linked route: ${migrateHostname} → migrate API`);
+        } finally {
+          await routePool.end();
+        }
+      } catch (routeErr: any) {
+        console.warn(`   Could not create migrate route: ${routeErr.message}`);
       }
     }
   }
@@ -562,15 +589,12 @@ async function main() {
     const flushPool = new Pool({ database: MIGRATE_DB });
     try {
       const domainsResult = await flushPool.query(
-        `SELECT DISTINCT subdomain, domain FROM services_public.domains
+        `SELECT DISTINCT hostname FROM routing_public.domains
          WHERE database_id = $1`,
         [config.databaseId]
       );
       for (const row of domainsResult.rows) {
-        const host = row.subdomain
-          ? `${row.subdomain}.${row.domain}`
-          : row.domain;
-        subdomainsToFlush.push(host);
+        subdomainsToFlush.push(row.hostname);
       }
     } catch (err: any) {
       console.warn(`   Could not list subdomains: ${err.message}`);

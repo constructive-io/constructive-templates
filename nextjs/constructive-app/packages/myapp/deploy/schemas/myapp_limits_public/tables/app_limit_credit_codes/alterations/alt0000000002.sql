@@ -5,5 +5,5 @@
 -- requires: schemas/myapp_limits_public/tables/app_limit_credit_codes/table
 
 
-COMMENT ON TABLE myapp_limits_public.app_limit_credit_codes IS E'Redeemable credit codes managed by admins with the add_credits permission';
+COMMENT ON TABLE myapp_limits_public.app_limit_credit_codes IS E'Redeemable credit codes managed by admins with the add_credits capability';
 

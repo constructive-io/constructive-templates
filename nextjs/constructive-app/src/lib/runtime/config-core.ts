@@ -88,7 +88,7 @@ export function getAuthEndpoint(): string {
  * schema "app_public").
  *
  * Override with NEXT_PUBLIC_APP_ENDPOINT to point at a different host
- * (e.g. when the per-DB domain in services_public.domains differs).
+ * (e.g. when the per-DB domain in routing_public.domains differs).
  */
 export function getAppEndpoint(): string {
 	const override = getRuntimeConfig('NEXT_PUBLIC_APP_ENDPOINT');

@@ -1,0 +1,11 @@
+-- Deploy: schemas/myapp_capabilities_public/tables/app_capability_defaults/columns/id/alterations/alt0000000001
+-- made with <3 @ constructive.io
+
+-- requires: schemas/myapp_capabilities_public/schema
+-- requires: schemas/myapp_capabilities_public/tables/app_capability_defaults/table
+-- requires: schemas/myapp_capabilities_public/tables/app_capability_defaults/columns/id/column
+
+
+ALTER TABLE myapp_capabilities_public.app_capability_defaults 
+  ALTER COLUMN id SET NOT NULL;
+

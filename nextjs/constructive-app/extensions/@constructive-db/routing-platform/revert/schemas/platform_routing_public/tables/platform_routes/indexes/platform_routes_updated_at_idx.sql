@@ -1,0 +1,4 @@
+-- Revert: schemas/platform_routing_public/tables/platform_routes/indexes/platform_routes_updated_at_idx
+
+
+DROP INDEX platform_routing_public.platform_routes_updated_at_idx;

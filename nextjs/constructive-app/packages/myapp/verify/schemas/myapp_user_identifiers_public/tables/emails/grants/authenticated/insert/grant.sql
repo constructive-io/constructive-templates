@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_user_identifiers_public/tables/emails/grants/authenticated/insert/grant
 
 
-SELECT verify_table_grant('myapp_user_identifiers_public.emails', 'insert', 'authenticated');
+SELECT assert_table_grant('myapp_user_identifiers_public.emails'::regclass, 'authenticated', 'INSERT', ARRAY['email', 'owner_id', 'is_primary', 'name'], true);
 
 

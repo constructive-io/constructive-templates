@@ -42,7 +42,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'email_verification_request') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -57,7 +57,7 @@ BEGIN
     DELETE FROM myapp_auth_private.auth_rate_limits
     WHERE
       subject_id = v_email.owner_id AND action = 'email_verification_request';
-    PERFORM myapp_store_private.user_secrets_del(v_email.owner_id, ARRAY[verification_token_name]);
+    PERFORM myapp_store_private.user_secrets_del(v_email.owner_id, verification_token_name);
     RETURN false;
   END IF;
   v_user_id := v_email.owner_id;

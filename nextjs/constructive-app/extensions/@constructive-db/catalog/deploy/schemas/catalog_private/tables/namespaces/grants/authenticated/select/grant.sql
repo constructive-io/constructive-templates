@@ -1,0 +1,8 @@
+-- Deploy: schemas/catalog_private/tables/namespaces/grants/authenticated/select/grant
+-- made with <3 @ constructive.io
+
+-- requires: schemas/catalog_private/schema
+-- requires: schemas/catalog_private/tables/namespaces/table
+
+
+GRANT SELECT ON catalog_private.namespaces TO authenticated;

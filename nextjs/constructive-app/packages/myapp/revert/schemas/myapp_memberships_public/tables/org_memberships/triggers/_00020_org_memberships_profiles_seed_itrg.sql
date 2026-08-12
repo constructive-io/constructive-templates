@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_memberships_public/tables/org_memberships/triggers/_00020_org_memberships_profiles_seed_itrg
+
+
+DROP TRIGGER _00020_org_memberships_profiles_seed_itrg ON myapp_memberships_public.org_memberships;
+
+

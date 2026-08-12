@@ -38,7 +38,7 @@ INSERT INTO metaschema_modules_public.internal_secrets_module (
   policies,
   provisions
 ) VALUES
-  ('019fa2a1-6721-71f7-912f-09a88bff1e95', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5af9-72d1-8fba-f96774dd90ce', '019fa2a1-5af9-72d1-8fba-f96774dd90ce', NULL, NULL, '019fa2a1-674f-73fa-9633-39edfbd13c6c', 'app_internal_secrets', 'config', NULL, 'app', 'app', NULL, NULL, NULL, NULL);
+  ('019feb75-895a-7df5-befb-04b92cbe59df', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', '019feb75-8658-74d1-9931-76da2692e55d', '019feb75-8658-74d1-9931-76da2692e55d', NULL, NULL, '019feb75-8966-7ecd-bc75-e2778b51a789', 'app_internal_secrets', 'config', NULL, 'app', 'app', NULL, NULL, NULL, NULL);
 
 
 SET session_replication_role TO DEFAULT;

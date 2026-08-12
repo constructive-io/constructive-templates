@@ -1,0 +1,4 @@
+-- Revert: schemas/platform_routing_public/tables/platform_route_bindings/indexes/platform_route_bindings_domain_id_is_active_idx
+
+
+DROP INDEX platform_routing_public.platform_route_bindings_domain_id_is_active_idx;

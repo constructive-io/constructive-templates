@@ -35,7 +35,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'send_sms_otp') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -43,15 +43,15 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_sms_sign_in, false)) THEN
-    RAISE EXCEPTION 'SMS_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('SMS_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
-  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', send_sms_otp.phone));
+  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g')));
   IF v_sms_otp_secret IS NULL THEN
     v_sms_otp_secret := concat('\x', encode(gen_random_bytes(20), 'hex'));
-    PERFORM myapp_store_private.user_state_set(uuid_nil(), concat('sms_otp:', send_sms_otp.phone), v_sms_otp_secret);
+    PERFORM myapp_store_private.user_state_set(uuid_nil(), concat('sms_otp:', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g')), v_sms_otp_secret);
   END IF;
   v_code := totp.generate(v_sms_otp_secret, 600, 6, now(), 'sha1', 'raw');
-  PERFORM app_jobs.add_job('sms:send_verification_code', json_build_object('sms_type', 'sms_otp_code', 'phone', send_sms_otp.phone, 'code', v_code));
+  PERFORM app_jobs.add_job('sms:send_verification_code', json_build_object('sms_type', 'sms_otp_code', 'phone', regexp_replace(send_sms_otp.phone, '[^+0-9]', '', 'g'), 'code', v_code));
   IF v_ip_address IS NOT NULL THEN
     DELETE FROM myapp_auth_private.auth_ip_rate_limits
     WHERE

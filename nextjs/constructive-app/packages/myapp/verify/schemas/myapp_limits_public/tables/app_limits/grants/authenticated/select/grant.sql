@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_limits_public/tables/app_limits/grants/authenticated/select/grant
 
 
-SELECT verify_table_grant('myapp_limits_public.app_limits', 'select', 'authenticated');
+SELECT assert_table_grant('myapp_limits_public.app_limits'::regclass, 'authenticated', 'SELECT', NULL, true);
 
 

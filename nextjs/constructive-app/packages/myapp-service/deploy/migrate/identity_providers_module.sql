@@ -1,7 +1,7 @@
 -- Deploy: migrate/identity_providers_module
 -- made with <3 @ constructive.io
 
--- requires: migrate/emails_module
+-- requires: migrate/hierarchy_module
 
 
 SET session_replication_role TO replica;
@@ -36,7 +36,7 @@ INSERT INTO metaschema_modules_public.identity_providers_module (
   prefix,
   entity_table_id
 ) VALUES
-  ('019fa2a1-6e02-7ed6-862e-7d9f684897f7', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', NULL, '019fa2a1-68d3-7385-938c-1973d9bed8f2', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', NULL, NULL, '019fa2a1-6e03-77a5-8d95-46056bdd7ccf', 'identity_providers', 'auth', NULL, 'app', 'app', NULL);
+  ('019feb75-8b7d-7c7d-a8a5-de7c495348e9', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', NULL, '019feb75-89de-7d6c-a0e8-f04fbeb7d8d9', '019feb75-8695-7e24-8b0b-8db166cbaf4a', NULL, NULL, '019feb75-8b7e-7a85-9b53-09c3e40fc17e', 'identity_providers', 'auth', NULL, 'app', 'app', NULL);
 
 
 SET session_replication_role TO DEFAULT;

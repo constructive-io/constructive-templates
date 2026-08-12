@@ -59,7 +59,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'webauthn_finish_sign_in') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -67,7 +67,7 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_webauthn_sign_in, false)) THEN
-    RAISE EXCEPTION 'WEBAUTHN_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('WEBAUTHN_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   v_session_id := jwt_private.current_session_id();
   DELETE FROM myapp_auth_private.session_secrets AS s
@@ -126,7 +126,7 @@ BEGIN
         ELSE NULL 
       END;
     END IF;
-    RAISE EXCEPTION 'WEBAUTHN_SIGN_IN_CHALLENGE_NOT_FOUND_OR_EXPIRED';
+    PERFORM errors.raise_error('WEBAUTHN_SIGN_IN_CHALLENGE_NOT_FOUND_OR_EXPIRED', '{}', 'public');
   END IF;
   UPDATE myapp_user_identifiers_public.webauthn_credentials AS c SET
   sign_count = webauthn_finish_sign_in.new_sign_count, backup_state = webauthn_finish_sign_in.new_backup_state, last_used_at = now()
@@ -185,7 +185,7 @@ BEGIN
         ELSE NULL 
       END;
     END IF;
-    RAISE EXCEPTION 'WEBAUTHN_CREDENTIAL_NOT_FOUND';
+    PERFORM errors.raise_error('WEBAUTHN_CREDENTIAL_NOT_FOUND', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_session_expires_at := now() + v_default_session_duration;

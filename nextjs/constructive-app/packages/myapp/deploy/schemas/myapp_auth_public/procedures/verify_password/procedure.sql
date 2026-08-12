@@ -29,7 +29,7 @@ BEGIN
   WHERE
     subject_id = v_user_id AND action = 'verify_password' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('ACCOUNT_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   IF myapp_store_private.user_secrets_verify(v_user_id, 'password_hash', verify_password.password) THEN
     DELETE FROM myapp_auth_private.auth_rate_limits

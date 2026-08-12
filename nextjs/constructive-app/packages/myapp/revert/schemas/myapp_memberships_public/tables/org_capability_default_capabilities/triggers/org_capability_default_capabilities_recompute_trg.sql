@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_memberships_public/tables/org_capability_default_capabilities/triggers/org_capability_default_capabilities_recompute_trg
+
+
+DROP TRIGGER org_capability_default_capabilities_recompute_trg ON myapp_memberships_public.org_capability_default_capabilities;
+
+

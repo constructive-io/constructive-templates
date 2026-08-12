@@ -8,10 +8,10 @@
  *
  * IMPORTANT — module shape:
  *   - Unscoped modules are plain strings:        'users_module'
- *   - Scoped modules MUST use tuple form:        ['permissions_module', { scope: 'app' }]
+ *   - Scoped modules MUST use tuple form:        ['capabilities_module', { scope: 'app' }]
  *
  *   The live `databaseProvisionModule` proc REJECTS the legacy colon-string form
- *   ('permissions_module:app') with a PROVISION-001 hard-fail. The generated SDK
+ *   ('capabilities_module:app') with a PROVISION-001 hard-fail. The generated SDK
  *   types `modules` as `string[]` because the underlying column is JSONB; pass
  *   `asModules(...)` at the call site to satisfy the SDK boundary.
  */
@@ -33,25 +33,26 @@ export type ProvisionModule = string | [string, ModuleScope];
 export const AUTH_HARDENED_MODULES: ProvisionModule[] = [
   'users_module',
   'membership_types_module',
-  ['permissions_module', { scope: 'app' }],
+  ['capabilities_module', { scope: 'app' }],
   ['limits_module', { scope: 'app' }],
   ['levels_module', { scope: 'app' }],
   ['memberships_module', { scope: 'app' }],
   'sessions_module',
   'user_state_module',
   'user_credentials_module',
-  'internal_secrets_module',
+  ['internal_secrets_module', { scope: 'app' }],
   'emails_module',
   'rls_module',
   'user_auth_module',
   'session_secrets_module',
   'rate_limits_module',
   'connected_accounts_module',
-  'identity_providers_module',
+  ['identity_providers_module', { scope: 'app' }],
   'webauthn_credentials_module',
   'webauthn_auth_module',
   'phone_numbers_module',
-  'devices_module'
+  'devices_module',
+  'user_settings_security_module'
 ];
 
 /**
@@ -63,7 +64,7 @@ export const AUTH_HARDENED_MODULES: ProvisionModule[] = [
  * `b2b:storage` preset and `auth:hardened` (see docs/B2B.md).
  */
 export const ORG_MODULES: ProvisionModule[] = [
-  ['permissions_module', { scope: 'org' }],
+  ['capabilities_module', { scope: 'org' }],
   ['limits_module', { scope: 'org' }],
   ['levels_module', { scope: 'org' }],
   ['memberships_module', { scope: 'org' }],
@@ -72,7 +73,7 @@ export const ORG_MODULES: ProvisionModule[] = [
   ['hierarchy_module', { scope: 'org' }],
   ['invites_module', { scope: 'app' }],
   ['invites_module', { scope: 'org' }],
-  'storage_module'
+  ['storage_module', { scope: 'app' }]
 ];
 
 /**

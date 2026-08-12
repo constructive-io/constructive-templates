@@ -37,7 +37,7 @@ CREATE TABLE metaschema_public.embedding_chunks (
 
     -- job configuration
     enqueue_chunking_job boolean NOT NULL DEFAULT true,
-    chunking_task_name text NOT NULL DEFAULT 'generate_chunks',
+    chunking_task_name text NOT NULL DEFAULT 'embedding:generate_chunks',
 
     -- model config (optional — worker falls back to runtime config when null)
     embedding_model text,
@@ -66,5 +66,7 @@ CREATE TABLE metaschema_public.embedding_chunks (
 CREATE INDEX embedding_chunks_table_id_idx ON metaschema_public.embedding_chunks ( table_id );
 CREATE INDEX embedding_chunks_database_id_idx ON metaschema_public.embedding_chunks ( database_id );
 CREATE INDEX embedding_chunks_chunks_table_id_idx ON metaschema_public.embedding_chunks ( chunks_table_id );
+CREATE INDEX embedding_chunks_embedding_field_id_idx ON metaschema_public.embedding_chunks ( embedding_field_id );
+CREATE INDEX embedding_chunks_parent_fk_field_id_idx ON metaschema_public.embedding_chunks ( parent_fk_field_id );
 
 COMMIT;

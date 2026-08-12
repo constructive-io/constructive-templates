@@ -29,7 +29,7 @@ INSERT INTO metaschema_modules_public.user_credentials_module (
   table_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-6661-7059-8619-4848dca01e9e', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', 'owner_id', '019fa2a1-5af9-72d1-8fba-f96774dd90ce', '019fa2a1-6661-7502-b1a4-7ebfccb37ee9', 'user_secrets', NULL);
+  ('019feb75-891b-7774-bb09-be001384f4c3', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', 'owner_id', '019feb75-8658-74d1-9931-76da2692e55d', '019feb75-891b-7bcd-9ed3-1fc29a40c6cd', 'user_secrets', NULL);
 
 
 SET session_replication_role TO DEFAULT;

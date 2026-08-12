@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_store_public/schema
 
 
-SELECT verify_schema('myapp_store_public');
+SELECT assert_schema('myapp_store_public'::regnamespace);
 
 

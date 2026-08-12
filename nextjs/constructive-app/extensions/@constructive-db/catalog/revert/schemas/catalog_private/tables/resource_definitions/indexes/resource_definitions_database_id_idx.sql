@@ -1,0 +1,4 @@
+-- Revert: schemas/catalog_private/tables/resource_definitions/indexes/resource_definitions_database_id_idx
+
+
+DROP INDEX catalog_private.resource_definitions_database_id_idx;

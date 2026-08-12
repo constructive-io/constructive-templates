@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_memberships_private/tables/org_memberships_sprt/triggers/_00040_org_memberships_sprt_principal_sync
+
+
+DROP TRIGGER _00040_org_memberships_sprt_principal_sync ON myapp_memberships_private.org_memberships_sprt;
+
+

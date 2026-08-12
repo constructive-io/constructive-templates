@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/metaschema-schema",
-  "version": "0.15.5",
+  "version": "0.41.0",
   "description": "Database metadata utilities and introspection functions",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
@@ -21,13 +21,13 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@pgpm/database-jobs": "workspace:*",
-    "@pgpm/inflection": "workspace:*",
-    "@pgpm/types": "workspace:*",
-    "@pgpm/verify": "workspace:*"
+    "@pgpm/database-jobs": "0.41.0",
+    "@pgpm/inflection": "0.41.0",
+    "@pgpm/types": "0.41.0",
+    "@pgpm/verify": "0.41.0"
   },
   "devDependencies": {
-    "pgpm": "^5.0.4"
+    "pgpm": "^5"
   },
   "repository": {
     "type": "git",
@@ -36,5 +36,6 @@
   "homepage": "https://github.com/constructive-io/pgpm-modules",
   "bugs": {
     "url": "https://github.com/constructive-io/pgpm-modules/issues"
-  }
+  },
+  "gitHead": "3ebc4c2a7f8ab0a61bb05e54c2d3ac52c5b27651"
 }

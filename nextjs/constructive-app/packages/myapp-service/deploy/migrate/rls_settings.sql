@@ -1,7 +1,7 @@
 -- Deploy: migrate/rls_settings
 -- made with <3 @ constructive.io
 
--- requires: migrate/view
+-- requires: migrate/domains
 
 
 SET session_replication_role TO replica;
@@ -20,9 +20,8 @@ DO $LQLMIGRATION$
   END;
 $LQLMIGRATION$;
 
-INSERT INTO services_public.rls_settings (
+INSERT INTO routing_public.rls_settings (
   id,
-  database_id,
   authenticate_schema_id,
   role_schema_id,
   authenticate_function_id,
@@ -30,9 +29,10 @@ INSERT INTO services_public.rls_settings (
   current_role_function_id,
   current_role_id_function_id,
   current_user_agent_function_id,
-  current_ip_address_function_id
+  current_ip_address_function_id,
+  database_id
 ) VALUES
-  ('019fa2a1-6940-7865-868d-16555ffb4ad4', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', '019fa2a1-5b92-7e43-b110-f1d39bc5ee19', '019fa2a1-68d3-7385-938c-1973d9bed8f2', '019fa2a1-693d-7319-acdd-6b3cb37d32cc', '019fa2a1-693d-7d66-9dc4-264de36f3f9c', '019fa2a1-693e-7618-9e7f-71279c10a1fa', '019fa2a1-693e-7ea8-abfa-61083c752dba', '019fa2a1-693f-7743-83ab-09ebe35e414f', '019fa2a1-693f-7f8d-8c55-8bab4e44afad');
+  ('019feb75-8a0d-7e34-86e7-d090dde6fa86', '019feb75-8695-7e24-8b0b-8db166cbaf4a', '019feb75-89de-7d6c-a0e8-f04fbeb7d8d9', '019feb75-8a0c-7e1c-8bf7-927d06c61034', '019feb75-8a0d-70f9-929a-f77c897775da', '019feb75-8a0d-71eb-b4e3-4bc704a95f36', '019feb75-8a0d-7351-93fa-5bf52714a65e', '019feb75-8a0d-7415-a353-3c78b8d93d0a', '019feb75-8a0d-74cf-83b2-ccaf7362a0d9', '019feb75-7843-7bd5-a19f-88c4cbec0ee6');
 
 
 SET session_replication_role TO DEFAULT;

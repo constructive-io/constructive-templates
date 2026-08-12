@@ -5,6 +5,5 @@
 -- requires: schemas/myapp_auth_public/tables/principals/table
 
 
-COMMENT ON TABLE myapp_auth_public.principals IS E'@behavior -insert -update -delete
-Scoped sub-identities (API keys and agents) with precomputed SPRT';
+COMMENT ON TABLE myapp_auth_public.principals IS E'Scoped sub-identities (API keys and agents) with precomputed SPRT';
 

@@ -5,10 +5,9 @@
 BEGIN;
 
 -- WebAuthn / Passkey auth module config.
--- Sibling of crypto_auth_module. Registers a `webauthn_challenge` entry in
--- services_public.api_modules for every authenticated API in the database,
--- so the Node relying-party (using @simplewebauthn/server) knows where to
--- read and write passkey challenges + where the credentials table lives.
+-- Sibling of crypto_auth_module. Publishes typed webauthn_settings so the
+-- Node relying-party (using @simplewebauthn/server) knows where to read and
+-- write passkey challenges + where the credentials table lives.
 --
 -- RP config (rp_id, rp_name, origin_allowlist, attestation_type,
 -- require_user_verification, resident_key) lives on this row (not on
@@ -59,5 +58,12 @@ CREATE TABLE metaschema_modules_public.webauthn_auth_module (
 );
 
 CREATE INDEX webauthn_auth_module_database_id_idx ON metaschema_modules_public.webauthn_auth_module ( database_id );
+CREATE INDEX webauthn_auth_module_auth_settings_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( auth_settings_table_id );
+CREATE INDEX webauthn_auth_module_credentials_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( credentials_table_id );
+CREATE INDEX webauthn_auth_module_session_credentials_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( session_credentials_table_id );
+CREATE INDEX webauthn_auth_module_session_secrets_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( session_secrets_table_id );
+CREATE INDEX webauthn_auth_module_sessions_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( sessions_table_id );
+CREATE INDEX webauthn_auth_module_users_table_id_idx ON metaschema_modules_public.webauthn_auth_module ( users_table_id );
+CREATE INDEX webauthn_auth_module_schema_id_idx ON metaschema_modules_public.webauthn_auth_module ( schema_id );
 
 COMMIT;

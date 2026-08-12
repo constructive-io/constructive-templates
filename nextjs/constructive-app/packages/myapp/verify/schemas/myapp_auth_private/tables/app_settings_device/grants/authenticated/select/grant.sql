@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_auth_private/tables/app_settings_device/grants/authenticated/select/grant
 
 
-SELECT verify_table_grant('myapp_auth_private.app_settings_device', 'select', 'authenticated');
+SELECT assert_table_grant('myapp_auth_private.app_settings_device'::regclass, 'authenticated', 'SELECT', NULL, true);
 
 

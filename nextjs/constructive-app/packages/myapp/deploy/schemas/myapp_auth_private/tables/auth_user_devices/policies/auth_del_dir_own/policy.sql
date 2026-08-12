@@ -10,6 +10,6 @@ CREATE POLICY auth_del_dir_own ON myapp_auth_private.auth_user_devices
 FOR DELETE
 TO authenticated
 USING (
-  user_id = jwt_public.current_principal_id()
+  user_id = ((SELECT jwt_public.current_principal_id()))
 );
 

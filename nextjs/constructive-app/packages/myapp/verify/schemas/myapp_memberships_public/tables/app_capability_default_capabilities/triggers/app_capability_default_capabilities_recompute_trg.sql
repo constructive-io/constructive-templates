@@ -1,0 +1,6 @@
+-- Verify: schemas/myapp_memberships_public/tables/app_capability_default_capabilities/triggers/app_capability_default_capabilities_recompute_trg
+
+
+SELECT assert_trigger('myapp_memberships_public.app_capability_default_capabilities'::regclass, 'app_capability_default_capabilities_recompute_trg', 'myapp_memberships_private.app_capability_default_capabilities_recompute_tg'::regproc, 31);
+
+

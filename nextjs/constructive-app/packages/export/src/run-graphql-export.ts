@@ -14,11 +14,11 @@
  *   META_ENDPOINT     - GraphQL endpoint for metaschema/services/modules data
  *                      (default: http://modules.localhost:3000/graphql). Must be the `modules`
  *                      API, which links all three meta schemas (metaschema_public,
- *                      services_public, metaschema_modules_public). The `api` API
- *                      (api.localhost) only links metaschema_public + services_public
+ *                      routing_public, metaschema_modules_public). The `api` API
+ *                      (api.localhost) only links metaschema_public + routing_public
  *                      and cannot serve metaschema_modules_public tables.
  *   META_SCHEMAS      - Comma-separated schemas to expose via X-Schemata on the meta endpoint
- *                      (default: services_public,metaschema_public,metaschema_modules_public).
+ *                      (default: routing_public,metaschema_public,metaschema_modules_public).
  *                      The export requests exactly the schemas it reads rather than relying on
  *                      the server's metaSchemas default, so it is self-sufficient across
  *                      machines/sandboxes regardless of how the server was launched.
@@ -106,16 +106,16 @@ async function main() {
   // Meta/module data must be read from the `modules` API (modules.localhost), which
   // links all three meta schemas — including metaschema_modules_public (StorageModule,
   // MembershipsModule, …). The `api` API (api.localhost) only links metaschema_public +
-  // services_public (the schema-builder set), so it silently drops every module table.
+  // routing_public (the schema-builder set), so it silently drops every module table.
   // In isPublic=true (domain-lookup) mode the Host header selects the API; in
   // isPublic=false mode the X-Schemata header below drives exposure regardless of host.
   // NOTE: API_ENDPOINT is intentionally NOT used here — it points at the app API.
   const metaEndpoint = process.env.META_ENDPOINT || `http://modules.localhost:${process.env.NEXT_PUBLIC_API_PORT || '3000'}/graphql`;
-  // Schemas the export must read: metaschema_public, services_public, metaschema_modules_public.
+  // Schemas the export must read: metaschema_public, routing_public, metaschema_modules_public.
   // Sent via X-Schemata so the meta API exposes them regardless of the server's metaSchemas
   // default — the export no longer depends on how the server was launched. Override with
   // META_SCHEMAS=... if a deployment ever needs a different set.
-  const metaSchemas = (process.env.META_SCHEMAS || 'services_public,metaschema_public,metaschema_modules_public')
+  const metaSchemas = (process.env.META_SCHEMAS || 'routing_public,metaschema_public,metaschema_modules_public')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);

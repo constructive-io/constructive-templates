@@ -1,6 +1,6 @@
 -- Verify: schemas/myapp_user_identifiers_private/schema
 
 
-SELECT verify_schema('myapp_user_identifiers_private');
+SELECT assert_schema('myapp_user_identifiers_private'::regnamespace);
 
 

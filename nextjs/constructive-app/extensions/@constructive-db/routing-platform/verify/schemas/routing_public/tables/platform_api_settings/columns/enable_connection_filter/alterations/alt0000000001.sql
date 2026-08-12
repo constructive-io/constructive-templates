@@ -1,0 +1,8 @@
+-- Verify: schemas/routing_public/tables/platform_api_settings/columns/enable_connection_filter/alterations/alt0000000001
+
+
+
+
+
+
+

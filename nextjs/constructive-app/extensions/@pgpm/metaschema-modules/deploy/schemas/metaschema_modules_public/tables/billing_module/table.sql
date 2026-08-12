@@ -50,9 +50,15 @@ CREATE TABLE metaschema_modules_public.billing_module (
 
   prefix text NULL,
 
-  -- Default permissions: permission names auto-granted to new members.
+  -- Default meter catalog: array of rows copied into the generated
+  -- meter_defaults table as data fixtures at provision time. Each element:
+  -- {slug, display_name, meter_type, default_plan_limit, unit, category_meter, is_active}.
+  -- NULL seeds nothing (clean catalog).
+  default_meter_catalog jsonb DEFAULT NULL,
+
+  -- Default capabilities: capability names auto-granted to new members.
   -- NULL uses the module's built-in defaults; explicit array overrides them.
-  default_permissions text[] DEFAULT NULL,
+  default_capabilities text[] DEFAULT NULL,
 
   -- API routing (configurable per-module)
   api_name text DEFAULT 'usage',
@@ -71,6 +77,14 @@ CREATE TABLE metaschema_modules_public.billing_module (
   CONSTRAINT billing_module_database_id_unique UNIQUE (database_id)
 );
 
-CREATE INDEX billing_module_database_id_idx ON metaschema_modules_public.billing_module ( database_id );
+CREATE INDEX billing_module_balances_table_id_idx ON metaschema_modules_public.billing_module ( balances_table_id );
+CREATE INDEX billing_module_ledger_table_id_idx ON metaschema_modules_public.billing_module ( ledger_table_id );
+CREATE INDEX billing_module_meter_credits_table_id_idx ON metaschema_modules_public.billing_module ( meter_credits_table_id );
+CREATE INDEX billing_module_meter_defaults_table_id_idx ON metaschema_modules_public.billing_module ( meter_defaults_table_id );
+CREATE INDEX billing_module_meter_sources_table_id_idx ON metaschema_modules_public.billing_module ( meter_sources_table_id );
+CREATE INDEX billing_module_meters_table_id_idx ON metaschema_modules_public.billing_module ( meters_table_id );
+CREATE INDEX billing_module_plan_subscriptions_table_id_idx ON metaschema_modules_public.billing_module ( plan_subscriptions_table_id );
+CREATE INDEX billing_module_private_schema_id_idx ON metaschema_modules_public.billing_module ( private_schema_id );
+CREATE INDEX billing_module_schema_id_idx ON metaschema_modules_public.billing_module ( schema_id );
 
 COMMIT;

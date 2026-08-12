@@ -1,0 +1,11 @@
+-- Deploy: schemas/myapp_storage_public/tables/app_files/columns/status/alterations/alt0000000002
+-- made with <3 @ constructive.io
+
+-- requires: schemas/myapp_storage_public/schema
+-- requires: schemas/myapp_storage_public/tables/app_files/table
+-- requires: schemas/myapp_storage_public/tables/app_files/columns/status/column
+
+
+ALTER TABLE myapp_storage_public.app_files 
+  ALTER COLUMN status SET DEFAULT 'requested';
+

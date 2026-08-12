@@ -29,7 +29,7 @@ CREATE TABLE metaschema_modules_public.graph_execution_module (
 
     -- Scope: determines the security level for this module instance.
     -- Can differ from graph_module scope (e.g., platform definitions + entity executions).
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     prefix text NOT NULL DEFAULT '',
@@ -62,8 +62,8 @@ CREATE TABLE metaschema_modules_public.graph_execution_module (
     -- Keys are table keys (executions, outputs, node_states).
     provisions jsonb NULL,
 
-    -- Default permissions: permission names auto-granted to new members.
-    default_permissions text[] DEFAULT NULL,
+    -- Default capabilities: capability names auto-granted to new members.
+    default_capabilities text[] DEFAULT NULL,
 
     -- Timestamps
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -80,9 +80,14 @@ CREATE TABLE metaschema_modules_public.graph_execution_module (
     CONSTRAINT graph_execution_module_entity_table_fkey FOREIGN KEY (entity_table_id) REFERENCES metaschema_public.table (id) ON DELETE CASCADE
 );
 
-CREATE INDEX graph_execution_module_database_id_idx ON metaschema_modules_public.graph_execution_module ( database_id );
-
 -- One execution module per (database, scope) (K8s infra: scopes never share).
 CREATE UNIQUE INDEX graph_execution_module_unique_scope ON metaschema_modules_public.graph_execution_module ( database_id, scope );
+CREATE INDEX graph_execution_module_entity_table_id_idx ON metaschema_modules_public.graph_execution_module ( entity_table_id );
+CREATE INDEX graph_execution_module_executions_table_id_idx ON metaschema_modules_public.graph_execution_module ( executions_table_id );
+CREATE INDEX graph_execution_module_node_states_table_id_idx ON metaschema_modules_public.graph_execution_module ( node_states_table_id );
+CREATE INDEX graph_execution_module_outputs_table_id_idx ON metaschema_modules_public.graph_execution_module ( outputs_table_id );
+CREATE INDEX graph_execution_module_private_schema_id_idx ON metaschema_modules_public.graph_execution_module ( private_schema_id );
+CREATE INDEX graph_execution_module_schema_id_idx ON metaschema_modules_public.graph_execution_module ( schema_id );
+CREATE INDEX graph_execution_module_graph_module_id_idx ON metaschema_modules_public.graph_execution_module ( graph_module_id );
 
 COMMIT;

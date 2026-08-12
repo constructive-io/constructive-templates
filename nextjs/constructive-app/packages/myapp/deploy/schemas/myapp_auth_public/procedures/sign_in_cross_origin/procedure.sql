@@ -7,6 +7,7 @@
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
+-- requires: schemas/myapp_users_public/tables/user_settings_security/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
@@ -28,6 +29,7 @@ DECLARE
   v_expires_at timestamptz;
   v_user_is_verified boolean := false;
   v_totp_enabled boolean := false;
+  v_security_settings myapp_users_public.user_settings_security;
   v_rate_settings myapp_auth_private.app_settings_rate_limit;
   v_ip_rate_limit myapp_auth_private.auth_ip_rate_limits;
   v_ip_address inet;
@@ -51,7 +53,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_in_cross_origin') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT
@@ -95,7 +97,12 @@ BEGIN
   SELECT v_expires_at INTO access_token_expires_at;
   SELECT
     COALESCE(v_user_is_verified, false) INTO is_verified;
-  SELECT false INTO totp_enabled;
+  SELECT *
+  FROM myapp_users_public.user_settings_security AS uss
+  WHERE
+    uss.owner_id = v_user_id INTO v_security_settings;
+  SELECT
+    (COALESCE(v_security_settings.totp_enabled, false) OR COALESCE(v_security_settings.email_mfa_enabled, false)) OR COALESCE(v_security_settings.sms_mfa_enabled, false) INTO totp_enabled;
   RETURN;
 END;
 $_PGFN_$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;

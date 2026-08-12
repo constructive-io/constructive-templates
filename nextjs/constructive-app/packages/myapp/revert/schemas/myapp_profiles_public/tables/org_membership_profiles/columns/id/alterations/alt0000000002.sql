@@ -1,0 +1,7 @@
+-- Revert: schemas/myapp_profiles_public/tables/org_membership_profiles/columns/id/alterations/alt0000000002
+
+
+ALTER TABLE myapp_profiles_public.org_membership_profiles 
+  ALTER COLUMN id DROP DEFAULT;
+
+

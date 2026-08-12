@@ -27,14 +27,14 @@ BEGIN
   1 INTO v_rate_settings;
   totp_secret := myapp_store_private.user_state_get(v_user_id, 'totp_secret');
   IF totp_secret IS NULL THEN
-    RAISE EXCEPTION 'TOTP_NOT_ENABLED';
+    PERFORM errors.raise_error('TOTP_NOT_ENABLED', '{}', 'public');
   END IF;
   SELECT *
   FROM myapp_auth_private.auth_rate_limits
   WHERE
     subject_id = v_user_id AND action = 'verify_totp' INTO v_user_rate_limit;
   IF v_user_rate_limit.locked_until IS NOT NULL AND v_user_rate_limit.locked_until > now() THEN
-    RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
+    PERFORM errors.raise_error('ACCOUNT_LOCKED_EXCEED_ATTEMPTS', '{}', 'public');
   END IF;
   IF totp.verify(totp_secret, verify_totp.totp_value, 30, 6) IS TRUE THEN
     DELETE FROM myapp_auth_private.auth_rate_limits

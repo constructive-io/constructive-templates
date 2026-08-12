@@ -41,3 +41,4 @@ export { RegisterScreen } from './screens/register-screen';
 export { ForgotPasswordScreen } from './screens/forgot-password-screen';
 export { ResetPasswordScreen } from './screens/reset-password-screen';
 export { VerifyEmailScreen } from './screens/verify-email-screen';
+export { InviteScreen } from './screens/invite-screen';

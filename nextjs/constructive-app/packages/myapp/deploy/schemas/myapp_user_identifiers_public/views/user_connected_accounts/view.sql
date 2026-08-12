@@ -15,5 +15,5 @@ CREATE VIEW myapp_user_identifiers_public.user_connected_accounts WITH ( securit
   updated_at
 FROM myapp_user_identifiers_private.connected_accounts
 WHERE
-  owner_id = jwt_public.current_principal_id();
+  owner_id = ((SELECT jwt_public.current_principal_id()));
 

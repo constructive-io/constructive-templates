@@ -32,7 +32,7 @@ CREATE TABLE metaschema_modules_public.hierarchy_module (
     users_table_id uuid NOT NULL,   -- Users table
 
     -- Scope: determines the security level for this module instance.
-    scope text NOT NULL DEFAULT 'org',
+    scope text NOT NULL,
     
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     prefix text NOT NULL DEFAULT '',
@@ -47,9 +47,9 @@ CREATE TABLE metaschema_modules_public.hierarchy_module (
     get_managers_function text NOT NULL DEFAULT '',
     is_manager_of_function text NOT NULL DEFAULT '',
     
-    -- Default permissions: permission names auto-granted to new members.
+    -- Default capabilities: capability names auto-granted to new members.
     -- NULL uses the module's built-in defaults; explicit array overrides them.
-    default_permissions text[] DEFAULT NULL,
+    default_capabilities text[] DEFAULT NULL,
 
     -- Timestamps
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -68,6 +68,12 @@ CREATE TABLE metaschema_modules_public.hierarchy_module (
     CONSTRAINT hierarchy_module_database_unique UNIQUE (database_id)
 );
 
-CREATE INDEX hierarchy_module_database_id_idx ON metaschema_modules_public.hierarchy_module ( database_id );
+CREATE INDEX hierarchy_module_chart_edge_grants_table_id_idx ON metaschema_modules_public.hierarchy_module ( chart_edge_grants_table_id );
+CREATE INDEX hierarchy_module_chart_edges_table_id_idx ON metaschema_modules_public.hierarchy_module ( chart_edges_table_id );
+CREATE INDEX hierarchy_module_entity_table_id_idx ON metaschema_modules_public.hierarchy_module ( entity_table_id );
+CREATE INDEX hierarchy_module_hierarchy_sprt_table_id_idx ON metaschema_modules_public.hierarchy_module ( hierarchy_sprt_table_id );
+CREATE INDEX hierarchy_module_users_table_id_idx ON metaschema_modules_public.hierarchy_module ( users_table_id );
+CREATE INDEX hierarchy_module_private_schema_id_idx ON metaschema_modules_public.hierarchy_module ( private_schema_id );
+CREATE INDEX hierarchy_module_schema_id_idx ON metaschema_modules_public.hierarchy_module ( schema_id );
 
 COMMIT;

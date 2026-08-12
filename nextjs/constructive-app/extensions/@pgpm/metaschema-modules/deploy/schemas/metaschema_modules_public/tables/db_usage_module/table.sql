@@ -48,14 +48,14 @@ CREATE TABLE metaschema_modules_public.db_usage_module (
   premake int NOT NULL DEFAULT 2,
 
   -- Scope configuration: 'app' = per-app usage
-  scope text NOT NULL DEFAULT 'app',
+  scope text NOT NULL,
 
   -- Table name prefix. Auto-derived from scope by the trigger when empty.
   prefix text NOT NULL DEFAULT '',
 
-  -- Default permissions: permission names auto-granted to new members.
+  -- Default capabilities: capability names auto-granted to new members.
   -- NULL uses the module's built-in defaults; explicit array overrides them.
-  default_permissions text[] DEFAULT NULL,
+  default_capabilities text[] DEFAULT NULL,
 
   -- API routing (configurable per-module)
   api_name text DEFAULT 'usage',
@@ -71,6 +71,11 @@ CREATE TABLE metaschema_modules_public.db_usage_module (
   CONSTRAINT db_usage_module_database_id_scope_unique UNIQUE (database_id, scope)
 );
 
-CREATE INDEX db_usage_module_database_id_idx ON metaschema_modules_public.db_usage_module ( database_id );
+CREATE INDEX db_usage_module_query_stats_log_table_id_idx ON metaschema_modules_public.db_usage_module ( query_stats_log_table_id );
+CREATE INDEX db_usage_module_query_stats_summary_table_id_idx ON metaschema_modules_public.db_usage_module ( query_stats_summary_table_id );
+CREATE INDEX db_usage_module_table_stats_log_table_id_idx ON metaschema_modules_public.db_usage_module ( table_stats_log_table_id );
+CREATE INDEX db_usage_module_table_stats_summary_table_id_idx ON metaschema_modules_public.db_usage_module ( table_stats_summary_table_id );
+CREATE INDEX db_usage_module_private_schema_id_idx ON metaschema_modules_public.db_usage_module ( private_schema_id );
+CREATE INDEX db_usage_module_schema_id_idx ON metaschema_modules_public.db_usage_module ( schema_id );
 
 COMMIT;

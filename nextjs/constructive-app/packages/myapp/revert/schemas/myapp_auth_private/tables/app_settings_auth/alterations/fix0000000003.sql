@@ -1,6 +1,8 @@
 -- Revert: schemas/myapp_auth_private/tables/app_settings_auth/alterations/fix0000000003
 
 
-
+DELETE FROM myapp_auth_private.app_settings_auth
+WHERE
+  require_csrf_for_auth = 'f'::boolean AND default_session_duration = '2 weeks'::interval AND remember_me_duration = '30 days'::interval AND default_credential_duration = '1 hour'::interval AND default_fingerprint_mode = 'lax' AND allow_anonymous_sessions = 't'::boolean AND allow_multiple_sessions = 't'::boolean AND min_password_length = 8 AND enable_cookie_auth = 'f'::boolean AND step_up_window = '30 minutes'::interval AND mfa_challenge_expiry = '5 minutes'::interval AND allow_sign_up = 't'::boolean AND allow_password_sign_up = 't'::boolean AND allow_identity_sign_up = 'f'::boolean AND allow_magic_link_sign_up = 'f'::boolean AND allow_sms_sign_up = 'f'::boolean AND allow_password_sign_in = 't'::boolean AND allow_identity_sign_in = 'f'::boolean AND allow_magic_link_sign_in = 'f'::boolean AND allow_email_otp_sign_in = 'f'::boolean AND allow_sms_sign_in = 'f'::boolean AND allow_webauthn_sign_up = 'f'::boolean AND allow_webauthn_sign_in = 'f'::boolean AND allow_webauthn_usernameless = 'f'::boolean AND allow_cross_origin_token = 't'::boolean AND require_mfa = 'f'::boolean AND allow_totp_mfa = 't'::boolean AND allow_email_mfa = 't'::boolean AND allow_sms_mfa = 'f'::boolean AND allow_backup_codes = 't'::boolean AND allow_api_keys = 't'::boolean AND api_key_max_per_user = 10 AND api_key_default_duration = '90 days'::interval AND api_key_max_duration = '365 days'::interval AND identity_providers_max = 10 AND oauth_state_max_age = '10 minutes'::interval AND oauth_require_verified_email = 't'::boolean AND oauth_error_redirect_path = '/auth/error' AND cookie_secure = 't'::boolean AND cookie_samesite = 'lax' AND cookie_httponly = 't'::boolean AND cookie_max_age = '2 weeks'::interval AND cookie_path = '/' AND enforce_primary_auth_method = 't'::boolean AND enable_captcha = 'f'::boolean;
 
 

@@ -1,0 +1,5 @@
+# routing extension
+comment = 'Database-scope routing plane (apis/sites/domains/routes) and read-path resolvers (resolve_route, api_schema_names) for the constructive platform'
+default_version = '6.1.0'
+relocatable = false
+requires = 'plpgsql,uuid-ossp,pgpm-stamps,catalog,routing-platform'

@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_profiles_public/tables/app_profile_capabilities/triggers/app_profile_capabilities_recompute_trg
+
+
+DROP TRIGGER app_profile_capabilities_recompute_trg ON myapp_profiles_public.app_profile_capabilities;
+
+

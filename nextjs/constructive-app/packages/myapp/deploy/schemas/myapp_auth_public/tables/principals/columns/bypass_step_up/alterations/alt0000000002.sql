@@ -7,5 +7,5 @@
 
 
 ALTER TABLE myapp_auth_public.principals 
-  ALTER COLUMN bypass_step_up SET DEFAULT true;
+  ALTER COLUMN bypass_step_up SET DEFAULT false;
 

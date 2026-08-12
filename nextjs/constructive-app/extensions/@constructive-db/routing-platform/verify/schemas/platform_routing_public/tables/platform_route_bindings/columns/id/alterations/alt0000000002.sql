@@ -1,0 +1,8 @@
+-- Verify: schemas/platform_routing_public/tables/platform_route_bindings/columns/id/alterations/alt0000000002
+
+
+
+
+
+
+

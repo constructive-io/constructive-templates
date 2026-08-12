@@ -48,7 +48,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'webauthn_begin_sign_in') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -56,7 +56,7 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_webauthn_sign_in, false)) THEN
-    RAISE EXCEPTION 'WEBAUTHN_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('WEBAUTHN_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   v_session_id := jwt_private.current_session_id();
   v_challenge := translate(encode(gen_random_bytes(32), 'base64'), '+/=', '-_');

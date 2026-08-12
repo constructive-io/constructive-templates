@@ -32,3 +32,6 @@ src/graphql/sdk/app/
 *.tmp
 *.temp
 
+# Constructive feature-pack manifests (install-time artifacts)
+.constructive/
+

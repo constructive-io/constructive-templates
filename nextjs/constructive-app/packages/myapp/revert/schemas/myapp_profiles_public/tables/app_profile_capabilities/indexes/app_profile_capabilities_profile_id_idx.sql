@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_profiles_public/tables/app_profile_capabilities/indexes/app_profile_capabilities_profile_id_idx
+
+
+DROP INDEX myapp_profiles_public.app_profile_capabilities_profile_id_idx;
+
+

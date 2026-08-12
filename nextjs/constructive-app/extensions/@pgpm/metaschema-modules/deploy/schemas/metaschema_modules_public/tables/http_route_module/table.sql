@@ -28,13 +28,13 @@ CREATE TABLE metaschema_modules_public.http_route_module (
     api_name text,
     private_api_name text,
 
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
     prefix text NOT NULL DEFAULT '',
     entity_table_id uuid NULL,
 
     policies jsonb NULL,
     provisions jsonb NULL,
-    default_permissions text[] DEFAULT NULL,
+    default_capabilities text[] DEFAULT NULL,
 
     CONSTRAINT http_route_module_db_fkey
         FOREIGN KEY (database_id)
@@ -70,10 +70,14 @@ CREATE TABLE metaschema_modules_public.http_route_module (
         ON DELETE CASCADE
 );
 
-CREATE INDEX http_route_module_database_id_idx
-    ON metaschema_modules_public.http_route_module (database_id);
-
 CREATE UNIQUE INDEX http_route_module_unique_scope
     ON metaschema_modules_public.http_route_module (database_id, scope);
+CREATE INDEX http_route_module_entity_table_id_idx ON metaschema_modules_public.http_route_module ( entity_table_id );
+CREATE INDEX http_route_module_http_routes_table_id_idx ON metaschema_modules_public.http_route_module ( http_routes_table_id );
+CREATE INDEX http_route_module_private_schema_id_idx ON metaschema_modules_public.http_route_module ( private_schema_id );
+CREATE INDEX http_route_module_schema_id_idx ON metaschema_modules_public.http_route_module ( schema_id );
+CREATE INDEX http_route_module_function_module_id_idx ON metaschema_modules_public.http_route_module ( function_module_id );
+CREATE INDEX http_route_module_resource_module_id_idx ON metaschema_modules_public.http_route_module ( resource_module_id );
+CREATE INDEX http_route_module_storage_module_id_idx ON metaschema_modules_public.http_route_module ( storage_module_id );
 
 COMMIT;

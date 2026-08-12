@@ -7,6 +7,7 @@
 -- requires: schemas/myapp_user_identifiers_public/tables/emails/table
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
+-- requires: schemas/myapp_users_public/tables/user_settings_security/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
@@ -20,6 +21,7 @@ DECLARE
   v_credential_id uuid;
   v_session_id uuid;
   v_ot_token text;
+  v_security_settings myapp_users_public.user_settings_security;
   v_rate_settings myapp_auth_private.app_settings_rate_limit;
   v_ip_rate_limit myapp_auth_private.auth_ip_rate_limits;
   v_ip_address inet;
@@ -43,8 +45,17 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'request_cross_origin_token') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
+  END IF;
+  SELECT uss.*
+  FROM myapp_users_public.user_settings_security AS uss INNER JOIN myapp_auth_private.user_emails AS e ON e.owner_id = uss.owner_id
+  WHERE
+    e.email = request_cross_origin_token.email::email AND (COALESCE(uss.totp_enabled, false) OR COALESCE(uss.email_mfa_enabled, false))
+  LIMIT
+  1 INTO v_security_settings;
+  IF FOUND THEN
+    PERFORM errors.raise_error('MFA_REQUIRED', '{}', 'public');
   END IF;
   SELECT si.id
   FROM myapp_auth_public.sign_in(request_cross_origin_token.email, request_cross_origin_token.password, request_cross_origin_token.remember_me) AS si INTO v_credential_id;

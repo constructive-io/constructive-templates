@@ -22,7 +22,7 @@ BEGIN
   WHERE
     id = rotate_identity_provider_app_secret.provider_id INTO v_secret_id, v_slug;
   IF NOT (FOUND) THEN
-    RAISE EXCEPTION 'IDENTITY_PROVIDER_NOT_FOUND';
+    PERFORM errors.raise_error('IDENTITY_PROVIDER_NOT_FOUND', '{}', 'public');
   END IF;
   v_namespace_id := uuid_nil();
   IF v_secret_id IS NULL THEN

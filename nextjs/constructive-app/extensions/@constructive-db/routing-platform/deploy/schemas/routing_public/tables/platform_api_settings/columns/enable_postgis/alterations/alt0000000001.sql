@@ -1,0 +1,8 @@
+-- Deploy: schemas/routing_public/tables/platform_api_settings/columns/enable_postgis/alterations/alt0000000001
+-- made with <3 @ constructive.io
+
+-- requires: schemas/routing_public/schema
+-- requires: schemas/routing_public/tables/platform_api_settings/columns/enable_postgis/column
+
+
+COMMENT ON COLUMN routing_public.platform_api_settings.enable_postgis IS 'Override: enable PostGIS spatial types (NULL = inherit from database_settings)';

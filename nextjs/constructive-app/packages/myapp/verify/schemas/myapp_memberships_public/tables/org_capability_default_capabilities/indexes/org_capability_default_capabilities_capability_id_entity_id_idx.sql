@@ -1,0 +1,6 @@
+-- Verify: schemas/myapp_memberships_public/tables/org_capability_default_capabilities/indexes/org_capability_default_capabilities_capability_id_entity_id_idx
+
+
+SELECT assert_index('myapp_memberships_public.org_capability_default_capabilities_capability_id_entity_id_idx'::regclass, 'myapp_memberships_public.org_capability_default_capabilities'::regclass, true);
+
+

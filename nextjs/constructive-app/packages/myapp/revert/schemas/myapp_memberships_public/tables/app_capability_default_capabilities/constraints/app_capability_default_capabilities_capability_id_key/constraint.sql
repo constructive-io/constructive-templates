@@ -1,0 +1,7 @@
+-- Revert: schemas/myapp_memberships_public/tables/app_capability_default_capabilities/constraints/app_capability_default_capabilities_capability_id_key/constraint
+
+
+ALTER TABLE myapp_memberships_public.app_capability_default_capabilities 
+  DROP CONSTRAINT app_capability_default_capabilities_capability_id_key;
+
+

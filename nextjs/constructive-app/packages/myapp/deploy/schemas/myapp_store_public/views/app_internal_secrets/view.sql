@@ -7,6 +7,7 @@
 CREATE VIEW myapp_store_public.app_internal_secrets WITH ( security_invoker = true ) AS SELECT
   id,
   name,
+  realm,
   namespace_id,
   description,
   labels,

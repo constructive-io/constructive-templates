@@ -21,6 +21,10 @@ export const APP_PERMISSIONS = {
 	// Settings management
 	VIEW_SETTINGS: 'app:settings:view',
 	MANAGE_SETTINGS: 'app:settings:manage',
+
+	// Organization management
+	VIEW_ORGANIZATIONS: 'app:organizations:view',
+	MANAGE_ORGANIZATIONS: 'app:organizations:manage',
 } as const;
 
 export type AppPermission = (typeof APP_PERMISSIONS)[keyof typeof APP_PERMISSIONS];

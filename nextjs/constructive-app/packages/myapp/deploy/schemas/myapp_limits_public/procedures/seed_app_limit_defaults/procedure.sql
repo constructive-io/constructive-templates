@@ -12,7 +12,7 @@ DECLARE
   v_item jsonb;
 BEGIN
   IF seed_app_limit_defaults.defaults IS NULL THEN
-    RAISE EXCEPTION 'seed_limit_defaults: defaults is required';
+    PERFORM errors.raise_error('SEED_LIMIT_DEFAULTS_REQUIRED');
   END IF;
   FOR v_item IN SELECT jsonb_array_elements(seed_app_limit_defaults.defaults) LOOP
     INSERT INTO myapp_limits_public.app_limit_defaults (

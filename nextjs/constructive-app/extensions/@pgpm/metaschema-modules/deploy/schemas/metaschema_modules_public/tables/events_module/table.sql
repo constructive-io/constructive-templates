@@ -56,6 +56,10 @@ CREATE TABLE metaschema_modules_public.events_module (
   tg_check_achievements text NOT NULL DEFAULT '',
   grant_achievement text NOT NULL DEFAULT '',
   tg_achievement_reward text NOT NULL DEFAULT '',
+  revoke_achievement text NOT NULL DEFAULT '',
+  recompute_capabilities text NOT NULL DEFAULT '',
+  tg_level_grant_sync text NOT NULL DEFAULT '',
+  expire_grants text NOT NULL DEFAULT '',
 
   -- Partition lifecycle configuration for events table
   "interval" text NOT NULL DEFAULT '1 month',
@@ -63,7 +67,7 @@ CREATE TABLE metaschema_modules_public.events_module (
   premake int NOT NULL DEFAULT 2,
 
   -- Scope: determines the security level for this module instance.
-  scope text NOT NULL DEFAULT 'app',
+  scope text NOT NULL,
 
   -- Table name prefix. Auto-derived from scope by the trigger when empty.
   prefix text NOT NULL DEFAULT '',
@@ -75,9 +79,15 @@ CREATE TABLE metaschema_modules_public.events_module (
   actor_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
 
-  -- Default permissions: permission names auto-granted to new members.
+  -- Default capabilities: capability names auto-granted to new members.
   -- NULL uses the module's built-in defaults; explicit array overrides them.
-  default_permissions text[] DEFAULT NULL,
+  default_capabilities text[] DEFAULT NULL,
+
+  -- Trust ladder seeded at provision, as an array of rungs. NULL seeds nothing;
+  -- the usual value is a content_presets row named by slug, so which evidence
+  -- counts is data. App scope only — an entity ladder belongs to an
+  -- organization that does not exist at provision time.
+  trust_ladder jsonb DEFAULT NULL,
 
   -- API routing (configurable per-module)
   api_name text DEFAULT 'usage',
@@ -99,5 +109,16 @@ CREATE TABLE metaschema_modules_public.events_module (
 );
 
 CREATE INDEX events_module_database_id_idx ON metaschema_modules_public.events_module ( database_id );
+CREATE INDEX events_module_achievement_rewards_table_id_idx ON metaschema_modules_public.events_module ( achievement_rewards_table_id );
+CREATE INDEX events_module_actor_table_id_idx ON metaschema_modules_public.events_module ( actor_table_id );
+CREATE INDEX events_module_entity_table_id_idx ON metaschema_modules_public.events_module ( entity_table_id );
+CREATE INDEX events_module_event_aggregates_table_id_idx ON metaschema_modules_public.events_module ( event_aggregates_table_id );
+CREATE INDEX events_module_event_types_table_id_idx ON metaschema_modules_public.events_module ( event_types_table_id );
+CREATE INDEX events_module_events_table_id_idx ON metaschema_modules_public.events_module ( events_table_id );
+CREATE INDEX events_module_level_grants_table_id_idx ON metaschema_modules_public.events_module ( level_grants_table_id );
+CREATE INDEX events_module_level_requirements_table_id_idx ON metaschema_modules_public.events_module ( level_requirements_table_id );
+CREATE INDEX events_module_levels_table_id_idx ON metaschema_modules_public.events_module ( levels_table_id );
+CREATE INDEX events_module_private_schema_id_idx ON metaschema_modules_public.events_module ( private_schema_id );
+CREATE INDEX events_module_schema_id_idx ON metaschema_modules_public.events_module ( schema_id );
 
 COMMIT;

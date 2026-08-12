@@ -34,7 +34,7 @@ CREATE TABLE metaschema_modules_public.transfer_log_module (
   premake int NOT NULL DEFAULT 2,
 
   -- Scope configuration: 'app' = per-app usage (actor_id RLS)
-  scope text NOT NULL DEFAULT 'app',
+  scope text NOT NULL,
   actor_fk_table_id uuid NULL,
   entity_fk_table_id uuid NULL,
 
@@ -53,6 +53,9 @@ CREATE TABLE metaschema_modules_public.transfer_log_module (
   CONSTRAINT transfer_log_module_database_id_prefix_unique UNIQUE NULLS NOT DISTINCT (database_id, prefix)
 );
 
-CREATE INDEX transfer_log_module_database_id_idx ON metaschema_modules_public.transfer_log_module ( database_id );
+CREATE INDEX transfer_log_module_transfer_log_table_id_idx ON metaschema_modules_public.transfer_log_module ( transfer_log_table_id );
+CREATE INDEX transfer_log_module_usage_summary_table_id_idx ON metaschema_modules_public.transfer_log_module ( usage_summary_table_id );
+CREATE INDEX transfer_log_module_private_schema_id_idx ON metaschema_modules_public.transfer_log_module ( private_schema_id );
+CREATE INDEX transfer_log_module_schema_id_idx ON metaschema_modules_public.transfer_log_module ( schema_id );
 
 COMMIT;

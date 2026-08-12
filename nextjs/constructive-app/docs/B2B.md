@@ -40,34 +40,49 @@ org blocks consume.
 
 ## 2. Add the registry org blocks
 
-Install the organization blocks from the Constructive blocks registry and mount
-them on your org routes — they bring their own data hooks, wired to the
-org-scoped admin SDK:
+Install the organization feature pack from the Constructive blocks registry.
+The feature pack is a provider-neutral component that receives data and actions
+via props, so this template includes an adapter (`src/components/orgs/org-feature-pack-adapter.tsx`)
+that bridges the recovered GraphQL hooks to the feature pack's contracts:
 
 ```bash
-npx shadcn@latest add org-create-card org-members-list org-roles-editor org-settings-form
+# Install the shared foundation + the organizations feature pack
+pnpm dlx shadcn@4.13.1 add @constructive/pack-foundation @constructive/feature-pack-organizations
 ```
 
-| Block               | Purpose                                  |
-| ------------------- | ---------------------------------------- |
-| `org-create-card`   | Create a new organization                |
-| `org-members-list`  | List / manage members of an organization |
-| `org-roles-editor`  | Edit member roles & permissions          |
-| `org-settings-form` | Organization profile & settings          |
+| Registry item                 | Purpose                                                  |
+| ----------------------------- | -------------------------------------------------------- |
+| `pack-foundation`             | Shared resource, action-policy, error, and UI contracts  |
+| `feature-pack-organizations`  | Members, invitations, settings, hierarchy, API keys      |
 
-Then reintroduce the org navigation seam that the base intentionally leaves
-minimal:
+The feature pack installs to `src/blocks/feature-packs/organizations/` with
+`@constructive-io/ui/*` imports rewritten to `@/components/ui/*` by the registry
+compiler, so all UI primitives resolve to local source.
 
-- `src/lib/navigation/sidebar-config.ts` — add an `Organizations` nav entry and
-  an org-level nav group.
-- `src/lib/navigation/use-entity-params.ts` — reintroduce the `orgId` path param
-  (and an org switcher) so `/orgs/[orgId]/*` routes resolve.
-- `src/app-routes.ts` — add the org-scoped routes; the
-  `requiredPermission: 'app-admin'` gate in `RouteGuard` is already present for
-  app-admin surfaces to reuse.
+### Adapter pattern
 
-That's the whole opt-in: provision the modules, regenerate the SDK, drop in the
-blocks, and wire the routes. No org UI is hand-written in this template.
+The feature pack is provider-neutral: it receives `OrganizationsFeatureData`,
+`OrganizationsFeatureActions`, and a `FeatureActionPolicy` via props. The adapter
+(`OrgFeaturePackAdapter`) in `src/components/orgs/` calls the existing
+GraphQL hooks (`useOrgMembers`, `useOrgInvites`, etc.), transforms the results to
+the feature pack's contract types, wraps mutations as feature pack actions, and
+renders `<OrganizationsFeaturePack>` with the appropriate `section` prop.
+
+The org pages mount the adapter:
+
+- `/orgs/[orgId]/members` — `<OrgFeaturePackAdapter section="members" />`
+- `/orgs/[orgId]/invites` — `<OrgFeaturePackAdapter section="invitations" />`
+- `/orgs/[orgId]/settings` — `<OrgFeaturePackAdapter section="settings" />`
+
+### Navigation
+
+The org navigation seam is already wired in this template:
+
+- `src/lib/navigation/sidebar-config.ts` — includes an `Organizations` nav entry
+  and an org-level nav group (Members, Invites, Settings).
+- `src/lib/navigation/use-entity-params.ts` — resolves the `orgId` path param and
+  provides an org switcher so `/orgs/[orgId]/*` routes resolve.
+- `src/app-routes.ts` — declares the org-scoped routes with `access: 'protected'`.
 
 ## 3. Prerequisite: the org-create RLS permission bit
 

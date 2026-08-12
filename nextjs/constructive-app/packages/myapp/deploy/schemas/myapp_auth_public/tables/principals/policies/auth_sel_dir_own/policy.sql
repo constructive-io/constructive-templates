@@ -10,6 +10,6 @@ CREATE POLICY auth_sel_dir_own ON myapp_auth_public.principals
 FOR SELECT
 TO authenticated
 USING (
-  owner_id = jwt_public.current_principal_id()
+  owner_id = ((SELECT jwt_public.current_principal_id()))
 );
 

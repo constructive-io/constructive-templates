@@ -35,7 +35,7 @@ CREATE TABLE metaschema_modules_public.namespace_module (
 
     -- Scope: determines the security level for this module instance.
     -- Resolved to a membership_type integer at trigger time via membership_types table.
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     -- Override to create multiple module instances at the same scope.
@@ -56,9 +56,9 @@ CREATE TABLE metaschema_modules_public.namespace_module (
     -- secure_table_provision applies the custom grants/policies instead.
     provisions jsonb NULL,
 
-    -- Default permissions: permission names auto-granted to new members.
+    -- Default capabilities: capability names auto-granted to new members.
     -- NULL uses the module's built-in defaults; explicit array overrides them.
-    default_permissions text[] DEFAULT NULL,
+    default_capabilities text[] DEFAULT NULL,
 
     -- Constraints
     CONSTRAINT namespace_module_db_fkey FOREIGN KEY (database_id) REFERENCES metaschema_public.database (id) ON DELETE CASCADE,
@@ -69,9 +69,12 @@ CREATE TABLE metaschema_modules_public.namespace_module (
     CONSTRAINT namespace_module_entity_table_fkey FOREIGN KEY (entity_table_id) REFERENCES metaschema_public.table (id) ON DELETE CASCADE
 );
 
-CREATE INDEX namespace_module_database_id_idx ON metaschema_modules_public.namespace_module ( database_id );
-
 -- Unique constraint: one namespace module per database per scope (K8s infra: scopes never share).
 CREATE UNIQUE INDEX namespace_module_unique_scope ON metaschema_modules_public.namespace_module ( database_id, scope );
+CREATE INDEX namespace_module_entity_table_id_idx ON metaschema_modules_public.namespace_module ( entity_table_id );
+CREATE INDEX namespace_module_namespace_events_table_id_idx ON metaschema_modules_public.namespace_module ( namespace_events_table_id );
+CREATE INDEX namespace_module_namespaces_table_id_idx ON metaschema_modules_public.namespace_module ( namespaces_table_id );
+CREATE INDEX namespace_module_private_schema_id_idx ON metaschema_modules_public.namespace_module ( private_schema_id );
+CREATE INDEX namespace_module_schema_id_idx ON metaschema_modules_public.namespace_module ( schema_id );
 
 COMMIT;

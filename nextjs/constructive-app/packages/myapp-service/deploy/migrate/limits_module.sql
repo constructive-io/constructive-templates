@@ -1,7 +1,7 @@
 -- Deploy: migrate/limits_module
 -- made with <3 @ constructive.io
 
--- requires: migrate/internal_secrets_module
+-- requires: migrate/invites_module
 
 
 SET session_replication_role TO replica;
@@ -56,10 +56,12 @@ INSERT INTO metaschema_modules_public.limits_module (
   prefix,
   entity_table_id,
   actor_table_id,
+  limit_defaults,
   api_name,
   private_api_name
 ) VALUES
-  ('019fa2a1-51a3-7aa0-9a9c-e4fbebdb1cc8', '019fa2a1-4faf-7d97-ab36-59264d5d52d8', NULL, '019fa2a1-51a3-7e09-92ab-08da59fa62d6', '019fa2a1-51bb-7c48-a313-feb84675ce8d', NULL, NULL, '019fa2a1-51d7-7525-a82f-f18b7765f445', 'app_limits', '019fa2a1-5245-7943-99d6-ab69b0046c4a', 'app_limit_defaults', 'app_limits_inc', 'app_limits_dec', 'app_limits_inc_tg', 'app_limits_dec_tg', 'app_limits_upd_tg', 'app_limits_check', '019fa2a1-5285-725c-9bcd-65d477e277f4', '019fa2a1-52e7-7b9a-83c9-44ece4f9c7a4', '019fa2a1-5378-7160-b636-5d7814a54a7c', '019fa2a1-53be-7020-a577-17e52f91740f', '019fa2a1-5416-73f2-acac-2d0393ddb8cb', NULL, '019fa2a1-5496-7d14-aea2-866a78236d8a', '019fa2a1-5468-7986-ba62-d5ec673318b9', 'app_limits_cap_check_tg_fn', 'app_limits_resolve_cap', '019fa2a1-54d8-72b7-8837-7d5008546c02', '019fa2a1-5515-74cb-b03a-e1a7265372b4', 'app_limits_check_soft', '', 'app', 'app', NULL, '019fa2a1-5022-77c8-9de2-2ef6079855de', 'usage', NULL);
+  ('019feb75-79b3-7efd-a016-5087043ac822', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', NULL, '019feb75-79b4-722d-bbc4-c5ef8a53db6b', '019feb75-79bc-73be-9da4-a0da9c33a7fc', NULL, NULL, '019feb75-79c8-7b1d-97d4-30cd885258c7', 'app_limits', '019feb75-79ee-72c1-a134-d898911d2b82', 'app_limit_defaults', 'app_limits_inc', 'app_limits_dec', 'app_limits_inc_tg', 'app_limits_dec_tg', 'app_limits_upd_tg', 'app_limits_check', '019feb75-7a1f-70ad-af15-440dd2401c7e', '019feb75-7a56-789b-b3c7-a2b7134c8406', '019feb75-7aa4-7b5b-aacc-2517f0ff61eb', '019feb75-7aba-7a92-9d13-8877944a965f', '019feb75-7ad8-7045-8b15-a07b2abdb858', NULL, '019feb75-7b08-7ddd-a465-1505c8a5e604', '019feb75-7af8-783b-b7e9-73b66653c4a4', 'app_limits_cap_check_tg_fn', 'app_limits_resolve_cap', '019feb75-7b26-7496-8f57-9d3af1da9a94', '019feb75-7b39-7dcd-a575-3a0ef02c3a5b', 'app_limits_check_soft', '', 'app', 'app', NULL, '019feb75-78e2-720e-82dc-c3ed84264ce8', NULL, 'usage', NULL),
+  ('019feb75-7f19-7876-85b3-f2ffc48a94f9', '019feb75-7843-7bd5-a19f-88c4cbec0ee6', 'entity_id', '019feb75-79b4-722d-bbc4-c5ef8a53db6b', '019feb75-79bc-73be-9da4-a0da9c33a7fc', NULL, NULL, '019feb75-7f1b-74ca-9a57-a7a77a490ba9', 'org_limits', '019feb75-7f42-7e7f-adeb-651d0ecc673c', 'org_limit_defaults', 'org_limits_inc', 'org_limits_dec', 'org_limits_inc_tg', 'org_limits_dec_tg', 'org_limits_upd_tg', 'org_limits_check', '019feb75-7f70-7a9a-b1b8-af5eaf063cc7', '019feb75-800e-723c-9bc5-bd7ad5ccacf4', NULL, NULL, NULL, '019feb75-7fb2-7e3f-accd-1083624b72d7', '019feb75-807a-7c6b-acaa-eba03b0252bd', '019feb75-8069-7350-adb8-7640b3b672a2', 'org_limits_cap_check_tg_fn', 'org_limits_resolve_cap', '019feb75-80a3-7086-aac3-48a15ab63067', '019feb75-80bd-7a38-8322-a23264db0479', 'org_limits_check_soft', 'org_limit_aggregates_check_soft', 'org', 'org', '019feb75-78e2-720e-82dc-c3ed84264ce8', '019feb75-78e2-720e-82dc-c3ed84264ce8', NULL, 'usage', NULL);
 
 
 SET session_replication_role TO DEFAULT;

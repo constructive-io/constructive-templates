@@ -11,16 +11,11 @@
 import { auth, NodeHttpAdapter, public_ } from '@constructive-io/node';
 import { createFetch } from '@constructive-io/fetch';
 
-import { asModules, AUTH_HARDENED_MODULES, type ProvisionModule } from './modules.js';
+import { asModules, AUTH_HARDENED_MODULES, ORG_MODULES, type ProvisionModule } from './modules.js';
 
-// BASE tier default module set: the upstream `auth:hardened` preset.
-// Single-tenant (no org / hierarchy / invites modules). A base scaffold ships
-// no org/b2b code, so it does not need those modules provisioned.
-//
-// B2B OPT-IN: an app that adopts the registry org blocks
-// (org-create-card / org-members-list / org-roles-editor / org-settings-form)
-// extends this set with ORG_MODULES — see docs/B2B.md.
-const APP_MODULES: ProvisionModule[] = AUTH_HARDENED_MODULES;
+// B2B tier: auth:hardened + org modules (organizations, members, invites, settings).
+// The recovered org pages + feature pack integration require these modules.
+const APP_MODULES: ProvisionModule[] = [...AUTH_HARDENED_MODULES, ...ORG_MODULES];
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -157,7 +152,7 @@ async function main() {
       try {
         // Find the platform database ID (all existing APIs share this)
         const dbRes = await bootstrapPool.query(
-          `SELECT DISTINCT database_id FROM services_public.apis LIMIT 1`
+          `SELECT DISTINCT database_id FROM routing_public.apis LIMIT 1`
         );
         const platformDbId: string = dbRes.rows[0]?.database_id;
         if (!platformDbId) {
@@ -168,7 +163,7 @@ async function main() {
           // server's buildLoaderContext connects a tenantPool with row.dbname;
           // a logical tenant name here 404s the whole API at runtime.
           const apiRes = await bootstrapPool.query(
-            `INSERT INTO services_public.apis (database_id, name, dbname, anon_role, role_name, is_public)
+            `INSERT INTO routing_public.apis (database_id, name, dbname, anon_role, role_name, is_published)
              VALUES ($1, 'modules', $2, 'administrator', 'administrator', true)
              ON CONFLICT DO NOTHING
              RETURNING id`,
@@ -179,7 +174,7 @@ async function main() {
           } else {
             // Already exists — ensure role is correct
             await bootstrapPool.query(
-              `UPDATE services_public.apis SET anon_role = 'administrator', role_name = 'administrator'
+              `UPDATE routing_public.apis SET anon_role = 'administrator', role_name = 'administrator'
                WHERE name = 'modules' AND database_id = $1 AND anon_role != 'administrator'`,
               [platformDbId]
             );
@@ -188,24 +183,41 @@ async function main() {
 
           // Create the modules.localhost domain
           await bootstrapPool.query(
-            `INSERT INTO services_public.domains (database_id, api_id, subdomain, domain)
-             SELECT $1, id, 'modules', 'localhost'
-             FROM services_public.apis
-             WHERE name = 'modules' AND database_id = $1
+            `INSERT INTO routing_public.domains (database_id, hostname)
+             SELECT $1, 'modules.localhost'
+             WHERE NOT EXISTS (
+               SELECT 1 FROM routing_public.domains
+               WHERE hostname = 'modules.localhost' AND database_id = $1
+             )
              ON CONFLICT DO NOTHING`,
             [platformDbId]
           );
 
-          // Attach required schemas (metaschema_modules_public, metaschema_public, services_public)
+          // Create route from modules.localhost domain to modules API
           await bootstrapPool.query(
-            `INSERT INTO services_public.api_schemas (database_id, api_id, schema_id)
+            `INSERT INTO routing_public.routes (database_id, domain_id, target_api_id)
+             SELECT $1, d.id, a.id
+             FROM routing_public.domains d, routing_public.apis a
+             WHERE d.hostname = 'modules.localhost' AND d.database_id = $1
+               AND a.name = 'modules' AND a.database_id = $1
+               AND NOT EXISTS (
+                 SELECT 1 FROM routing_public.routes r
+                 WHERE r.domain_id = d.id AND r.target_api_id = a.id
+               )
+             ON CONFLICT DO NOTHING`,
+            [platformDbId]
+          );
+
+          // Attach required schemas (metaschema_modules_public, metaschema_public, routing_public)
+          await bootstrapPool.query(
+            `INSERT INTO routing_public.api_schemas (database_id, api_id, schema_id)
              SELECT $1, a.id, s.id
-             FROM services_public.apis a, metaschema_public.schema s
+             FROM routing_public.apis a, metaschema_public.schema s
              WHERE a.name = 'modules' AND a.database_id = $1
                AND s.database_id = $1
-               AND s.schema_name IN ('metaschema_modules_public', 'metaschema_public', 'services_public')
+               AND s.schema_name IN ('metaschema_modules_public', 'metaschema_public', 'routing_public')
                AND NOT EXISTS (
-                 SELECT 1 FROM services_public.api_schemas AS existing
+                 SELECT 1 FROM routing_public.api_schemas AS existing
                  WHERE existing.api_id = a.id AND existing.schema_id = s.id
                )
              ON CONFLICT DO NOTHING`,
@@ -296,7 +308,7 @@ async function main() {
 
   // --- Step 2.1: Create migrate API row (SQL — uses databaseId from Step 2) ---
   // The migrate API is needed by provision.ts for export. It must be created
-  // via SQL (superuser) because INSERT on services_public.apis is blocked by
+  // via SQL (superuser) because INSERT on routing_public.apis is blocked by
   // RLS for authenticated users. We do this AFTER Step 2 because we need
   // the correct databaseId (the tenant DB, not the platform DB).
   if (pgAvailable && databaseId) {
@@ -307,7 +319,7 @@ async function main() {
         // server's buildLoaderContext connects a tenantPool with row.dbname;
         // a logical tenant name here 404s the whole API at runtime.
         const migrateRes = await migratePool.query(
-          `INSERT INTO services_public.apis (database_id, name, dbname, anon_role, role_name, is_public)
+          `INSERT INTO routing_public.apis (database_id, name, dbname, anon_role, role_name, is_published)
            VALUES ($1, 'migrate', $2, 'anonymous', 'authenticated', true)
            ON CONFLICT (database_id, name) DO NOTHING
            RETURNING id`,
@@ -319,8 +331,8 @@ async function main() {
           // Already exists — ensure database_id, physical dbname, and role are
           // correct (self-heals rows written with a logical tenant dbname)
           await migratePool.query(
-            `UPDATE services_public.apis
-             SET dbname = $2, anon_role = 'anonymous', role_name = 'authenticated', is_public = true
+            `UPDATE routing_public.apis
+             SET dbname = $2, anon_role = 'anonymous', role_name = 'authenticated', is_published = true
              WHERE name = 'migrate' AND database_id = $1`,
             [databaseId, config.pgInternalDatabase]
           );
@@ -464,7 +476,7 @@ async function main() {
   // permission bits in app_memberships_sprt, which default to all zeros.
   //
   // Also grant org-level permissions if org_memberships tables exist
-  // (B2B opt-in) — RLS policies on services_public tables check
+  // (B2B opt-in) — RLS policies on routing_public tables check
   // manage_services permission via org membership.
   let permissionsGranted = false;
   if (dbAdminUserId && pgAvailable) {

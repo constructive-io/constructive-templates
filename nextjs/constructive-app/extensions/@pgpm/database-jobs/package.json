@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/database-jobs",
-  "version": "0.22.0",
+  "version": "0.41.0",
   "description": "Database-specific job handling and queue management",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
@@ -21,11 +21,11 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
-    "pgpm": "^5.0.4"
+    "pgpm": "^5"
   },
   "dependencies": {
-    "@pgpm/jwt-claims": "workspace:*",
-    "@pgpm/verify": "workspace:*"
+    "@pgpm/jwt-claims": "0.41.0",
+    "@pgpm/verify": "0.41.0"
   },
   "repository": {
     "type": "git",
@@ -34,5 +34,6 @@
   "homepage": "https://github.com/constructive-io/pgpm-modules",
   "bugs": {
     "url": "https://github.com/constructive-io/pgpm-modules/issues"
-  }
+  },
+  "gitHead": "3ebc4c2a7f8ab0a61bb05e54c2d3ac52c5b27651"
 }

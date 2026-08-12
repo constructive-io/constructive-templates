@@ -1,0 +1,4 @@
+-- Revert: schemas/catalog_private/trigger_fns/tg_function_capability_bindings_catalog_del
+
+
+DROP FUNCTION catalog_private.tg_function_capability_bindings_catalog_del();

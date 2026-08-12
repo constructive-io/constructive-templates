@@ -60,7 +60,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_up_sms') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -68,30 +68,30 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_sign_up, true)) THEN
-    RAISE EXCEPTION 'SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   IF NOT (COALESCE(v_settings.allow_sms_sign_up, false)) THEN
-    RAISE EXCEPTION 'SMS_SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('SMS_SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('sms' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
-  v_sms_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', sign_up_sms.phone));
+  v_sms_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g')));
   IF v_sms_secret IS NULL THEN
-    RAISE EXCEPTION 'INVALID_CODE';
+    PERFORM errors.raise_error('INVALID_CODE', '{}', 'public');
   END IF;
   v_code_valid := totp.verify(v_sms_secret, sign_up_sms.code, 600, 6, now(), 'sha1', 'raw');
   IF NOT (COALESCE(v_code_valid, false)) THEN
-    RAISE EXCEPTION 'INVALID_CODE';
+    PERFORM errors.raise_error('INVALID_CODE', '{}', 'public');
   END IF;
   SELECT *
   FROM myapp_user_identifiers_public.phone_numbers AS pn
   WHERE
-    pn.number = sign_up_sms.phone INTO v_phone;
+    pn.number = regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g') INTO v_phone;
   IF v_phone.owner_id IS NOT NULL THEN
-    RAISE EXCEPTION 'ACCOUNT_EXISTS';
+    PERFORM errors.raise_error('ACCOUNT_EXISTS', '{}', 'public');
   END IF;
   v_user_id := myapp_auth_public.provision_new_user(NULL::text);
   INSERT INTO myapp_user_identifiers_public.phone_numbers (
@@ -100,7 +100,7 @@ BEGIN
     number
   )
   VALUES
-    (v_user_id, '+', sign_up_sms.phone);
+    (v_user_id, '+', regexp_replace(sign_up_sms.phone, '[^+0-9]', '', 'g'));
   PERFORM myapp_store_private.user_state_set(v_user_id, 'primary_auth_method', 'sms'::text);
   v_csrf_secret := encode(gen_random_bytes(32), 'hex');
   v_session_id := uuidv7();

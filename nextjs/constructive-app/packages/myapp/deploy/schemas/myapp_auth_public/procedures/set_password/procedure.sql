@@ -30,7 +30,7 @@ BEGIN
       owner_id = v_user.id AND name = 'password_hash') INTO password_exists;
   IF password_exists IS TRUE THEN
     IF myapp_store_private.user_secrets_verify(v_user.id, 'password_hash', set_password.current_password) = false THEN
-      RAISE EXCEPTION 'INCORRECT_PASSWORD';
+      PERFORM errors.raise_error('INCORRECT_PASSWORD', '{}', 'public');
     END IF;
   END IF;
   INSERT INTO myapp_logging_public.audit_log_auth (

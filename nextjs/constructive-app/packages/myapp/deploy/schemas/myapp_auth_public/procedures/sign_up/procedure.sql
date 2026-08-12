@@ -11,6 +11,7 @@
 -- requires: schemas/myapp_auth_private/tables/auth_ip_rate_limits/table
 -- requires: schemas/myapp_auth_private/tables/session_credentials/table
 -- requires: schemas/myapp_memberships_public/tables/app_memberships/table
+-- requires: schemas/myapp_users_public/tables/user_settings_security/table
 -- requires: schemas/myapp_auth_private/tables/app_settings_rate_limit/table
 
 
@@ -69,7 +70,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_up') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -77,17 +78,17 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_password_sign_up, true)) THEN
-    RAISE EXCEPTION 'PASSWORD_SIGN_UP_DISABLED';
+    PERFORM errors.raise_error('PASSWORD_SIGN_UP_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('password' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
   v_require_csrf := COALESCE(v_settings.require_csrf_for_auth, false);
   v_min_password_length := COALESCE(v_settings.min_password_length, 8);
   IF v_require_csrf AND sign_up.csrf_token IS NULL THEN
-    RAISE EXCEPTION 'CSRF_TOKEN_REQUIRED';
+    PERFORM errors.raise_error('CSRF_TOKEN_REQUIRED', '{}', 'public');
   END IF;
   IF sign_up.csrf_token IS NOT NULL THEN
     SELECT s.*
@@ -95,7 +96,7 @@ BEGIN
     WHERE
       ((s.csrf_secret = sign_up.csrf_token AND s.is_anonymous = true) AND s.revoked_at IS NULL) AND s.expires_at > now() INTO v_anon_session;
     IF NOT (FOUND) THEN
-      RAISE EXCEPTION 'INVALID_CSRF_TOKEN';
+      PERFORM errors.raise_error('INVALID_CSRF_TOKEN', '{}', 'public');
     END IF;
   END IF;
   PERFORM myapp_auth_public.check_password(sign_up.password);
@@ -117,6 +118,15 @@ BEGIN
       (v_user.id, trim(sign_up.email))
     RETURNING * INTO v_email;
     PERFORM myapp_store_private.user_secrets_set(v_user.id, 'password_hash', trim(sign_up.password), 'crypt');
+    INSERT INTO myapp_users_public.user_settings_security (
+      owner_id,
+      totp_enabled,
+      email_mfa_enabled,
+      sms_mfa_enabled,
+      backup_codes_count
+    )
+    VALUES
+      (v_user.id, false, false, false, 0);
     PERFORM myapp_store_private.user_state_set(v_user.id, 'primary_auth_method', 'password'::text);
     IF v_anon_session.id IS NOT NULL THEN
       UPDATE myapp_auth_private.sessions SET
@@ -136,10 +146,11 @@ BEGIN
       user_id,
       is_anonymous,
       expires_at,
+      last_password_verified,
       csrf_secret
     )
     VALUES
-      (v_session_id, v_user.id, false, v_session_expires_at, v_csrf_secret);
+      (v_session_id, v_user.id, false, v_session_expires_at, CURRENT_TIMESTAMP, v_csrf_secret);
     v_plaintext_credential := (CASE 
       WHEN sign_up.credential_kind = 'api_key' THEN 'cnc_live_sk_' 
       WHEN sign_up.credential_kind = 'bearer' THEN 'cnc_live_bt_' 
@@ -202,7 +213,7 @@ BEGIN
     END IF;
     RETURN;
   ELSE
-    RAISE EXCEPTION 'ACCOUNT_EXISTS';
+    PERFORM errors.raise_error('ACCOUNT_EXISTS', '{}', 'public');
   END IF;
 END;
 $_PGFN_$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;

@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/domain_verifications/indexes/domain_verifications_updated_at_idx
+
+
+DROP INDEX routing_public.domain_verifications_updated_at_idx;

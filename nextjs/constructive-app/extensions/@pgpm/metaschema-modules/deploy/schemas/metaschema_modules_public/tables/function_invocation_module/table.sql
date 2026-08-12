@@ -37,7 +37,7 @@ CREATE TABLE metaschema_modules_public.function_invocation_module (
     private_api_name text,
 
     -- Scope: determines the security level for this module instance.
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     -- Override to create multiple module instances at the same scope.
@@ -54,8 +54,8 @@ CREATE TABLE metaschema_modules_public.function_invocation_module (
     -- Keys are table keys (invocations, execution_logs).
     provisions jsonb NULL,
 
-    -- Default permissions: permission names auto-granted to new members.
-    default_permissions text[] DEFAULT NULL,
+    -- Default capabilities: capability names auto-granted to new members.
+    default_capabilities text[] DEFAULT NULL,
 
     -- Constraints
     CONSTRAINT function_invocation_module_db_fkey FOREIGN KEY (database_id) REFERENCES metaschema_public.database (id) ON DELETE CASCADE,
@@ -67,9 +67,13 @@ CREATE TABLE metaschema_modules_public.function_invocation_module (
     CONSTRAINT function_invocation_module_entity_table_fkey FOREIGN KEY (entity_table_id) REFERENCES metaschema_public.table (id) ON DELETE CASCADE
 );
 
-CREATE INDEX function_invocation_module_database_id_idx ON metaschema_modules_public.function_invocation_module ( database_id );
-
 -- Unique constraint: one function invocation module per database per scope (K8s infra: scopes never share).
 CREATE UNIQUE INDEX function_invocation_module_unique_scope ON metaschema_modules_public.function_invocation_module ( database_id, scope );
+CREATE INDEX function_invocation_module_attempts_table_id_idx ON metaschema_modules_public.function_invocation_module ( attempts_table_id );
+CREATE INDEX function_invocation_module_entity_table_id_idx ON metaschema_modules_public.function_invocation_module ( entity_table_id );
+CREATE INDEX function_invocation_module_invocations_table_id_idx ON metaschema_modules_public.function_invocation_module ( invocations_table_id );
+CREATE INDEX function_invocation_module_execution_logs_table_id_idx ON metaschema_modules_public.function_invocation_module ( execution_logs_table_id );
+CREATE INDEX function_invocation_module_private_schema_id_idx ON metaschema_modules_public.function_invocation_module ( private_schema_id );
+CREATE INDEX function_invocation_module_schema_id_idx ON metaschema_modules_public.function_invocation_module ( schema_id );
 
 COMMIT;

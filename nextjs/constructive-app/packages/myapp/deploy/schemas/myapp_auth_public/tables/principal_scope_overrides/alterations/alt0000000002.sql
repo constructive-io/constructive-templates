@@ -5,6 +5,5 @@
 -- requires: schemas/myapp_auth_public/tables/principal_scope_overrides/table
 
 
-COMMENT ON TABLE myapp_auth_public.principal_scope_overrides IS E'@behavior -insert -update -delete
-Per-scope permission overrides for principals. No row = full access; row exists = apply restrictions.';
+COMMENT ON TABLE myapp_auth_public.principal_scope_overrides IS E'Per-scope capability overrides for principals. No row = full access; row exists = apply restrictions.';
 

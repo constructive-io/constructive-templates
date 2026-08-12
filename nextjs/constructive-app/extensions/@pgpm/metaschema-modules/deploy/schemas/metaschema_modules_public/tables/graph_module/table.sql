@@ -23,7 +23,7 @@ CREATE TABLE metaschema_modules_public.graph_module (
     private_schema_name text,
 
     -- Scope: determines the security level for this module instance.
-    scope text NOT NULL DEFAULT 'app',
+    scope text NOT NULL,
 
     -- Table name prefix. Auto-derived from scope by the trigger when empty.
     prefix text NOT NULL DEFAULT '',
@@ -53,9 +53,9 @@ CREATE TABLE metaschema_modules_public.graph_module (
     -- secure_table_provision applies the custom grants/policies instead.
     provisions jsonb NULL,
 
-    -- Default permissions: permission names auto-granted to new members.
+    -- Default capabilities: capability names auto-granted to new members.
     -- NULL uses the module's built-in defaults; explicit array overrides them.
-    default_permissions text[] DEFAULT NULL,
+    default_capabilities text[] DEFAULT NULL,
 
     -- Timestamps
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -72,6 +72,10 @@ CREATE TABLE metaschema_modules_public.graph_module (
     CONSTRAINT graph_module_database_merkle_unique UNIQUE (database_id, merkle_store_module_id)
 );
 
-CREATE INDEX graph_module_database_id_idx ON metaschema_modules_public.graph_module ( database_id );
+CREATE INDEX graph_module_entity_table_id_idx ON metaschema_modules_public.graph_module ( entity_table_id );
+CREATE INDEX graph_module_graphs_table_id_idx ON metaschema_modules_public.graph_module ( graphs_table_id );
+CREATE INDEX graph_module_private_schema_id_idx ON metaschema_modules_public.graph_module ( private_schema_id );
+CREATE INDEX graph_module_public_schema_id_idx ON metaschema_modules_public.graph_module ( public_schema_id );
+CREATE INDEX graph_module_merkle_store_module_id_idx ON metaschema_modules_public.graph_module ( merkle_store_module_id );
 
 COMMIT;

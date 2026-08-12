@@ -1,0 +1,12 @@
+-- Deploy: schemas/routing_public/tables/domain_verifications/columns/domain_id/alterations/alt0000000002
+-- made with <3 @ constructive.io
+
+-- requires: schemas/routing_public/schema
+-- requires: schemas/routing_public/tables/domain_verifications/table
+-- requires: schemas/routing_public/tables/domain_verifications/columns/domain_id/column
+-- requires: schemas/routing_public/tables/domain_verifications/columns/managed_domain_id/column
+
+
+ALTER TABLE routing_public.domain_verifications 
+  ADD CONSTRAINT domain_verifications_domain_id_managed_domain_id_chk 
+    CHECK (num_nonnulls(domain_id, managed_domain_id) = 1);

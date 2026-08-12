@@ -68,7 +68,7 @@ BEGIN
       ((ip_address = v_ip_address AND ua_hash = ANY( ARRAY[v_ua_hash, ''] )) AND action = 'sign_in_sms_otp') AND locked_until > now()
     LIMIT
     1) THEN
-      RAISE EXCEPTION 'TOO_MANY_REQUESTS';
+      PERFORM errors.raise_error('TOO_MANY_REQUESTS', '{}', 'public');
     END IF;
   END IF;
   SELECT *
@@ -76,14 +76,14 @@ BEGIN
   LIMIT
   1 INTO v_settings;
   IF NOT (COALESCE(v_settings.allow_sms_sign_in, false)) THEN
-    RAISE EXCEPTION 'SMS_SIGN_IN_DISABLED';
+    PERFORM errors.raise_error('SMS_SIGN_IN_DISABLED', '{}', 'public');
   END IF;
   IF v_settings.allowed_auth_methods IS NOT NULL AND NOT ('sms' = ANY( v_settings.allowed_auth_methods )) THEN
-    RAISE EXCEPTION 'AUTH_METHOD_NOT_ALLOWED';
+    PERFORM errors.raise_error('AUTH_METHOD_NOT_ALLOWED', '{}', 'public');
   END IF;
   v_default_session_duration := COALESCE(v_settings.default_session_duration, '2 weeks'::interval);
   v_remember_me_duration := COALESCE(v_settings.remember_me_duration, '30 days'::interval);
-  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', sign_in_sms_otp.phone));
+  v_sms_otp_secret := myapp_store_private.user_state_get(uuid_nil(), concat('sms_otp:', regexp_replace(sign_in_sms_otp.phone, '[^+0-9]', '', 'g')));
   IF v_sms_otp_secret IS NULL THEN
     IF v_ip_address IS NOT NULL THEN
       INSERT INTO myapp_auth_private.auth_ip_rate_limits (
@@ -182,9 +182,9 @@ BEGIN
   SELECT *
   FROM myapp_user_identifiers_public.phone_numbers AS pn
   WHERE
-    pn.number = sign_in_sms_otp.phone INTO v_phone;
+    pn.number = regexp_replace(sign_in_sms_otp.phone, '[^+0-9]', '', 'g') INTO v_phone;
   IF v_phone.owner_id IS NULL THEN
-    RAISE EXCEPTION 'ACCOUNT_NOT_FOUND';
+    PERFORM errors.raise_error('ACCOUNT_NOT_FOUND', '{}', 'public');
   END IF;
   v_user_id := v_phone.owner_id;
   SELECT
@@ -195,10 +195,10 @@ BEGIN
   WHERE
     membership_status.actor_id = v_user_id INTO v_user_is_verified, v_user_is_disabled, v_user_is_banned;
   IF v_user_is_disabled IS TRUE OR v_user_is_banned IS TRUE THEN
-    RAISE EXCEPTION 'ACCOUNT_DISABLED';
+    PERFORM errors.raise_error('ACCOUNT_DISABLED', '{}', 'public');
   END IF;
   IF COALESCE(v_settings.enforce_primary_auth_method, true) AND myapp_store_private.user_state_get(v_user_id, 'primary_auth_method') <> 'sms' THEN
-    RAISE EXCEPTION 'PRIMARY_AUTH_METHOD_MISMATCH';
+    PERFORM errors.raise_error('PRIMARY_AUTH_METHOD_MISMATCH', '{}', 'public');
   END IF;
   SELECT *
   FROM myapp_auth_private.app_settings_device

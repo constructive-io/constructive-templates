@@ -1,0 +1,6 @@
+-- Verify: schemas/myapp_limits_public/tables/org_limit_credits/indexes/org_limit_credits_entity_id_idx
+
+
+SELECT assert_index('myapp_limits_public.org_limit_credits_entity_id_idx'::regclass, 'myapp_limits_public.org_limit_credits'::regclass, false);
+
+
