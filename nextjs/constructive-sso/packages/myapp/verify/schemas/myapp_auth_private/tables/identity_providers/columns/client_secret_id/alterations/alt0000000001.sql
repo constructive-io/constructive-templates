@@ -1,0 +1,6 @@
+-- Verify: schemas/myapp_auth_private/tables/identity_providers/columns/client_secret_id/alterations/alt0000000001
+
+
+
+
+

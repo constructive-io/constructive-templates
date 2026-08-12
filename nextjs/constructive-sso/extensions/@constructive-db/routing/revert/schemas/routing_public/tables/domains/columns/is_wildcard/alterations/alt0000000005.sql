@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/domains/columns/is_wildcard/alterations/alt0000000005
+
+
+COMMENT ON COLUMN routing_public.domains.is_wildcard IS NULL;

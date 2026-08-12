@@ -1,0 +1,106 @@
+'use client';
+
+import React from 'react';
+import { Rocket } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { getAppOrigin, getDbName, getEndpoint } from '@/app-config';
+import { useAuthContext } from '@/lib/auth/auth-context';
+import { LoginScreen } from '@/components/auth/screens/login-screen';
+import { AuthSocialProvidersGrid } from '@/blocks/auth/social-providers-grid/social-providers-grid';
+
+/**
+ * Home Page - Start Building Here
+ *
+ * Replace this page with your business logic.
+ */
+export default function HomePage() {
+	const { isAuthenticated, isLoading: isAuthLoading, login } = useAuthContext();
+
+	// Prevent hydration mismatch: auth state resolves on the client after
+	// useEffect runs, so the server always sees isLoading=true while the
+	// client may already have a resolved state. Render the same loading UI
+	// on both server and first client paint, then switch after mount.
+	const [mounted, setMounted] = React.useState(false);
+	React.useEffect(() => setMounted(true), []);
+
+	let dbName = 'your-db';
+	try {
+		dbName = getDbName();
+	} catch {
+		// DB name not configured yet
+	}
+
+	// Show loading until client-side auth state is resolved
+	if (!mounted || isAuthLoading) {
+		return (
+			<div className='bg-background flex h-dvh w-dvw items-center justify-center'>
+				<div className='border-primary/20 h-10 w-10 animate-spin rounded-full border-2 border-t-transparent' />
+			</div>
+		);
+	}
+
+	// Login screen for unauthenticated users
+	if (!isAuthenticated) {
+		const authOrigin = new URL(getEndpoint('auth')).origin;
+		// After OAuth success the middleware redirects to `returnTo` — this must be
+		// the FRONTEND app origin (Next.js on :3011), NOT the auth API origin
+		// (:3000, which has no UI and 404s). Uses the auth hostname + app port so
+		// it works even when the page is opened via localhost:3011. mounted=true
+		// guarantees window exists (getAppOrigin reads window.location.port).
+		const appOrigin = getAppOrigin();
+		return (
+			<LoginScreen onLogin={login}>
+				<AuthSocialProvidersGrid
+					mode='sign-in'
+					baseOAuthPath={`${authOrigin}/auth`}
+					returnTo={`${appOrigin}/`}
+					className='mb-4 w-full max-w-sm mx-auto'
+				/>
+			</LoginScreen>
+		);
+	}
+
+	// =========================================================================
+	// START BUILDING HERE - Replace this with your app
+	// =========================================================================
+
+	return (
+		<div className="h-full overflow-y-auto">
+			<div className="mx-auto max-w-2xl px-6 py-16">
+				<div className="text-center space-y-6">
+					<div className="flex justify-center">
+						<div className="rounded-full bg-primary/10 p-4">
+							<Rocket className="h-10 w-10 text-primary" />
+						</div>
+					</div>
+					
+					<div>
+						<h1 className="text-2xl font-bold tracking-tight">Start Building Here</h1>
+						<p className="text-muted-foreground mt-2">
+							Edit <code className="text-primary bg-muted px-1.5 py-0.5 rounded text-sm">src/app/page.tsx</code> to build your app
+						</p>
+					</div>
+
+					<Card className="text-left">
+						<CardContent className="pt-6 space-y-4">
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground text-sm">Database:</span>
+								<code className="text-sm font-medium">{dbName}</code>
+							</div>
+							<div className="border-t pt-4 space-y-2 font-mono text-xs">
+								<div className="flex gap-2">
+									<span className="text-green-600 w-24">@sdk/auth</span>
+									<span className="text-muted-foreground">users, authentication</span>
+								</div>
+								<div className="flex gap-2">
+									<span className="text-purple-600 w-24">@sdk/app</span>
+									<span className="text-muted-foreground">your business data</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</div>
+	);
+}

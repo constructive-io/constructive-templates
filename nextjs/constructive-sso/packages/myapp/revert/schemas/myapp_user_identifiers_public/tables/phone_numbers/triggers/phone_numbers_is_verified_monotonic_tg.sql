@@ -1,0 +1,6 @@
+-- Revert: schemas/myapp_user_identifiers_public/tables/phone_numbers/triggers/phone_numbers_is_verified_monotonic_tg
+
+
+DROP TRIGGER phone_numbers_is_verified_monotonic_tg ON myapp_user_identifiers_public.phone_numbers;
+
+

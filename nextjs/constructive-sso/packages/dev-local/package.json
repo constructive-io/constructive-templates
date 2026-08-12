@@ -1,0 +1,6 @@
+{
+  "name": "@constructive-app/dev-local",
+  "version": "0.0.1",
+  "private": true,
+  "description": "constructive-app dev-local patch module (local-dev fixes for upstream drift)"
+}

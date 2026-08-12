@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/platform_site_metadata/indexes/platform_site_metadata_updated_at_idx
+
+
+DROP INDEX routing_public.platform_site_metadata_updated_at_idx;

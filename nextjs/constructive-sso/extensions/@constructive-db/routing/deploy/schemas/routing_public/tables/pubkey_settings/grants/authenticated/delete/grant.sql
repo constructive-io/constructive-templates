@@ -1,0 +1,8 @@
+-- Deploy: schemas/routing_public/tables/pubkey_settings/grants/authenticated/delete/grant
+-- made with <3 @ constructive.io
+
+-- requires: schemas/routing_public/schema
+-- requires: schemas/routing_public/tables/pubkey_settings/table
+
+
+GRANT DELETE ON routing_public.pubkey_settings TO authenticated;

@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/route_bindings/indexes/route_bindings_domain_id_is_active_idx
+
+
+DROP INDEX routing_public.route_bindings_domain_id_is_active_idx;

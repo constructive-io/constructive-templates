@@ -1,0 +1,41 @@
+{
+  "name": "@pgpm/metaschema-schema",
+  "version": "0.34.0",
+  "description": "Database metadata utilities and introspection functions",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "contributors": [
+    "Constructive <developers@constructive.io>"
+  ],
+  "keywords": [
+    "postgresql",
+    "pgpm",
+    "metadata",
+    "introspection"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "bundle": "pgpm package",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@pgpm/database-jobs": "0.34.0",
+    "@pgpm/inflection": "0.34.0",
+    "@pgpm/types": "0.34.0",
+    "@pgpm/verify": "0.34.0"
+  },
+  "devDependencies": {
+    "pgpm": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/constructive-io/pgpm-modules"
+  },
+  "homepage": "https://github.com/constructive-io/pgpm-modules",
+  "bugs": {
+    "url": "https://github.com/constructive-io/pgpm-modules/issues"
+  },
+  "gitHead": "0ff87a0ea1dd93bb25bfe0cc9e0386e88e77d8ec"
+}

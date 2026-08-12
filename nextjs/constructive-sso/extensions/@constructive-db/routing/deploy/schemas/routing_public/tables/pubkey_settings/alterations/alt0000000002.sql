@@ -1,0 +1,8 @@
+-- Deploy: schemas/routing_public/tables/pubkey_settings/alterations/alt0000000002
+-- made with <3 @ constructive.io
+
+-- requires: schemas/routing_public/schema
+-- requires: schemas/routing_public/tables/pubkey_settings/table
+
+
+COMMENT ON TABLE routing_public.pubkey_settings IS 'Public-key crypto auth runtime configuration; typed references to the crypto sign-up/sign-in function plumbing';
