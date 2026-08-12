@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/api_settings/grants/authenticated/insert/grant
 
 
-SELECT verify_table_grant('routing_public.api_settings', 'INSERT', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.api_settings' AS regclass), 'authenticated', 'INSERT', NULL, true);

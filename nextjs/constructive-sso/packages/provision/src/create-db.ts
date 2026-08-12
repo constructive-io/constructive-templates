@@ -503,7 +503,7 @@ async function main() {
         try {
           const appResult = await permPool.query(
             `UPDATE "${membershipsSchema}".app_memberships
-             SET is_admin = true, is_owner = true, permissions = $2::bit(64)
+             SET is_admin = true, is_owner = true, capabilities = $2::bit(64)
              WHERE actor_id = $1`,
             [dbAdminUserId, ALL_PERMS]
           );
@@ -520,7 +520,7 @@ async function main() {
         try {
           const orgResult = await permPool.query(
             `UPDATE "${membershipsSchema}".org_memberships
-             SET is_admin = true, is_owner = true, permissions = $2::bit(64)
+             SET is_admin = true, is_owner = true, capabilities = $2::bit(64)
              WHERE actor_id = $1`,
             [dbAdminUserId, ALL_PERMS]
           );

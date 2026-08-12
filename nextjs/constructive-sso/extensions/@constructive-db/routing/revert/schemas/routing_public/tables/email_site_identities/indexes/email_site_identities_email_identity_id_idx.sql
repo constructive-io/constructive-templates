@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/email_site_identities/indexes/email_site_identities_email_identity_id_idx
+
+
+DROP INDEX routing_public.email_site_identities_email_identity_id_idx;

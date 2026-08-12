@@ -1,0 +1,5 @@
+-- Revert: schemas/routing_public/tables/platform_email_site_identities/constraints/platform_email_site_identities_site_id_key/constraint
+
+
+ALTER TABLE routing_public.platform_email_site_identities 
+  DROP CONSTRAINT platform_email_site_identities_site_id_key RESTRICT;

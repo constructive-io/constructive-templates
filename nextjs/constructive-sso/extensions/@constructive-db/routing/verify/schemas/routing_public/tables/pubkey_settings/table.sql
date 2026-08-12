@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/pubkey_settings/table
 
 
-SELECT verify_table('routing_public.pubkey_settings');
+SELECT assert_table(CAST('routing_public.pubkey_settings' AS regclass), false, NULL);

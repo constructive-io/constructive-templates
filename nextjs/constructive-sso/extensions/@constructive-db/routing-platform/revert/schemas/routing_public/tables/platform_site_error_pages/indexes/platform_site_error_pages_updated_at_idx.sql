@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/platform_site_error_pages/indexes/platform_site_error_pages_updated_at_idx
+
+
+DROP INDEX routing_public.platform_site_error_pages_updated_at_idx;

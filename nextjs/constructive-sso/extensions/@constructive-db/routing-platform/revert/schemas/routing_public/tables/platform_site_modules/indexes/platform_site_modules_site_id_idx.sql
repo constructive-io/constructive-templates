@@ -1,4 +1,0 @@
--- Revert: schemas/routing_public/tables/platform_site_modules/indexes/platform_site_modules_site_id_idx
-
-
-DROP INDEX routing_public.platform_site_modules_site_id_idx;

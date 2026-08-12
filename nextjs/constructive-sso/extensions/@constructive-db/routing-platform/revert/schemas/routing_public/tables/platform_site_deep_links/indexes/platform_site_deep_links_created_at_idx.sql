@@ -1,0 +1,4 @@
+-- Revert: schemas/routing_public/tables/platform_site_deep_links/indexes/platform_site_deep_links_created_at_idx
+
+
+DROP INDEX routing_public.platform_site_deep_links_created_at_idx;

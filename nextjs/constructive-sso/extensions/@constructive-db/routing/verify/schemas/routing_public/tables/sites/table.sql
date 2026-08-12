@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/sites/table
 
 
-SELECT verify_table('routing_public.sites');
+SELECT assert_table(CAST('routing_public.sites' AS regclass), false, NULL);

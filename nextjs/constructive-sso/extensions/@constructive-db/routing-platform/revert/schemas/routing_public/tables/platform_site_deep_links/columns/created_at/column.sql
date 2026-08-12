@@ -1,0 +1,5 @@
+-- Revert: schemas/routing_public/tables/platform_site_deep_links/columns/created_at/column
+
+
+ALTER TABLE routing_public.platform_site_deep_links 
+  DROP COLUMN created_at RESTRICT;

@@ -1,0 +1,5 @@
+-- Revert: schemas/routing_public/tables/platform_site_error_pages/constraints/platform_site_error_pages_site_id_fkey/constraint
+
+
+ALTER TABLE routing_public.platform_site_error_pages 
+  DROP CONSTRAINT platform_site_error_pages_site_id_fkey RESTRICT;

@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/managed_domains/table
 
 
-SELECT verify_table('routing_public.managed_domains');
+SELECT assert_table(CAST('routing_public.managed_domains' AS regclass), false, NULL);

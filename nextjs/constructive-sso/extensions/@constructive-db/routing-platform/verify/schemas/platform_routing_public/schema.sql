@@ -1,4 +1,4 @@
 -- Verify: schemas/platform_routing_public/schema
 
 
-SELECT verify_schema('platform_routing_public');
+SELECT assert_schema(CAST('platform_routing_public' AS regnamespace));

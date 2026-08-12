@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_private/schema
 
 
-SELECT verify_schema('routing_private');
+SELECT assert_schema(CAST('routing_private' AS regnamespace));

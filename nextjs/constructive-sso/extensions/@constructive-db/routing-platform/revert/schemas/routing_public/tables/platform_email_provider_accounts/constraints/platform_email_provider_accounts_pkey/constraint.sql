@@ -1,0 +1,5 @@
+-- Revert: schemas/routing_public/tables/platform_email_provider_accounts/constraints/platform_email_provider_accounts_pkey/constraint
+
+
+ALTER TABLE routing_public.platform_email_provider_accounts 
+  DROP CONSTRAINT platform_email_provider_accounts_pkey RESTRICT;
