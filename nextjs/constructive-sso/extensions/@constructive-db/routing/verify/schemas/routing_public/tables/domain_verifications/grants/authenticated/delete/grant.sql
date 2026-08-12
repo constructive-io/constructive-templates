@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/domain_verifications/grants/authenticated/delete/grant
 
 
-SELECT verify_table_grant('routing_public.domain_verifications', 'DELETE', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.domain_verifications' AS regclass), 'authenticated', 'DELETE', NULL, true);

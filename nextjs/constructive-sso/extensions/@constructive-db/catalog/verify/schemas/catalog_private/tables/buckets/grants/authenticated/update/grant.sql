@@ -1,0 +1,4 @@
+-- Verify: schemas/catalog_private/tables/buckets/grants/authenticated/update/grant
+
+
+SELECT assert_table_grant(CAST('catalog_private.buckets' AS regclass), 'authenticated', 'UPDATE', NULL, true);

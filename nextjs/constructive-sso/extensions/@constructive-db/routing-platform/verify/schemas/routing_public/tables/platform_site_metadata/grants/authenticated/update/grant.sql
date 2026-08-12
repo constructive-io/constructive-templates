@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/platform_site_metadata/grants/authenticated/update/grant
 
 
-SELECT verify_table_grant('routing_public.platform_site_metadata', 'UPDATE', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.platform_site_metadata' AS regclass), 'authenticated', 'UPDATE', NULL, true);

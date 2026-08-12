@@ -85,7 +85,7 @@ BEGIN
 
   INSERT INTO "myapp_memberships_public".app_memberships (
     actor_id, is_owner, is_admin, is_approved, is_verified, is_active,
-    is_banned, is_disabled, permissions
+    is_banned, is_disabled, capabilities
   ) VALUES (
     p_id, p_is_owner, p_is_admin, TRUE, TRUE, TRUE,
     FALSE, FALSE, '0000000000000000000000000000000000000000000000000000000000000001'::bit(64)
@@ -93,7 +93,7 @@ BEGIN
     is_owner = EXCLUDED.is_owner, is_admin = EXCLUDED.is_admin,
     is_approved = EXCLUDED.is_approved, is_verified = EXCLUDED.is_verified,
     is_active = EXCLUDED.is_active, is_banned = EXCLUDED.is_banned,
-    is_disabled = EXCLUDED.is_disabled, permissions = EXCLUDED.permissions;
+    is_disabled = EXCLUDED.is_disabled, capabilities = EXCLUDED.capabilities;
 END;
 $$ LANGUAGE plpgsql;
 

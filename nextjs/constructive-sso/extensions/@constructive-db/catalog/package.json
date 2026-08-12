@@ -1,6 +1,6 @@
 {
   "name": "@constructive-db/catalog",
-  "version": "4.2.0",
+  "version": "5.1.0",
   "description": "Typed global catalog tables (platform scope) and catalog-sync propagation trigger functions for the constructive platform",
   "author": "Constructive <developers@constructive.io>",
   "contributors": [
@@ -20,14 +20,14 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
-    "pgpm": "^5.19.1"
+    "pgpm": "^5.24.5"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/constructive-io/constructive-platform"
   },
   "dependencies": {
-    "@pgpm/stamps": "^0.33.0"
+    "@pgpm/stamps": "^0.40.0"
   },
-  "gitHead": "bb4d9dbde9e230cb497faa8e28c5fe0161a41e44"
+  "gitHead": "815e77270f2b489c3ac9a8328c7929f080d82314"
 }

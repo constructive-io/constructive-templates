@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/platform_site_modules/grants/authenticated/insert/grant
 
 
-SELECT verify_table_grant('routing_public.platform_site_modules', 'INSERT', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.platform_site_modules' AS regclass), 'authenticated', 'INSERT', NULL, true);

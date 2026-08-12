@@ -2,7 +2,7 @@
 
 Database-scope routing plane (apis/sites/domains/routes) and read-path resolvers (resolve_route, api_schema_names) for the constructive platform.
 
-`resolve_route` reads `catalog_public.{apis,sites,functions}` and `api_schema_names` reads `metaschema_public.schema` at runtime.
+`resolve_route` reads `catalog_private.{apis,sites,functions}` and `api_schema_names` reads `metaschema_public.schema` at runtime.
 
 **GENERATED MODULE — DO NOT EDIT.**
 

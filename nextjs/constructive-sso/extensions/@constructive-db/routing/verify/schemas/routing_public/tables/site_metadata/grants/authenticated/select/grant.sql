@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/site_metadata/grants/authenticated/select/grant
 
 
-SELECT verify_table_grant('routing_public.site_metadata', 'SELECT', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.site_metadata' AS regclass), 'authenticated', 'SELECT', NULL, true);

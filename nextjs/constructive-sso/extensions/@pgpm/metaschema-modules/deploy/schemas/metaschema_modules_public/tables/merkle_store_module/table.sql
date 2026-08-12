@@ -44,10 +44,10 @@ CREATE TABLE metaschema_modules_public.merkle_store_module (
     -- any other value is used as-is. Tables always keep their prefix regardless of this setting.
     function_prefix text DEFAULT NULL,
 
-    -- Permission key for SELECT gating: when set, all 4 merkle tables require this
-    -- permission for SELECT at platform/app scope (e.g., 'manage_graphs').
+    -- Capability key for SELECT gating: when set, all 4 merkle tables require this
+    -- capability for SELECT at platform/app scope (e.g., 'manage_graphs').
     -- NULL means the caller intentionally wants open membership SELECT.
-    permission_key text DEFAULT NULL,
+    capability_key text DEFAULT NULL,
 
     -- Timestamps
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -65,7 +65,11 @@ CREATE TABLE metaschema_modules_public.merkle_store_module (
     CONSTRAINT merkle_store_module_database_prefix_unique UNIQUE (database_id, prefix)
 );
 
-CREATE INDEX merkle_store_module_database_id_idx ON metaschema_modules_public.merkle_store_module ( database_id );
 CREATE INDEX merkle_store_module_private_schema_id_idx ON metaschema_modules_public.merkle_store_module ( private_schema_id );
+CREATE INDEX merkle_store_module_commit_table_id_idx ON metaschema_modules_public.merkle_store_module ( commit_table_id );
+CREATE INDEX merkle_store_module_object_table_id_idx ON metaschema_modules_public.merkle_store_module ( object_table_id );
+CREATE INDEX merkle_store_module_ref_table_id_idx ON metaschema_modules_public.merkle_store_module ( ref_table_id );
+CREATE INDEX merkle_store_module_store_table_id_idx ON metaschema_modules_public.merkle_store_module ( store_table_id );
+CREATE INDEX merkle_store_module_schema_id_idx ON metaschema_modules_public.merkle_store_module ( schema_id );
 
 COMMIT;

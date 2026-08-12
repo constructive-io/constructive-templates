@@ -1,0 +1,5 @@
+-- Revert: schemas/routing_public/tables/platform_email_identities/columns/transport_mode/alterations/alt0000000004
+
+
+ALTER TABLE routing_public.platform_email_identities 
+  DROP CONSTRAINT platform_email_identities_transport_mode_provider_account_id_ch RESTRICT;

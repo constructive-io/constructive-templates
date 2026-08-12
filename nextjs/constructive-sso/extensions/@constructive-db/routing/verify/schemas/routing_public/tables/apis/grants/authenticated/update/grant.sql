@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/apis/grants/authenticated/update/grant
 
 
-SELECT verify_table_grant('routing_public.apis', 'UPDATE', 'authenticated');
+SELECT assert_table_grant(CAST('routing_public.apis' AS regclass), 'authenticated', 'UPDATE', NULL, true);

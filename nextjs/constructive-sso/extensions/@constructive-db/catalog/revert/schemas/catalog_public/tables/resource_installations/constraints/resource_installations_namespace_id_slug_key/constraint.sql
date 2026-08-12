@@ -1,5 +1,0 @@
--- Revert: schemas/catalog_public/tables/resource_installations/constraints/resource_installations_namespace_id_slug_key/constraint
-
-
-ALTER TABLE catalog_public.resource_installations 
-  DROP CONSTRAINT resource_installations_namespace_id_slug_key RESTRICT;

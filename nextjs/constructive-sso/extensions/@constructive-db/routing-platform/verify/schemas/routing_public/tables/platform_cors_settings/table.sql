@@ -1,4 +1,4 @@
 -- Verify: schemas/routing_public/tables/platform_cors_settings/table
 
 
-SELECT verify_table('routing_public.platform_cors_settings');
+SELECT assert_table(CAST('routing_public.platform_cors_settings' AS regclass), false, NULL);

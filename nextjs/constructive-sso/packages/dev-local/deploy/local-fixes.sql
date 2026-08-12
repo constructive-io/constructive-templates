@@ -967,9 +967,9 @@ begin
     -- 1. Backfill existing identity users (e.g. the SSO test user)
     execute format(
         'UPDATE %I.app_memberships am
-         SET is_admin = true, is_owner = true, permissions = $1
+         SET is_admin = true, is_owner = true, capabilities = $1
          WHERE am.actor_id IN (SELECT ca.owner_id FROM %I.connected_accounts ca)
-           AND (am.is_admin = false OR am.is_owner = false OR am.permissions <> $1)',
+           AND (am.is_admin = false OR am.is_owner = false OR am.capabilities <> $1)',
         v_memberships_schema, v_identifiers_schema)
         using v_all_perms;
 
@@ -982,9 +982,9 @@ begin
            v_all_perms bit(64) := repeat(''1'', 64)::bit(64);
          BEGIN
            UPDATE %I.app_memberships
-           SET is_admin = true, is_owner = true, permissions = v_all_perms
+           SET is_admin = true, is_owner = true, capabilities = v_all_perms
            WHERE actor_id = NEW.owner_id
-             AND (is_admin = false OR is_owner = false OR permissions <> v_all_perms);
+             AND (is_admin = false OR is_owner = false OR capabilities <> v_all_perms);
            RETURN NEW;
          END;
          $body$ LANGUAGE plpgsql SECURITY DEFINER',

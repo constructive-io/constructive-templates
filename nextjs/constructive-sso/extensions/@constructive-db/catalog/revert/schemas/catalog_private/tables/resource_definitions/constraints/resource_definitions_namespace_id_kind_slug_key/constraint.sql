@@ -1,0 +1,5 @@
+-- Revert: schemas/catalog_private/tables/resource_definitions/constraints/resource_definitions_namespace_id_kind_slug_key/constraint
+
+
+ALTER TABLE catalog_private.resource_definitions 
+  DROP CONSTRAINT resource_definitions_namespace_id_kind_slug_key RESTRICT;
