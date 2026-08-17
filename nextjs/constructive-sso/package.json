@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port ${PORT:-3011}",
+    "dev": "next dev --turbopack --port ${PORT:-3000}",
     "build": "next build",
-    "start": "next start --port ${PORT:-3011}",
+    "start": "next start --port ${PORT:-3000}",
     "lint": "eslint .",
     "lint:types": "tsc --noEmit",
     "deps": "pnpm up -r -i -L",
@@ -16,7 +16,6 @@
     "create-db": "pnpm --filter @constructive-app/provision run create-db",
     "reset-db": "pnpm --filter @constructive-app/provision run reset-db",
     "provision": "pnpm --filter @constructive-app/provision run provision",
-    "seed": "pnpm --filter @constructive-app/provision run seed",
     "export:graphql": "pnpm --filter @constructive-app/export run export:graphql",
     "local:bringup": "./scripts/local-bringup.sh",
     "mock-oauth": "tsx scripts/mock-oauth-server.ts"

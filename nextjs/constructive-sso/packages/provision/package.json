@@ -4,10 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "create-db": "tsx src/create-db.ts",
+    "create-db": "tsx src/provision-tenant.ts",
+    "provision": "tsx src/configure-sso.ts",
     "reset-db": "tsx src/reset-db.ts",
-    "provision": "tsx src/provision.ts",
-    "seed": "tsx src/seed/index.ts",
     "build": "echo 'No build required'"
   },
   "dependencies": {

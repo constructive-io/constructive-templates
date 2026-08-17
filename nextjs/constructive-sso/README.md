@@ -1,206 +1,106 @@
-# constructive-app
+# constructive-sso
 
-Next.js + Constructive per-tenant-database boilerplate with SSO testing.
-Ships the base `auth:hardened` module set (email/password auth, sessions,
-rate limits, passkeys, SSO infrastructure) with no org/B2B surface — see
-[docs/B2B.md](./docs/B2B.md) for the org opt-in.
+Next.js boilerplate exercising Constructive's **cloud-function SSO**
+(`functions/sso` + `functions/auth`) end-to-end with real Google OAuth.
+The app signs users in through the compute sync gateway, not a GraphQL
+auth server.
 
-SSO is configured out of the box against a local mock OAuth server
-(oauth2-mock-server on port 4010) — no real GitHub/Google apps needed for
-development. See [SSO Testing](#sso-testing) below.
+> **Architecture:** `fun up --k8s` brings up ONE platform database —
+> `constructive-functions-db1` (in the local k8s cluster, port-forwarded to
+> `:15432`). The tenant is a physical database inside that platform
+> (`db-*`), provisioned with the `b2b:storage` preset. There is no second
+> database and no `cnc` GraphQL server — do **not** run the old
+> `docker-compose` / `cnc server` flow, it is a different, conflicting
+> platform.
 
-> **Architecture note:** `constructive` is the ONE physical database (platform
-> + every tenant's `{tenant}_*` schemas). `myapp` is the logical per-tenant DB
-> name used for schema prefixes and subdomain routing
-> (`api-myapp.localhost`) — it is never a connectable database.
+## Prerequisites
 
-## Repo layout assumptions
+- Docker Desktop with Kubernetes enabled
+- `pnpm`, `psql`, `kubectl`
+- A sibling `constructive-db` checkout (the platform + the SSO cloud functions)
+- `.env` filled with real Google credentials (see [SSO Testing](#sso-testing))
 
-This template expects sibling checkouts of the Constructive monorepos:
+## Full setup, one step at a time
 
-```
-<workspace>/
-├── constructive/        # GraphQL server + pgpm CLI (@pgpmjs/export link target)
-├── constructive-db/     # platform modules (constructive-local deploy)
-└── sandbox-templates/nextjs/constructive-app/   # this repo
-```
-
-`packages/export` depends on `@pgpmjs/export` via a `link:` into
-`constructive/pgpm/export/dist` — build it once with
-`cd constructive/pgpm/export && pnpm install && pnpm build`.
-
-## Full setup (from scratch)
+### 1. Bring up the platform (one database)
 
 ```bash
-# 1. In the constructive-db repo — platform deploy
-docker compose up -d
-pnpm install
-eval "$(pgpm env)"
-createdb constructive
-pgpm admin-users bootstrap --database constructive --yes
-pgpm admin-users add --database constructive --test --yes
-pgpm deploy --yes --database constructive --package constructive-local
+cd constructive-db/compute
+fun up --k8s --alt-ports
+```
 
-# 2. In the constructive repo (constructive/graphql/server) — GraphQL server
-#    SSO requires OAUTH_ENABLED=true + OAUTH_STATE_SECRET — source this .env first:
-source sandbox-templates/nextjs/constructive-sso/.env
-pnpm install
-PGDATABASE=constructive pnpm dev
-# (or: OAUTH_ENABLED=true PGDATABASE=constructive cnc server --port 3000 --origin "*")
-# NOTE: without OAUTH_ENABLED=true the /auth/* routes are NOT mounted (404).
+This builds the functions image, starts the k8s cluster, deploys the platform
+DB (`constructive-functions-db1`), registers the `functions/sso` and
+`functions/auth` definitions, and starts the compute-sync gateway. ~10 min the
+first time; idempotent after. Verify the four services are Ready:
 
-# 3. In this repo — create the tenant + provision modules
-eval "$(pgpm env)"
+```bash
+kubectl get ksvc -n constructive-platform-default | grep -E 'True' 
+```
+
+### 2. Create the tenant (same database, no conflict)
+
+```bash
+cd sandbox-templates/nextjs/constructive-sso
 pnpm run create-db
+```
+
+Provisions a tenant named `myapp` on the **same** platform DB via
+`metaschema_public.request_database('myapp','localhost', preset_slug :=
+'b2b:storage')` (warm-pool claim or cold provisioning), runs the owner
+bootstrap, creates the tenant-owned `localhost` routing domain, and writes
+`DATABASE_ID` back into `.env`. Idempotent — re-running reuses the tenant.
+
+### 3. Bind the SSO routes to the tenant on `localhost`
+
+```bash
+cd constructive-db/compute
+PGHOST=localhost PGPORT=15432 PGDATABASE=constructive-functions-db1 \
+  fun register --apply --route-host localhost --route-database-id "$(grep '^DATABASE_ID=' ../../sandbox-templates/nextjs/constructive-sso/.env | cut -d= -f2)"
+```
+
+Binds `/start`, `/auth/callback`, `/auth/who-am-i`, etc. to the tenant.
+Expect `21 route(s) resolving on localhost`.
+
+### 4. Add the bare-`localhost` rule to the gateway ingress
+
+`fun up` only registers `*.localhost` / `app.localhost`; the real-Google
+callback needs bare `localhost`:
+
+```bash
+kubectl patch ingress constructive-route-hosts -n constructive-platform-default --type=json \
+  -p='[{"op":"add","path":"/spec/rules/-","value":{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"compute-sync-svc","port":{"number":8789}}},"path":"/","pathType":"Prefix"}]}}}]'
+```
+
+### 5. Configure the Google provider
+
+```bash
+cd sandbox-templates/nextjs/constructive-sso
 pnpm run provision
-pgpm deploy --yes --database constructive --package dev-local
-pnpm run seed
+```
 
-# 4. Generate the SDK from the live endpoints, then start the app
-pnpm codegen
+Upserts the `google` provider row with the endpoints from `.env`, rotates the
+client secret into the tenant's encrypted store, sets the auth settings
+(host-only cookie, `/login` error path), and grants the anonymous role the
+sign-in lane needs.
+
+### 6. Start the app
+
+```bash
 pnpm dev
 ```
 
-Steps 1–3 (minus the GraphQL server, which runs separately) are automated by:
+The app runs on `http://localhost:3000`. Open `/login` → **Sign in with
+Google** → consent → you land back on the dashboard.
 
-```bash
-pnpm run local:bringup
-```
-
-## Export (regenerate packages/myapp + packages/myapp-service)
-
-With the full setup running:
-
-```bash
-pnpm export:graphql
-```
-
-This rewrites `packages/myapp` (tenant DDL from `sql_actions`) and
-`packages/myapp-service` (metaschema/services metadata). Never hand-edit the
-generated SQL.
-
-Then install the @pgpm module dependencies the proper way — `pgpm install`
-inside each exported package dir (installs everything listed in the
-package's `.control` `requires` into `extensions/` and records the resolved
-versions in `package.json` + `.control`):
-
-```bash
-cd packages/myapp && pgpm install
-cd ../myapp-service && pgpm install
-```
-
-## Redeployment (local, from exported packages)
-
-Wipe the previous container/database first, then:
-
-```bash
-docker compose up -d
-pnpm install
-eval "$(pgpm env)"
-createdb constructive
-pgpm admin-users bootstrap --database constructive --yes
-pgpm admin-users add --database constructive --test --yes
-
-# Install @pgpm module deps (skip if extensions/ is already committed)
-(cd packages/myapp-service && pgpm install)
-(cd packages/myapp && pgpm install)
-
-pgpm deploy --package myapp-service --database constructive --yes
-pgpm deploy --package myapp --database constructive --yes
-pgpm deploy --package dev-local --database constructive --yes
-pgpm deploy --package myapp-test-seed --database constructive --yes
-
-# GraphQL server (constructive repo): source .env first, then
-# PGDATABASE=constructive pnpm dev  (or OAUTH_ENABLED=true PGDATABASE=constructive cnc server --port 3000 --origin "*")
-# Without OAUTH_ENABLED=true the /auth/* SSO routes are NOT mounted.
-pnpm codegen
-pnpm dev
-```
+> **Shortcut:** steps 2–6 are chained in one command: `pnpm run local:bringup`
+> (it verifies the platform first, then runs create-db → routes → ingress →
+> provision → dev).
 
 ## SSO Testing
 
-This boilerplate provisions a Google-shaped identity provider pointing at a
-local mock OAuth server. The full SSO flow works without real OAuth app
-registrations.
-
-### Prerequisites
-
-1. **CNC GraphQL server** running from the `feat/oauth-reorg` (or stacked
-   `feat/tenant-shared-session-sso`) branch — the OAuth middleware is mounted
-   at `/auth` only when `OAUTH_ENABLED=true`. **The server must have
-   `OAUTH_ENABLED=true` and `OAUTH_STATE_SECRET` in its environment** — source
-   this repo's `.env` first so the vars are exported to the server process:
-   ```bash
-   source sandbox-templates/nextjs/constructive-sso/.env
-   cd constructive/graphql/server
-   pnpm build              # rebuild to pick up the OAuth middleware
-   PGDATABASE=constructive pnpm dev
-   ```
-   Verify: `curl http://auth-myapp.localhost:3000/auth/providers`
-   should return `{"providers":["google"]}`.
-
-2. **OAUTH_STATE_SECRET** — set in this repo's `.env` (already has a dev value).
-   The server reads it from its own `process.env`, so you MUST `source` the
-   `.env` (or export it manually) before starting the server. For a fresh one:
-   `openssl rand -hex 32`.
-
-### How it works
-
-1. `pnpm provision` calls `provisionOAuth()` which:
-   - Upserts a Google identity provider pointing at the mock server (:4010)
-   - Rotates the client secret via `rotate_identity_provider_app_secret`
-   - Enables cookie-based SSO in `app_settings_auth`
-     (`cookie_domain` empty = host-only cookie, `cookie_secure=false`)
-   - Grants anonymous access to the identity_providers view (view GRANT +
-     column-level GRANT + RLS policy)
-   - Creates `sign_up_identity`/`sign_in_identity` wrappers in
-     `{db}_auth_public` so the server's module loader resolves the tenant
-     schema instead of the platform's `constructive_auth_private`
-
-2. The **mock OAuth server** (`pnpm mock-oauth`, started by
-   `local-bringup.sh` step 4.5) provides a real authorization-code + PKCE
-   flow with a configurable test user.
-
-3. The login/register pages render `AuthSocialProvidersGrid` which queries
-   `identityProviders` from the auth API and builds `/auth/{slug}?redirect_uri=...`
-   links pointing at the auth API origin.
-
-4. After the OAuth callback sets the `constructive_session` cookie (host-only,
-   on `auth-myapp.localhost`), the user navigates to
-   `http://auth-myapp.localhost:3011/` (or `/auth/callback`). The app's
-   `auth-context` runs `trySessionAuth()` on mount — a `currentUser` query
-   with `credentials:'include'` that authenticates via the cookie (no Bearer
-   header needed).
-
-> IMPORTANT: the app must be accessed at `http://auth-{db}.localhost:3011`
-> (same host as the auth API), NOT `localhost:3011`. The session cookie is
-> host-only — `Domain=localhost` cookies are not sent to `*.localhost`
-> subdomains by browsers, so the cookie would never reach the app.
-
-### Testing the flow
-
-```bash
-# 1. Start the mock OAuth server (already in local:bringup, or run manually)
-pnpm mock-oauth
-
-# 2. Start the app
-pnpm dev
-
-# 3. Open http://auth-myapp.localhost:3011/login  (NOT localhost:3011)
-#    Click "Sign in with Google" → mock OAuth server → callback → cookie set
-
-# 4. After the callback, navigate to http://auth-myapp.localhost:3011/
-#    (or http://auth-myapp.localhost:3011/auth/callback)
-#    The app hydrates the session from the cookie and shows the dashboard.
-```
-
-### Using real OAuth providers
-
-The provision step is env-driven (see `packages/provision/src/oauth.ts`). Set the
-`OAUTH_*` vars in `.env` (or export them) before running `pnpm run provision`.
-The defaults point at the local mock OAuth server (:4010).
-
-Real Google example (`.env`):
+Put the real Google credentials in `.env` (and keep the Console redirect URI
+exactly `http://localhost:3000/auth/google/callback`):
 
 ```
 OAUTH_PROVIDER=google
@@ -209,56 +109,60 @@ OAUTH_CLIENT_SECRET=<your-google-client-secret>
 OAUTH_AUTHORIZE_URL=https://accounts.google.com/o/oauth2/v2/auth
 OAUTH_TOKEN_URL=https://oauth2.googleapis.com/token
 OAUTH_USERINFO_URL=https://openidconnect.googleapis.com/v1/userinfo
-OAUTH_PKCE_ENABLED=true
 OAUTH_SCOPES=openid,email,profile
 ```
 
-Then re-run `pnpm run provision` (upserts the row + re-rotates the secret,
-creates the localhost -> auth API routing alias) and restart the CNC server so
-the module loader cache refreshes.
+Then the flow is:
 
-**Real-Google flow uses `localhost:3000`** (Google only allows plain-HTTP
-redirect URIs on the exact host `localhost`):
+1. `http://localhost:3000/login` → **Sign in with Google**
+2. Consent at Google → Google redirects to
+   `http://localhost:3000/auth/google/callback` (the registered URI)
+3. The app relays it to the gateway's page lane (`localhost/auth/callback`),
+   which exchanges the code, mints the session, and sets the
+   `constructive_session` cookie (host-only on `localhost`)
+4. The `/auth/callback` page hydrates via `/api/auth/session` → dashboard
 
-1. Register in the Google Cloud Console:
-   `http://localhost:3000/auth/google/callback`
-2. `.env` must set `NEXT_PUBLIC_AUTH_ENDPOINT=http://localhost:3000/graphql`
-   (provision creates the routing alias so `localhost:3000` resolves to this
-   tenant's auth API).
-3. Access the app at `http://localhost:3011` (NOT `auth-myapp.localhost:3011`)
-   — the host-only session cookie set on `localhost:3000` is sent to
-   `localhost:3011` automatically.
+To test without Google, point the `OAUTH_*` values at the bundled mock
+(`pnpm mock-oauth`, `:4010`) and rerun `pnpm run provision`.
 
-> CAUTION: Google rejects non-HTTPS redirect URIs whose host is not exactly
-> `localhost` (e.g. `auth-myapp.localhost`) with "doesn't comply with Google's
-> OAuth 2.0 policy" / `invalid_request`. Keep the flow on `localhost:3000`,
-> or fall back to the mock provider (set
-> `OAUTH_CLIENT_ID=constructive-sso-local-client`).
+## Re-runs / restarts
+
+- After a Docker Desktop restart: re-run step 1 (`fun up --k8s --alt-ports`),
+  then `pnpm run local:bringup`.
+- To wipe the tenant and start over: `pnpm run reset-db`.
 
 ## Debugging
 
-Use `psql -P pager=off -d constructive` so output never blocks on the pager.
-The deploy steps for `myapp-service` / `myapp` are the usual failure points
-after upstream changes — inspect the failing SQL there first.
+```bash
+psql -P pager=off -h localhost -p 15432 -U postgres -d constructive-functions-db1
+```
 
-Note: `pnpm codegen` runs through `scripts/codegen.sh`, which preserves this
-hand-written README — the codegen tool otherwise overwrites the project-root
-`README.md` with a generated SDK overview on every run.
+```sql
+SELECT slug, left(client_id,20), authorization_url
+  FROM "pool-<tenant>-auth-private".identity_providers WHERE slug='google';
+SELECT id, user_id, auth_method FROM "pool-<tenant>-auth-private".sessions
+  ORDER BY created_at DESC LIMIT 5;
+```
+
+(`pool-<tenant>` is the schema prefix of your tenant — find it via
+`SELECT private_schema_name FROM metaschema_modules_public.identity_providers_module
+WHERE database_id='<DATABASE_ID>'`.)
+
+Gateway logs: `kubectl logs deploy/compute-sync -n constructive-platform-default`.
 
 ## Structure
 
-| Path                      | Purpose                                                      |
-| ------------------------- | ------------------------------------------------------------ |
-| `src/`                    | Next.js app (auth, account, app shell)                       |
-| `packages/provision`      | `create-db` / `provision` / `seed` scripts                   |
-| `packages/export`         | `export:graphql` — live GraphQL → pgpm packages              |
-| `packages/myapp`          | exported tenant DDL package (regenerated, never hand-edited) |
-| `packages/myapp-service`  | exported metaschema/services package (regenerated)           |
-| `packages/myapp-test-seed`| pgpm seed package for local dev data                         |
-| `packages/dev-local`      | local-dev patch module for upstream drift                    |
-| `extensions/`             | @pgpm modules installed via `pgpm install`                   |
-| `scripts/mock-oauth-server.ts` | local mock OAuth server (oauth2-mock-server, port 4010) |
-| `src/app/auth/callback/`  | OAuth callback / session-hydration route                     |
+| Path                          | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `src/`                        | Next.js app (auth, account, app shell)                       |
+| `src/app/api/sso/`            | BFF: `/providers`, `/start` (proxy to the cloud functions)   |
+| `src/app/auth/google/callback/` | Google redirect target; relays to the gateway page lane    |
+| `src/app/auth/callback/`      | session-hydration landing page                               |
+| `packages/provision`          | `create-db` (tenant) / `provision` (SSO) / `reset-db`        |
+| `packages/export`             | `export:graphql` (legacy GraphQL export; not used by SSO)    |
+| `packages/dev-local`          | retired — CNC-era pgpm patch, not used by the cloud-function flow |
+| `scripts/local-bringup.sh`    | chains create-db → routes → ingress → provision → dev        |
+| `scripts/mock-oauth-server.ts`| local mock OAuth server for Google-free testing (`:4010`)    |
 
 ## Disclaimer
 
