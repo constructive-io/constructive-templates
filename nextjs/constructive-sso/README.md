@@ -49,7 +49,8 @@ Provisions a tenant named `myapp` on the **same** platform DB via
 `metaschema_public.request_database('myapp','localhost', preset_slug :=
 'b2b:storage')` (warm-pool claim or cold provisioning), runs the owner
 bootstrap, creates the tenant-owned `localhost` routing domain, and writes
-`DATABASE_ID` back into `.env`. Idempotent — re-running reuses the tenant.
+`DATABASE_ID` plus the GraphQL-lane values (see below) back into `.env`.
+Idempotent — re-running reuses the tenant.
 
 ### 3. Bind the SSO routes to the tenant on `localhost`
 
@@ -71,6 +72,9 @@ callback needs bare `localhost`:
 kubectl patch ingress constructive-route-hosts -n constructive-platform-default --type=json \
   -p='[{"op":"add","path":"/spec/rules/-","value":{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"compute-sync-svc","port":{"number":8789}}},"path":"/","pathType":"Prefix"}]}}}]'
 ```
+
+(The patch errors with "already exists" if the rule is present — that's fine;
+`pnpm run local:bringup` checks for it first.)
 
 ### 5. Configure the Google provider
 
@@ -97,6 +101,24 @@ Google** → consent → you land back on the dashboard.
 > (it verifies the platform first, then runs create-db → routes → ingress →
 > provision → dev).
 
+## The two planes (SSO functions vs. GraphQL data)
+
+The app talks to its tenant over two separate planes, both behind the same
+Traefik ingress on port 80:
+
+- **Cloud functions** (sign-in, sign-out, who-am-i): the browser calls the
+  same-origin BFF (`/api/sso/*`, `/api/auth/*`), which forwards to the compute
+  sync gateway on `http://localhost` with the HttpOnly session cookie as a
+  Bearer credential. The credential never reaches client JS.
+- **GraphQL** (orgs, members, account settings): the platform auto-provisions
+  per-tenant GraphQL hosts named from the tenant's internal slug (e.g.
+  `admin-208-dry-rose-fox.localhost`) — NOT from `DATABASE_NAME`. The session
+  cookie is host-only on `localhost` and never crosses to those hosts, so the
+  SDK's endpoints point at the same-origin proxy (`/api/graphql/{admin,auth,app}`)
+  which forwards server-side. `create-db` derives the slug and writes
+  `NEXT_PUBLIC_DB_NAME` / `NEXT_PUBLIC_*_ENDPOINT` / `GRAPHQL_*_URL` into
+  `.env` for exactly this reason.
+
 ## SSO Testing
 
 Put the real Google credentials in `.env` (and keep the Console redirect URI
@@ -121,6 +143,23 @@ Then the flow is:
    which exchanges the code, mints the session, and sets the
    `constructive_session` cookie (host-only on `localhost`)
 4. The `/auth/callback` page hydrates via `/api/auth/session` → dashboard
+
+### After the first sign-in: promote the owner
+
+A fresh tenant's only owner is the platform bootstrap user. The first Google
+sign-in creates YOUR user, but with zero capabilities — organization creation
+(and every admin surface) is RLS-gated on a capability the user doesn't have
+yet (`new row violates row-level security policy for table "users"`). Run
+once after your first sign-in (idempotent):
+
+```bash
+pnpm run promote-owner                    # promotes the newest human user
+PROMOTE_OWNER_EMAIL=you@example.com pnpm run promote-owner   # or pick by email
+```
+
+It grants the same flags the platform's owner bootstrap does (owner/admin +
+full capabilities) and fills `display_name`/`username` from the Google
+profile (the generated sign-up does not populate them).
 
 To test without Google, point the `OAUTH_*` values at the bundled mock
 (`pnpm mock-oauth`, `:4010`) and rerun `pnpm run provision`.
@@ -158,7 +197,7 @@ Gateway logs: `kubectl logs deploy/compute-sync -n constructive-platform-default
 | `src/app/api/sso/`            | BFF: `/providers`, `/start` (proxy to the cloud functions)   |
 | `src/app/auth/google/callback/` | Google redirect target; relays to the gateway page lane    |
 | `src/app/auth/callback/`      | session-hydration landing page                               |
-| `packages/provision`          | `create-db` (tenant) / `provision` (SSO) / `reset-db`        |
+| `packages/provision`          | `create-db` (tenant) / `provision` (SSO) / `promote-owner` (first-user owner grant) / `reset-db` |
 | `packages/export`             | `export:graphql` (legacy GraphQL export; not used by SSO)    |
 | `packages/dev-local`          | retired — CNC-era pgpm patch, not used by the cloud-function flow |
 | `scripts/local-bringup.sh`    | chains create-db → routes → ingress → provision → dev        |

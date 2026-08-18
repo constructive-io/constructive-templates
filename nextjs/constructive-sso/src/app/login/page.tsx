@@ -4,19 +4,18 @@ import { Suspense } from 'react';
 
 import { SignInCard, type SignInResult } from '@/blocks/auth/sign-in-card/sign-in-card';
 import { AuthSocialProvidersGrid } from '@/blocks/auth/social-providers-grid/social-providers-grid';
-import { getAppOrigin, getEndpoint } from '@/app-config';
+import { getAppOrigin, getAuthOrigin } from '@/app-config';
 import { AuthScreenLayout } from '@/components/auth/auth-screen-layout';
 import { useAuthContext } from '@/lib/auth/auth-context';
 
 function LoginPageContent() {
 	const { login } = useAuthContext();
-	// OAuth middleware lives on the auth API origin (not this app's origin).
-	const authOrigin = new URL(getEndpoint('auth')).origin;
+	// The auth lane's origin — the app's own origin when the endpoint is the
+	// same-origin BFF proxy (relative), the per-tenant host otherwise.
+	const authOrigin = getAuthOrigin();
 	// After OAuth success the middleware redirects to `returnTo` — this must be
-	// the FRONTEND app origin (Next.js on :3011), NOT the auth API origin
-	// (:3000, which has no UI and 404s). Uses the auth hostname + app port so
-	// it works even when the page is opened via localhost:3011. The session
-	// cookie is host-only on auth-{db}.localhost, so it crosses ports.
+	// the FRONTEND app origin (Next.js), NOT the auth API origin. The session
+	// cookie is host-only on `localhost`, so it crosses ports on that host.
 	const appOrigin = getAppOrigin();
 
 	return (

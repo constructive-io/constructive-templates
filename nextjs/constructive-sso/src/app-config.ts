@@ -54,17 +54,36 @@ export { getDefaultEndpoint };
 
 /**
  * Get the FRONTEND app origin (Next.js dev server), e.g.
- * http://auth-myapp.localhost:3011
+ * http://localhost:3000
  *
- * Uses the auth endpoint's HOSTNAME (which has a routing_public binding the
- * OAuth middleware can resolve) with the port the app is actually served on.
- * NOT window.location.origin — that breaks when the user opens the app via
- * http://localhost:3011 (no route binding -> INVALID_REDIRECT_URI).
+ * When the GraphQL endpoints are absolute URLs (per-DB hosts), uses the auth
+ * endpoint's hostname with the port the app is actually served on. When they
+ * are same-origin relative paths (the SSO BFF proxy), the app origin is simply
+ * the current window's origin.
  */
 export function getAppOrigin(): string {
-	const authUrl = new URL(getEndpoint('auth'));
-	const port = typeof window !== 'undefined' ? window.location.port : '3011';
+	const authEndpoint = getEndpoint('auth');
+	const port = typeof window !== 'undefined' ? window.location.port : '3000';
+	// Relative endpoint (BFF proxy) — the app serves everything on its own origin.
+	if (authEndpoint.startsWith('/')) {
+		if (typeof window !== 'undefined') return window.location.origin;
+		return `http://localhost:${port}`;
+	}
+	const authUrl = new URL(authEndpoint);
 	return `${authUrl.protocol}//${authUrl.hostname}:${port}`;
+}
+
+/**
+ * The auth lane's origin — absolute when the auth endpoint is an absolute
+ * per-tenant URL, the app's own origin when it is the same-origin BFF proxy
+ * (a relative path has no origin of its own, and `new URL()` on one throws).
+ */
+export function getAuthOrigin(): string {
+	const endpoint = getEndpoint('auth');
+	if (endpoint.startsWith('/')) {
+		return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+	}
+	return new URL(endpoint).origin;
 }
 
 /** All contexts share the same home path in per-DB mode. */

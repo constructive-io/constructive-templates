@@ -164,27 +164,64 @@ async function main(): Promise<void> {
   );
   await client.query('COMMIT');
 
-  // 5. Persist DATABASE_ID so configure-sso and the app use this tenant.
+  // 5. The platform derives the tenant's per-database hosts from the physical
+  //    database's slug (NOT the catalog name) — e.g. api-208-dry-rose-fox.localhost.
+  //    The app needs that slug for NEXT_PUBLIC_DB_NAME and the GraphQL upstreams.
+  //    The rows are written by the provisioning machinery; on a cold ticket they
+  //    can land a beat after the ticket flips to completed, so poll briefly.
+  let slug: string | null = null;
+  for (let attempt = 0; attempt < 10 && !slug; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 3000));
+    const tenantDomains = await client.query(
+      `SELECT hostname FROM routing_public.domains WHERE database_id = $1 AND hostname LIKE 'api-%' LIMIT 1`,
+      [tenantDatabaseId]
+    );
+    if (tenantDomains.rows.length > 0) {
+      slug = (tenantDomains.rows[0] as { hostname: string }).hostname
+        .replace(/^api-/, '')
+        .replace(/\.localhost$/, '');
+    }
+  }
+  if (!slug) {
+    console.log('  (no api-* domain row after 30s — set NEXT_PUBLIC_DB_NAME / GRAPHQL_*_URL in .env manually)');
+  }
+
+  // 6. Persist the tenant's coordinates so configure-sso and the app use them.
   //    A fresh checkout may not have a root .env yet — create it rather than
-  //    failing after a successful provision.
+  //    failing after a successful provision. The GraphQL lanes go through the
+  //    same-origin BFF proxy (/api/graphql/*): the SSO session cookie is
+  //    host-only on `localhost` and never reaches the per-tenant hosts, so the
+  //    proxy forwards it server-side as a Bearer credential.
+  const envValues: Record<string, string> = {
+    DATABASE_ID: tenantDatabaseId,
+    ...(slug
+      ? {
+          NEXT_PUBLIC_DB_NAME: slug,
+          NEXT_PUBLIC_API_PORT: '80',
+          NEXT_PUBLIC_ADMIN_ENDPOINT: '/api/graphql/admin',
+          NEXT_PUBLIC_AUTH_ENDPOINT: '/api/graphql/auth',
+          NEXT_PUBLIC_APP_ENDPOINT: '/api/graphql/app',
+          GRAPHQL_ADMIN_URL: `http://admin-${slug}.localhost/graphql`,
+          GRAPHQL_AUTH_URL: `http://auth-${slug}.localhost/graphql`,
+          GRAPHQL_APP_URL: `http://api-${slug}.localhost/graphql`,
+        }
+      : {}),
+  };
   if (!existsSync(ROOT_ENV_PATH)) {
     console.log(`root .env not found at ${ROOT_ENV_PATH} — creating it`);
-    writeFileSync(ROOT_ENV_PATH, `DATABASE_ID=${tenantDatabaseId}\n`);
+    writeFileSync(ROOT_ENV_PATH, Object.entries(envValues).map(([k, v]) => `${k}=${v}`).join('\n') + '\n');
   } else {
     const envPath = ROOT_ENV_PATH;
     const envLines = readFileSync(envPath, 'utf8').split('\n');
-    const written = envLines.some((line, index) => {
-      if (line.startsWith('DATABASE_ID=')) {
-        envLines[index] = `DATABASE_ID=${tenantDatabaseId}`;
-        return true;
-      }
-      return false;
-    });
-    if (!written) envLines.push(`DATABASE_ID=${tenantDatabaseId}`);
+    for (const [key, value] of Object.entries(envValues)) {
+      const index = envLines.findIndex((line) => line.startsWith(`${key}=`));
+      if (index >= 0) envLines[index] = `${key}=${value}`;
+      else envLines.push(`${key}=${value}`);
+    }
     writeFileSync(envPath, envLines.join('\n') + '\n');
   }
 
-  console.log(`tenant '${DATABASE_NAME}' provisioned: ${tenantDatabaseId}`);
+  console.log(`tenant '${DATABASE_NAME}' provisioned: ${tenantDatabaseId}${slug ? ` (hosts: *-${slug}.localhost)` : ''}`);
   console.log(`domain '${DOMAIN}' owned by the tenant — next: bind routes and configure the provider (local-bringup)`);
 
   await client.end();

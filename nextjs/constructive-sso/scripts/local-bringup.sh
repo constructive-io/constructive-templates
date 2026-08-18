@@ -59,7 +59,9 @@ if ! kubectl get ingress constructive-route-hosts -n constructive-platform-defau
   echo "  ✗ ingress constructive-route-hosts not found — is the platform up?"
   exit 1
 fi
-if ! kubectl get ingress constructive-route-hosts -n constructive-platform-default -o jsonpath='{.spec.rules[*].host}' | grep -qw localhost; then
+# Exact host match: -w would falsely match app.localhost ('.' is a non-word
+# char to grep), silently skipping the rule the whole SSO lane depends on.
+if ! kubectl get ingress constructive-route-hosts -n constructive-platform-default -o jsonpath='{.spec.rules[*].host}' | tr ' ' '\n' | grep -qx 'localhost'; then
   kubectl patch ingress constructive-route-hosts -n constructive-platform-default --type=json \
     -p='[{"op":"add","path":"/spec/rules/-","value":{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"compute-sync-svc","port":{"number":8789}}},"path":"/","pathType":"Prefix"}]}}}]'
 fi

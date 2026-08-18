@@ -3,7 +3,7 @@
 import React from 'react';
 import { Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { getAppOrigin, getDbName, getEndpoint } from '@/app-config';
+import { getAppOrigin, getAuthOrigin, getDbName } from '@/app-config';
 import { useAuthContext } from '@/lib/auth/auth-context';
 import { LoginScreen } from '@/components/auth/screens/login-screen';
 import { AuthSocialProvidersGrid } from '@/blocks/auth/social-providers-grid/social-providers-grid';
@@ -41,12 +41,12 @@ export default function HomePage() {
 
 	// Login screen for unauthenticated users
 	if (!isAuthenticated) {
-		const authOrigin = new URL(getEndpoint('auth')).origin;
-		// After OAuth success the middleware redirects to `returnTo` — this must be
-		// the FRONTEND app origin (Next.js on :3011), NOT the auth API origin
-		// (:3000, which has no UI and 404s). Uses the auth hostname + app port so
-		// it works even when the page is opened via localhost:3011. mounted=true
-		// guarantees window exists (getAppOrigin reads window.location.port).
+		// The auth lane's origin — the app's own origin when the endpoint is the
+		// same-origin BFF proxy (relative), the per-tenant host otherwise.
+		const authOrigin = getAuthOrigin();
+		// After OAuth success the middleware redirects to `returnTo` — this must
+		// be the FRONTEND app origin (Next.js), NOT the auth API origin. mounted=true
+		// guarantees window exists (getAppOrigin reads window.location).
 		const appOrigin = getAppOrigin();
 		return (
 			<LoginScreen onLogin={login}>
