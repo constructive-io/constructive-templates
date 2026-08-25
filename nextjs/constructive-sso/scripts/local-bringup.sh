@@ -5,7 +5,9 @@
 #   1. Verify the k8s platform (fun up --k8s --alt-ports) is reachable.
 #   2. Provision the tenant: request_database (b2b:storage preset), owner
 #      bootstrap, tenant-owned `localhost` domain, DATABASE_ID -> .env.
-#   3. Bind the function routes to the tenant on `localhost`.
+#   3. Register the shared functions at the platform (fun register --apply)
+#      and bind the tenant's routes on `localhost` (provision bind-routes:
+#      tenant-plane definitions + mantra page set + sso sync paths).
 #   4. Add the `localhost` rule to the sync-gateway ingress.
 #   5. Configure the SSO provider (real Google from OAUTH_* in .env) + the
 #      anonymous grants the sign-in lane needs.
@@ -45,14 +47,31 @@ set -a
 source "$ROOT_DIR/.env"
 set +a
 
-echo "[3/6] Binding function routes to the tenant on 'localhost'..."
+echo "[3/6] Registering shared functions + binding tenant routes on 'localhost'..."
 if [ -z "${DATABASE_ID:-}" ]; then
   echo "  ✗ DATABASE_ID missing after provisioning"
   exit 1
 fi
+# 3a. Platform side: definitions + deployments at the platform plane. The
+#     --route-database-id flag is gone from upstream — tenant-owned routes are
+#     no longer written by this command (see 3b).
+#     --k8s: register's env-seeding mode. Without it the mode resolves 'local',
+#     `.env.k8s` (the in-cluster PG address) never loads, and the host-side
+#     PGHOST/PGPORT exported below leak into the platform's seeded secrets —
+#     poisoning every in-cluster workload's database connection (upstream bug
+#     in fun up's seeding; see kind-migration-plan). The flag flips ONLY the
+#     seeding mode; registration itself is unchanged. The host-side exports
+#     stay — they are how THIS command reaches the platform's port-forward.
 (cd "$DB_REPO/compute" && \
   PGHOST="$PGHOST" PGPORT="$PGPORT" PGDATABASE="$PGDATABASE" \
-  fun register --apply --route-host localhost --route-database-id "$DATABASE_ID")
+  fun register --apply --k8s)
+# 3b. Tenant side: register the sso + mantra manifests onto the TENANT's own
+#     plane (tenant-stamped definition rows — what the route-ownership guard
+#     requires), then bind the tenant's routes on 'localhost': the sso sync
+#     paths plus the mantra page set from the platform's route_bindings preset
+#     (/auth/callback is mantra:oauth_callback's — the sso callback is not
+#     routed).
+(cd "$ROOT_DIR/packages/provision" && pnpm run bind-routes)
 
 echo "[4/6] Adding the 'localhost' rule to the sync-gateway ingress..."
 if ! kubectl get ingress constructive-route-hosts -n constructive-platform-default >/dev/null 2>&1; then

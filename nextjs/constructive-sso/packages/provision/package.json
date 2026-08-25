@@ -6,6 +6,7 @@
   "scripts": {
     "create-db": "tsx src/provision-tenant.ts",
     "provision": "tsx src/configure-sso.ts",
+    "bind-routes": "tsx src/bind-routes.ts",
     "reset-db": "tsx src/reset-db.ts",
     "build": "echo 'No build required'",
     "promote-owner": "tsx src/promote-owner.ts"

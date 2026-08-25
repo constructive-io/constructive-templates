@@ -43,7 +43,14 @@ const PGPASSWORD = env.PGPASSWORD ?? 'password';
 
 const DATABASE_NAME = env.DATABASE_NAME ?? 'myapp';
 const DOMAIN = env.SSO_ROUTE_HOST ?? 'localhost';
-const PRESET_SLUG = 'b2b:storage';
+// The tenant's module preset. `b2b:storage` has a warm pool (instant claim);
+// it installs no function_module, so bind-routes provisions that one plane
+// itself. NOTE: `full` provisions a function_module natively, but its cold
+// path dispatches the database-provision-request job, whose seeded PG config
+// points at the HOST-side port-forward (localhost:15432) — the job cannot
+// reach that from inside its pod. Until that upstream --alt-ports bug is
+// fixed, the warm preset + bind-routes' ensure-step is the working path.
+const PRESET_SLUG = env.DATABASE_PRESET ?? 'b2b:storage';
 
 const CLAIMS_SQL = `
   SELECT set_config(c.key, c.value, true)

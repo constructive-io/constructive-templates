@@ -16,6 +16,7 @@
     "create-db": "pnpm --filter @constructive-app/provision run create-db",
     "reset-db": "pnpm --filter @constructive-app/provision run reset-db",
     "provision": "pnpm --filter @constructive-app/provision run provision",
+    "bind-routes": "pnpm --filter @constructive-app/provision run bind-routes",
     "export:graphql": "pnpm --filter @constructive-app/export run export:graphql",
     "local:bringup": "./scripts/local-bringup.sh",
     "mock-oauth": "tsx scripts/mock-oauth-server.ts",
