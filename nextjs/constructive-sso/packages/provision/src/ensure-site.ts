@@ -35,12 +35,13 @@ import { fileURLToPath } from 'node:url';
 import * as dotenv from 'dotenv';
 import { Client } from 'pg';
 
+import { claimsFor, resolveActingUser } from './owner-identity.js';
+
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT_ENV_PATH = resolve(MODULE_DIR, '../../../.env');
 dotenv.config({ path: ROOT_ENV_PATH });
 
 const env = process.env;
-const BOOTSTRAP_PRINCIPAL = 'platform-bootstrap';
 const SITE_NAME = env.DATABASE_NAME ?? 'myapp';
 const DOMAIN = env.SSO_ROUTE_HOST ?? 'localhost';
 const APP_ORIGIN = env.APP_ORIGIN ?? 'http://localhost:3000';
@@ -105,26 +106,16 @@ async function main(): Promise<void> {
     );
   }
 
-  // The same service identity the fun CLI acts as — never an invented JWT.
-  const principal = await client.query(
-    `SELECT id, user_id FROM constructive_auth_public.principals WHERE name = $1`,
-    [BOOTSTRAP_PRINCIPAL]
-  );
-  if (principal.rowCount === 0) {
-    throw new Error(`principal '${BOOTSTRAP_PRINCIPAL}' not found — fun up must have bootstrapped it`);
-  }
-  const { id: principalId, user_id: userId } = principal.rows[0] as { id: string; user_id: string };
-  // Both claims, per the platform's session contract: principal_id holds the
-  // principal's USER id (principals.user_id) — the same value SPRT is keyed
-  // by — never principals.id (that shape belongs to the private, RLS-exempt
-  // service lane). The capability gate's COALESCE(principal_id, user_id)
+  // Who this run acts as: the real owner when owner-login established one
+  // (issue-2 fix — the site verbs gate on the OWNING org's SPRT, and a real
+  // owner satisfies them the honest way), else the legacy machine principal.
+  const acting = await resolveActingUser(client, process.env.OWNER_USER_ID);
+  const userId = acting.userId;
+  // Claims per the platform's session contract: principal_id holds the
+  // principal's USER id — the same value SPRT is keyed by — never
+  // principals.id. The capability gate's COALESCE(principal_id, user_id)
   // therefore resolves to the user id either way. (Dan, 8-31: SPRT verdict.)
-  void principalId;
-  const tenantClaims = JSON.stringify({
-    'jwt.claims.database_id': tenantDatabaseId,
-    'jwt.claims.user_id': userId,
-    'jwt.claims.principal_id': userId,
-  });
+  const tenantClaims = claimsFor(tenantDatabaseId, userId);
   // Same identity plus the super-constructive GUC the module generators demand
   // for platform/database-scope plane provisioning.
   const superClaims = JSON.stringify({

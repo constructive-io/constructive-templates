@@ -9,7 +9,8 @@
     "ensure-site": "tsx src/ensure-site.ts",
     "reset-db": "tsx src/reset-db.ts",
     "build": "echo 'No build required'",
-    "promote-owner": "tsx src/promote-owner.ts"
+    "promote-owner": "tsx src/promote-owner.ts",
+    "owner-login": "tsx src/owner-login.ts"
   },
   "dependencies": {
     "@constructive-io/fetch": "^1.1.1",

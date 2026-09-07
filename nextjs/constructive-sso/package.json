@@ -14,6 +14,7 @@
     "codegen": "./scripts/codegen.sh",
     "codegen:w": "./scripts/codegen.sh --watch",
     "create-db": "pnpm --filter @constructive-app/provision run create-db",
+    "owner-login": "pnpm --filter @constructive-app/provision run owner-login",
     "reset-db": "pnpm --filter @constructive-app/provision run reset-db",
     "provision": "pnpm --filter @constructive-app/provision run provision",
     "ensure-site": "pnpm --filter @constructive-app/provision run ensure-site",

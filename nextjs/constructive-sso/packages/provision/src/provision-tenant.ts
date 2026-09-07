@@ -28,12 +28,13 @@ import { Client } from 'pg';
 // Loaded here so DATABASE_NAME / PGHOST overrides are honored even when this
 // runs standalone (local:bringup sources it too, but this must not depend on
 // that).
+import { claimsFor, resolveActingUser } from './owner-identity.js';
+
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT_ENV_PATH = resolve(MODULE_DIR, '../../../.env');
 dotenv.config({ path: ROOT_ENV_PATH });
 
 const env = process.env;
-const BOOTSTRAP_PRINCIPAL = 'platform-bootstrap';
 
 const PGHOST = env.PGHOST ?? 'localhost';
 const PGPORT = Number(env.PGPORT ?? 15432);
@@ -71,34 +72,33 @@ async function main(): Promise<void> {
     );
   }
 
-  // The platform database + the bootstrap principal: both are looked up, never
-  // assumed — the same way the fun CLI resolves them.
+  // The platform database, and who this run acts as: the real owner when
+  // owner-login established one (issue-2 fix — request_database assigns the
+  // CALLER the tenant's ownership), else the legacy machine principal.
   const platform = await client.query('SELECT app_scope.platform_database_id() AS id');
   const platformDatabaseId = (platform.rows[0] as { id: string }).id;
-  const principal = await client.query(
-    `SELECT id, user_id FROM constructive_auth_public.principals WHERE name = $1`,
-    [BOOTSTRAP_PRINCIPAL]
+  const acting = await resolveActingUser(client, env.OWNER_USER_ID);
+  const userId = acting.userId;
+  const claims = claimsFor(platformDatabaseId, userId);
+  console.log(
+    acting.mode === 'owner'
+      ? `acting as the owner user ${userId}`
+      : 'acting as platform-bootstrap (legacy — the tenant will be machine-owned)'
   );
-  if (principal.rowCount === 0) {
-    throw new Error(`principal '${BOOTSTRAP_PRINCIPAL}' not found — fun up must have bootstrapped it`);
-  }
-  const { id: principalId, user_id: userId } = principal.rows[0] as { id: string; user_id: string };
-  const claims = JSON.stringify({
-    'jwt.claims.database_id': platformDatabaseId,
-    'jwt.claims.user_id': userId,
-    'jwt.claims.principal_id': principalId,
-  });
 
   // The owner bootstrap copies the requester's identity into the tenant, and it
-  // requires a primary identifier (email). Ensure the bootstrap user has one —
-  // idempotent, so re-provisioning is safe.
-  await client.query(
-    `INSERT INTO constructive_user_identifiers_public.emails (owner_id, email, is_verified, is_primary)
-     VALUES ($1, $2, true, true) ON CONFLICT DO NOTHING`,
-    [userId, 'platform-bootstrap@constructive.test']
-  );
+  // requires a primary identifier (email). A real owner (owner-login) carries
+  // one from sign-up; only the legacy machine principal needs it seeded.
+  // Idempotent, so re-provisioning is safe.
+  if (acting.mode === 'legacy') {
+    await client.query(
+      `INSERT INTO constructive_user_identifiers_public.emails (owner_id, email, is_verified, is_primary)
+       VALUES ($1, $2, true, true) ON CONFLICT DO NOTHING`,
+      [userId, 'platform-bootstrap@constructive.test']
+    );
+  }
 
-  // 1. Request the tenant under the bootstrap identity. Idempotent: a tenant
+  // 1. Request the tenant under the acting identity. Idempotent: a tenant
   //    this owner already named `DATABASE_NAME` is reused, not re-requested
   //    (the catalog's (owner_id, name) pair is unique).
   let tenantDatabaseId: string | null = null;

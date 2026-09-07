@@ -71,19 +71,62 @@ nohup kubectl port-forward -n constructive-infra svc/postgres 15432:5432 >/tmp/p
 psql -h localhost -p 15432 -U postgres -d constructive-functions-db1 -c "select 'pg-ok'"
 ```
 
-### 2. Create the tenant
+**Then the DNS guard** (skip only if already applied — idempotent). Docker
+Desktop's built-in DNS proxy silently stops answering after host sleep/restarts;
+CoreDNS forwards there by default, so pods then fail EXTERNAL name resolution
+and the OAuth token exchange dies with `SSO_PROVIDER_TOKEN_EXCHANGE_FAILED`.
+Re-point the forward at public DNS:
+
+```bash
+if kubectl get configmap coredns -n kube-system -o jsonpath='{.data.Corefile}' | grep -q 'forward . /etc/resolv.conf'; then
+  python3 - <<'PY'
+import json, subprocess
+cm = json.loads(subprocess.run(['kubectl','get','configmap','coredns','-n','kube-system','-o','json'], capture_output=True, text=True).stdout)
+corefile = cm['data']['Corefile'].replace('forward . /etc/resolv.conf {', 'forward . 8.8.8.8 1.1.1.1 {')
+subprocess.run(['kubectl','patch','configmap','coredns','-n','kube-system','--type','merge','-p', json.dumps({'data':{'Corefile':corefile}})], capture_output=True)
+PY
+  kubectl rollout restart deploy/coredns -n kube-system
+  echo "CoreDNS re-pointed to public DNS"
+fi
+```
+
+Verify pod egress (expect `EGRESS OK`, HTTP 400 is Google's correct reply to an
+empty token POST):
+
+```bash
+kubectl exec deploy/compute-sync -n constructive-platform-default -- node -e \
+  "fetch('https://oauth2.googleapis.com/token',{method:'POST'}).then(r=>console.log('EGRESS OK',r.status)).catch(e=>console.log('EGRESS FAIL',e.cause?.code||e.message))"
+```
+
+### 2. Establish the owner, then create the tenant
+
+Tenant setup must run as the database's **owner** — a real platform user —
+never as the platform-bootstrap machine identity (which deliberately has
+zero org reach; widening it is forbidden). One-time setup in `.env`:
+
+```
+OWNER_EMAIL=owner@myapp.local
+OWNER_PASSWORD=<pick one>            # gitignored, never committed
+```
 
 ```bash
 cd sandbox-templates/nextjs/constructive-sso
 pnpm install        # once, after cloning or pulling
+pnpm run owner-login   # signs up / signs in via the platform auth lane; writes OWNER_USER_ID to .env
 pnpm run create-db
 ```
 
-Provisions a tenant named `myapp` on the platform DB via
-`metaschema_public.request_database('myapp','localhost', preset_slug :=
-'b2b:storage')` (warm-pool claim), runs the owner bootstrap, creates the
-tenant-owned `localhost` routing domain, and writes `DATABASE_ID` plus the
-GraphQL-lane values back into `.env`. Idempotent — re-running reuses the tenant.
+`owner-login` creates (first run) or signs in the owner through the platform's
+auth GraphQL lane (`auth.localhost`) and records its user id. `create-db` then
+provisions `myapp` **owned by that user**: `request_database` assigns ownership
+to the caller, the owner bootstrap mints the owner's self-membership (the
+capability `ensure-site` gates on) automatically, and the tenant's hostnames +
+`DATABASE_ID` land in `.env`. Idempotent — re-running reuses the tenant.
+
+> Legacy fallback: without `OWNER_USER_ID`, create-db/ensure-site act as
+> platform-bootstrap and print a warning on every run; that machine-owned
+> shape needs the `ensure-owner-self-membership` seed (below). Don't use it
+> for new setups.
 
 ### 3. Provision the rate-limiter stack (required for every NEW tenant)
 
@@ -109,15 +152,16 @@ The module entries must be JSON **strings** — `{"name":...}` objects are
 silently ignored. (Reported for upstream: this belongs in the preset or
 `ensure-site`, not in a runbook.)
 
-### 4. Seed the owner's capability (required for every NEW tenant)
+### 4. Seed the owner's capability (LEGACY — machine-owned tenants only)
+
+**Not needed for owner-mode tenants** (step 2): the owner bootstrap mints the
+owner's self-membership automatically. Only the legacy machine-owner shape
+needs this seed, which grants the platform-bootstrap user org reach — a local
+bypass of the platform boundary, kept solely for that path:
 
 ```bash
 pnpm run ensure-owner-self-membership
 ```
-
-Prints `owner … self-membership ready (manage_sites in SPRT)`. Without it,
-`ensure-site` fails `NOT_AUTHORIZED` at the site verb — the machine-owned
-tenant's owner has no `manage_sites` capability by default.
 
 ### 5. Register the shared functions, then ensure the tenant's site + routes
 
@@ -138,8 +182,9 @@ acting principal; register auto-detects the live cluster for secret seeding).
   never the compiled `hostname_bindings` index);
 - writes the site's `canonical_url` (mantra composes the OAuth callback from it);
 - installs the mantra page set (`sites_install_mantra`) plus the auth sync
-  lanes (who-am-i / sign-out) and a `/_mantra/styles.css` workaround binding
-  via one `install_route_bindings` custom document;
+  lanes (who-am-i / sign-out) via one `install_route_bindings` custom document
+  (the `/_mantra/styles.css` route ships with the preset since upstream PR
+  #3509 — no custom binding needed);
 - flags the sync lanes anonymous and verifies every bound path resolves.
 
 Expected output: `… site 'myapp' provisioned, mantra + sync lanes bound, 23
@@ -195,7 +240,9 @@ curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" \
 > **Shortcut:** steps 2, 3 and 4 must run once manually (the rate-limiter
 > stack is not in the script yet); after that, steps 2–8 are chained by
 > `pnpm run local:bringup` (it re-runs create-db idempotently, then
-> membership → register + ensure-site → ingress → provision → dev).
+> membership → register + ensure-site → ingress → provision → dev). With
+> `OWNER_USER_ID` in `.env`, the script's create-db/ensure-site runs act as
+> the owner automatically.
 
 ## The two planes (auth surfaces vs. GraphQL data)
 
