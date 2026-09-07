@@ -132,6 +132,14 @@ function consumeOAuthFragment(
 async function initializeAuth(
 	authActions: ReturnType<typeof useAuthActions>,
 ) {
+	// Hold the loading gate while we resolve: the store initializes to
+	// unauthenticated with isLoading=false (deserializeAuth), so without this a
+	// page that hard-redirects on !isAuthenticated would win the race against
+	// the async session check below (~40ms) and bounce signed-in users to the
+	// login page. Every completion path (setAuthenticated /
+	// setSessionAuthenticated / setUnauthenticated) clears it.
+	authActions.setLoading(true);
+
 	// OAuth redirect handoff (fragment token) takes precedence over stored tokens.
 	if (consumeOAuthFragment(authActions)) {
 		return;

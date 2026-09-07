@@ -1,3 +1,11 @@
 packages:
   - 'packages/*'
-onlyBuiltDependencies: esbuild,sharp,unrs-resolver
+
+# pnpm 10+ reads these here, not from the "pnpm" field in package.json.
+overrides:
+  graphql: 16.14.0
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver

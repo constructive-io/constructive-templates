@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
+import { redirect } from 'next/navigation';
+import type { Route } from 'next';
 import { Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { getAppOrigin, getAuthOrigin, getDbName } from '@/app-config';
+import { getDbName, getSSOGatewayOrigin } from '@/app-config';
 import { useAuthContext } from '@/lib/auth/auth-context';
-import { LoginScreen } from '@/components/auth/screens/login-screen';
-import { AuthSocialProvidersGrid } from '@/blocks/auth/social-providers-grid/social-providers-grid';
 
 /**
  * Home Page - Start Building Here
@@ -14,7 +14,7 @@ import { AuthSocialProvidersGrid } from '@/blocks/auth/social-providers-grid/soc
  * Replace this page with your business logic.
  */
 export default function HomePage() {
-	const { isAuthenticated, isLoading: isAuthLoading, login } = useAuthContext();
+	const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
 	// Prevent hydration mismatch: auth state resolves on the client after
 	// useEffect runs, so the server always sees isLoading=true while the
@@ -39,25 +39,12 @@ export default function HomePage() {
 		);
 	}
 
-	// Login screen for unauthenticated users
+	// Sign-in is owned by the platform's mantra page set — unauthenticated
+	// visitors go STRAIGHT to the gateway's sign-in page (no boilerplate login
+	// UI, no double sign-in). `next` points back to this page; mantra returns
+	// to it after sign-in.
 	if (!isAuthenticated) {
-		// The auth lane's origin — the app's own origin when the endpoint is the
-		// same-origin BFF proxy (relative), the per-tenant host otherwise.
-		const authOrigin = getAuthOrigin();
-		// After OAuth success the middleware redirects to `returnTo` — this must
-		// be the FRONTEND app origin (Next.js), NOT the auth API origin. mounted=true
-		// guarantees window exists (getAppOrigin reads window.location).
-		const appOrigin = getAppOrigin();
-		return (
-			<LoginScreen onLogin={login}>
-				<AuthSocialProvidersGrid
-					mode='sign-in'
-					baseOAuthPath={`${authOrigin}/auth`}
-					returnTo={`${appOrigin}/`}
-					className='mb-4 w-full max-w-sm mx-auto'
-				/>
-			</LoginScreen>
-		);
+		redirect(`${getSSOGatewayOrigin()}/login?next=%2F` as Route);
 	}
 
 	// =========================================================================

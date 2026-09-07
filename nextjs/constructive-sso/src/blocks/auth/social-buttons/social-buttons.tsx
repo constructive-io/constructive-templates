@@ -5,17 +5,23 @@
  *
  * Row of OAuth provider sign-in / sign-up buttons.
  *
- * DEFAULT DATA PATH — the cloud-function `sso:providers` lane through the
- *   same-origin BFF (`/api/sso/providers`), mapping the response to
- *   IdentityProvider[].
+ * DATA PATH — provider discovery is via the static `providers` prop (the
+ *   boilerplate passes the configured provider list). The block still carries
+ *   a dormant default-discovery fetch for reuse elsewhere, but the
+ *   `/api/sso/providers` BFF lane it once targeted is retired in this
+ *   boilerplate — always pass `providers` here.
  *
- * STATIC OVERRIDE — when `providers` prop is set the BFF call is skipped
- *   and the static slug list is used.
- *
- * OAUTH FLOW — the block asks the same-origin BFF (`/api/sso/start`) for the
- *   authorize URL (the redirect URI is constructed server-side) and navigates
- *   with `window.location.href`. It does NOT call any sign-in mutation; the
- *   cloud function's page lane handles the handshake.
+ * OAUTH FLOW — two start modes, selected by `startMode`:
+ *   • 'gateway' (default) — navigate the browser straight to the compute sync
+ *     gateway's `/auth/start?provider=<slug>&next=<path>` (mantra:oauth_start
+ *     handles state/PKCE and composes the redirect URI from the site's
+ *     canonical_url).
+ *   • 'bff' — POST the same-origin `/api/sso/start` (the `sso:start` sync
+ *     lane through the BFF, redirect URI constructed server-side) and
+ *     navigate to the returned authorize URL. Used by the app-owned custom
+ *     login surface at /custom-login.
+ *   Neither mode calls a sign-in mutation; the cloud function's callback page
+ *   lane handles the handshake.
  *
  * NO client bootstrap — the host mounts `@constructive/blocks-runtime` once;
  *   this block never calls configure()/getClient() or mounts a QueryClientProvider.
@@ -27,6 +33,7 @@ import { Skeleton } from '@constructive-io/ui/skeleton';
 import { Button } from '@constructive-io/ui/button';
 
 import { cn } from '@/lib/utils';
+import { getSSOGatewayOrigin } from '@/app-config';
 import { AuthErrorAlert } from '@/blocks/primitives/auth-error-alert';
 
 import { defaultAuthSocialButtonsMessages, type AuthSocialButtonsMessages, type AuthSocialButtonsMessageOverrides } from './messages';
@@ -152,9 +159,10 @@ function interpolateProvider(template: string, providerName: string): string {
 }
 
 /**
- * The BFF's /api/sso/start accepts only a local path (`/…`). Host pages
- * upgraded from the CNC lane pass full URLs (`http://localhost:3000/`), so
- * reduce whatever arrives to its path + query before sending.
+ * mantra's `next` param accepts only a local path (safeNext is strictly
+ * relative). Host pages upgraded from the CNC lane pass full URLs
+ * (`http://localhost:3000/`), so reduce whatever arrives to its path + query
+ * before sending.
  */
 function toLocalPath(value: string): string {
   if (value.startsWith('/')) return value;
@@ -191,6 +199,12 @@ export type AuthSocialButtonsProps = {
    */
   returnTo?: string;
   /**
+   * OAuth start transport. 'gateway' navigates to the mantra page lane
+   * directly; 'bff' asks the same-origin /api/sso/start (sso:start sync lane)
+   * for the authorize URL. Default: 'gateway' — the mantra wiring.
+   */
+  startMode?: 'gateway' | 'bff';
+  /**
    * Base path for the Express OAuth middleware.
    * Default: '/auth'
    * If your Next.js app and Express server are on different origins, pass the
@@ -221,6 +235,7 @@ export function AuthSocialButtons({
   layout = 'stacked',
   showDivider = true,
   returnTo,
+  startMode = 'gateway',
   baseOAuthPath = '/auth',
   renderButton,
   onProviderClick,
@@ -314,26 +329,33 @@ export function AuthSocialButtons({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerList.length, isLoading, fetchError]);
 
-  // Start the flow through the cloud-function lane: the BFF constructs the
-  // redirect URI server-side, parks the state, and returns the authorize URL.
+  // Start the flow. 'gateway': navigate straight to the mantra page lane.
+  // 'bff': the sso:start sync lane through the same-origin BFF answers the
+  // authorize URL as data; navigate to it. Both mint state/PKCE platform-side.
   async function handleProviderClick(provider: IdentityProvider) {
     setStartingSlug(provider.slug);
     setFetchError(null);
     try {
       const ret = toLocalPath(returnTo ?? (typeof window !== 'undefined' ? window.location.pathname : '/'));
-      const res = await fetch('/api/sso/start', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ provider: provider.slug, returnTo: ret })
-      });
-      const data = (await res.json()) as { location?: string; error?: string };
-      if (!res.ok || !data.location) {
-        throw new Error(data.error ?? 'failed to start sign-in');
+      let url: string;
+      if (startMode === 'bff') {
+        const res = await fetch('/api/sso/start', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ provider: provider.slug, returnTo: ret })
+        });
+        const data = (await res.json()) as { location?: string; error?: string };
+        if (!res.ok || !data.location) {
+          throw new Error(data.error ?? 'START_FAILED');
+        }
+        url = data.location;
+      } else {
+        url = `${getSSOGatewayOrigin()}/auth/start?provider=${encodeURIComponent(provider.slug)}&next=${encodeURIComponent(ret)}`;
       }
-      const shouldNavigate = onProviderClick?.(provider, data.location);
+      const shouldNavigate = onProviderClick?.(provider, url);
       if (shouldNavigate === false) return;
       if (typeof window !== 'undefined') {
-        window.location.href = data.location;
+        window.location.href = url;
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'UNKNOWN_ERROR';

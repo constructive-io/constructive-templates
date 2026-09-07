@@ -87,17 +87,22 @@ async function main(): Promise<void> {
   const authorizeUrl = required('OAUTH_AUTHORIZE_URL');
   const tokenUrl = required('OAUTH_TOKEN_URL');
   const userinfoUrl = required('OAUTH_USERINFO_URL');
+  // The issuer the provider row records. Defaults to Google; a local OIDC
+  // emulator is just a row — override this with its origin and it serves the
+  // same flow (its endpoints travel through the OAUTH_*_URL knobs above).
+  const issuerUrl = env.OAUTH_ISSUER_URL ?? 'https://accounts.google.com';
   const scopes = (env.OAUTH_SCOPES ?? 'openid,email,profile').split(',');
 
   // Provider row: upsert by slug so re-running provision is idempotent.
+  // Columns track upstream's current identity_providers shape (the old
+  // wire-knob columns — token_request_content_type, token_endpoint_auth_method,
+  // userinfo_method, extra_token_params — are gone from main; the runtime now
+  // speaks the standard exchange and reads only extra_authorization_params).
   const upsertProvider = `
     INSERT INTO "${providerSchema}"."${providersTable}"
       (slug, kind, display_name, enabled, client_id, issuer_url, authorization_url,
-       token_url, userinfo_url, scopes, pkce_enabled, skip_nonce_check,
-       token_request_content_type, token_endpoint_auth_method, userinfo_method,
-       extra_token_params)
-    VALUES ($1, 'oidc', $2, true, $3, 'https://accounts.google.com', $4, $5, $6, $7, true, false,
-            'form', 'client_secret_post', 'GET', '{}'::jsonb)
+       token_url, userinfo_url, scopes, pkce_enabled, skip_nonce_check)
+    VALUES ($1, 'oidc', $2, true, $3, $8, $4, $5, $6, $7, true, false)
     ON CONFLICT (slug) DO UPDATE SET
       display_name = EXCLUDED.display_name,
       enabled = true,
@@ -108,12 +113,9 @@ async function main(): Promise<void> {
       userinfo_url = EXCLUDED.userinfo_url,
       scopes = EXCLUDED.scopes,
       pkce_enabled = true,
-      skip_nonce_check = false,
-      token_request_content_type = EXCLUDED.token_request_content_type,
-      token_endpoint_auth_method = EXCLUDED.token_endpoint_auth_method,
-      userinfo_method = EXCLUDED.userinfo_method
+      skip_nonce_check = false
   `;
-  await client.query(upsertProvider, [slug, `Google (${slug})`, clientId, authorizeUrl, tokenUrl, userinfoUrl, scopes]);
+  await client.query(upsertProvider, [slug, `Google (${slug})`, clientId, authorizeUrl, tokenUrl, userinfoUrl, scopes, issuerUrl]);
 
   // Secret rotation through the tenant's own procedure: the value lands in
   // the tenant's encrypted secret store, never in this script or config.

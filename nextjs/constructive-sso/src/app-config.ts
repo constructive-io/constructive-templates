@@ -7,6 +7,7 @@ import {
 	getAppEndpoint,
 	type SchemaContext,
 } from '@/lib/runtime/config-core';
+import { getRuntimeConfig } from '@/lib/runtime/get-runtime-config';
 import { createLogger } from '@/lib/logger';
 import { useAppStore } from '@/store/app-store';
 import type { AppState } from '@/store/app-store';
@@ -88,6 +89,20 @@ export function getAuthOrigin(): string {
 
 /** All contexts share the same home path in per-DB mode. */
 export const HOME_PATH = '/';
+
+/**
+ * The compute sync gateway origin — where the mantra auth pages and the OAuth
+ * start lane live (http://localhost by default; Traefik port 80).
+ *
+ * Client-safe: reads through the runtime-config allowlist (NEXT_PUBLIC_*), so
+ * the value is inlined into the client bundle at build time. Do NOT read
+ * SSO_GATEWAY_URL from lib/sso/gateway in a client component — that const is
+ * server-only and silently degrades to its default in a client bundle.
+ */
+export function getSSOGatewayOrigin(): string {
+	const origin = getRuntimeConfig('NEXT_PUBLIC_SSO_GATEWAY_URL', 'http://localhost');
+	return (origin ?? 'http://localhost').replace(/\/$/, '');
+}
 
 export function getHomePath(_ctx?: SchemaContext): string {
 	return HOME_PATH;

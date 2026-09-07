@@ -28,6 +28,7 @@ import { Button } from '@constructive-io/ui/button';
 import { Separator } from '@constructive-io/ui/separator';
 
 import { cn } from '@/lib/utils';
+import { getSSOGatewayOrigin } from '@/app-config';
 import { AuthSocialButtons, type AuthSocialButtonsProps, type IdentityProvider } from '@/blocks/auth/social-buttons/social-buttons';
 
 import {
@@ -188,16 +189,14 @@ export function AuthSocialProvidersGrid({
     }
   }
 
-  async function startViaBff(provider: IdentityProvider): Promise<void> {
+  async function startViaGateway(provider: IdentityProvider): Promise<void> {
     try {
-      const res = await fetch('/api/sso/start', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ provider: provider.slug, returnTo: toLocalPath(returnTo ?? '/') })
-      });
-      const data = (await res.json()) as { location?: string; error?: string };
-      if (!res.ok || !data.location) throw new Error(data.error ?? 'failed to start sign-in');
-      if (typeof window !== 'undefined') window.location.href = data.location;
+      // Navigate the browser straight to the gateway's /auth/start — mantra's
+      // oauth_start mints state + PKCE and composes the redirect URI from the
+      // site's canonical_url. (Replaces the old same-origin BFF hop, which
+      // would have 404'd once /api/sso/start was removed.)
+      const url = `${getSSOGatewayOrigin()}/auth/start?provider=${encodeURIComponent(provider.slug)}&next=${encodeURIComponent(toLocalPath(returnTo ?? '/'))}`;
+      if (typeof window !== 'undefined') window.location.href = url;
     } catch (err: unknown) {
       onError?.(err);
     }
@@ -237,7 +236,7 @@ export function AuthSocialProvidersGrid({
                 aria-label={`${label} (${merged.lastUsedBadge})`}
                 data-testid={`social-btn-${provider.slug}`}
                 onClick={() => {
-                  void startViaBff(provider);
+                  void startViaGateway(provider);
                 }}
               >
                 <span>{label}</span>
