@@ -33,9 +33,37 @@ ensure-site.ts` is exactly this: a short sequence of platform verbs.
 - A sibling `constructive-db` checkout (the platform + the cloud functions)
 - `.env` filled with provider credentials (see [SSO Testing](#sso-testing))
 
-## Full setup, one step at a time
+## Full setup
 
-### 0. (Optional) Full teardown first
+Two parts:
+
+- **Part A — the platform.** Manual. The script does not do this.
+- **Part B — the tenant + app.** `pnpm run local:bringup` runs **all of Part
+  B automatically** (it ends by starting Next.js in the foreground). The
+  manual steps below are the same sequence, spelled out.
+
+| # | Step | Part | `local:bringup` covers it? |
+|---|---|---|---|
+| 0 | Full teardown (optional) | A | no — manual |
+| 1 | `fun up --alt-ports` + port-forward + DNS guard | A | no — prerequisite |
+| 2 | Owner login + create the tenant | B | **yes** |
+| 3 | Rate-limiter stack | B | **yes** |
+| 4 | Membership seed (LEGACY only) | B | **yes** — auto-skipped in owner mode |
+| 5 | `fun register` + `ensure-site` | B | **yes** |
+| 6 | Bare-`localhost` ingress rule | B | **yes** |
+| 7 | Configure the provider | B | **yes** |
+| 8 | Start the app (`pnpm dev`) | B | **yes** — script's last step |
+
+So the short path is: do Part A, put `OWNER_EMAIL`/`OWNER_PASSWORD` (and the
+`OAUTH_*` values) in `.env`, then one command:
+
+```bash
+pnpm run local:bringup
+```
+
+### Part A — Platform (manual)
+
+#### 0. (Optional) Full teardown first
 
 Skip this on a clean machine. Run it when you want a genuinely fresh start
 (stale cluster state, subnet shift after a reboot, preset experiments):
@@ -50,7 +78,7 @@ kind get clusters                   # → "No kind clusters found."
 `fun down` keeps Knative/Traefik/Cilium on purpose; the `kind delete`
 removes them with the cluster — that is what a true fresh start wants.
 
-### 1. Bring up the platform (one database)
+#### 1. Bring up the platform (one database)
 
 ```bash
 cd constructive-db/compute
@@ -98,7 +126,9 @@ kubectl exec deploy/compute-sync -n constructive-platform-default -- node -e \
   "fetch('https://oauth2.googleapis.com/token',{method:'POST'}).then(r=>console.log('EGRESS OK',r.status)).catch(e=>console.log('EGRESS FAIL',e.cause?.code||e.message))"
 ```
 
-### 2. Establish the owner, then create the tenant
+### Part B — Tenant setup (exactly what `pnpm run local:bringup` runs)
+
+#### 2. Establish the owner, then create the tenant
 
 Tenant setup must run as the database's **owner** — a real platform user —
 never as the platform-bootstrap machine identity (which deliberately has
@@ -128,7 +158,7 @@ capability `ensure-site` gates on) automatically, and the tenant's hostnames +
 > shape needs the `ensure-owner-self-membership` seed (below). Don't use it
 > for new setups.
 
-### 3. Provision the rate-limiter stack (required for every NEW tenant)
+#### 3. Provision the rate-limiter stack (required for every NEW tenant)
 
 `ensure-site` fails with `INVOCATION_RATE_LIMIT_NOT_PROVISIONED` without this:
 upstream's `invocation_sync_verb` now hard-requires a tenant-scope
@@ -152,7 +182,7 @@ The module entries must be JSON **strings** — `{"name":...}` objects are
 silently ignored. (Reported for upstream: this belongs in the preset or
 `ensure-site`, not in a runbook.)
 
-### 4. Seed the owner's capability (LEGACY — machine-owned tenants only)
+#### 4. Seed the owner's capability (LEGACY — machine-owned tenants only)
 
 **Not needed for owner-mode tenants** (step 2): the owner bootstrap mints the
 owner's self-membership automatically. Only the legacy machine-owner shape
@@ -163,7 +193,7 @@ bypass of the platform boundary, kept solely for that path:
 pnpm run ensure-owner-self-membership
 ```
 
-### 5. Register the shared functions, then ensure the tenant's site + routes
+#### 5. Register the shared functions, then ensure the tenant's site + routes
 
 ```bash
 cd constructive-db/compute
@@ -190,7 +220,7 @@ acting principal; register auto-detects the live cluster for secret seeding).
 Expected output: `… site 'myapp' provisioned, mantra + sync lanes bound, 23
 route(s) resolving on localhost`.
 
-### 6. Add the bare-`localhost` rule to the gateway ingress
+#### 6. Add the bare-`localhost` rule to the gateway ingress
 
 `fun up` registers `*.localhost` / `app.localhost`; the provider callback on
 bare `localhost` may need an explicit rule (the route reconciler has a
@@ -203,7 +233,7 @@ kubectl get ingress constructive-route-hosts -n constructive-platform-default -o
   -p='[{"op":"add","path":"/spec/rules/-","value":{"host":"localhost","http":{"paths":[{"backend":{"service":{"name":"compute-sync-svc","port":{"number":8789}}},"path":"/","pathType":"Prefix"}]}}}]'
 ```
 
-### 7. Configure the provider
+#### 7. Configure the provider
 
 ```bash
 cd sandbox-templates/nextjs/constructive-sso
@@ -215,7 +245,7 @@ secret into the tenant's encrypted store, sets the auth settings (host-only
 cookie, `/login` error path), and grants the anonymous role the sign-in lane
 needs.
 
-### 8. Start the app
+#### 8. Start the app
 
 ```bash
 pnpm dev
@@ -227,7 +257,7 @@ provider grid; **Sign in with Google** navigates to the gateway's
 `/login`, `/register`, `/forgot-password`, `/reset-password` are thin redirects
 to mantra's own pages on the gateway.
 
-### Verify it works
+#### Verify it works
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost/login     # 200 (mantra sign-in page)
@@ -237,12 +267,10 @@ curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" \
 # 302 → https://accounts.google.com/… redirect_uri=http://localhost:3000/auth/callback (PKCE S256)
 ```
 
-> **Shortcut:** steps 2, 3 and 4 must run once manually (the rate-limiter
-> stack is not in the script yet); after that, steps 2–8 are chained by
-> `pnpm run local:bringup` (it re-runs create-db idempotently, then
-> membership → register + ensure-site → ingress → provision → dev). With
-> `OWNER_USER_ID` in `.env`, the script's create-db/ensure-site runs act as
-> the owner automatically.
+> **Shortcut:** everything in Part B is chained by `pnpm run local:bringup` —
+> owner-login → create-db → rate-limiter stack → (legacy seed, auto-skipped
+> in owner mode) → register + ensure-site → ingress → provision → `pnpm dev`.
+> Prerequisites: Part A done, and `OWNER_EMAIL`/`OWNER_PASSWORD` in `.env`.
 
 ## The two planes (auth surfaces vs. GraphQL data)
 
@@ -376,7 +404,7 @@ Gateway logs: `kubectl logs deploy/compute-sync -n constructive-platform-default
 | `src/app/api/auth/sign-out/`  | BFF: revoke the session                                      |
 | `packages/provision`          | `create-db` (tenant) / `ensure-site` (site + routes) / `provision` (provider) / `promote-owner` / `reset-db` |
 | `packages/export`             | `export:graphql` (legacy GraphQL export; not used by SSO)    |
-| `scripts/local-bringup.sh`    | chains create-db → owner membership → register + ensure-site → ingress → provision → dev (run step 3's rate-limiter SQL once first) |
+| `scripts/local-bringup.sh`    | runs ALL of Part B: owner-login → create-db → rate-limiter stack → legacy seed (owner mode skips) → register + ensure-site → ingress → provision → dev; plus the CoreDNS guard |
 | `scripts/mock-oauth-server.ts`| local mock OAuth server for Google-free testing (`:4010`)    |
 
 ## Disclaimer
