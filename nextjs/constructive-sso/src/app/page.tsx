@@ -40,9 +40,10 @@ export default function HomePage() {
 	}
 
 	// Sign-in is owned by the platform's mantra page set — unauthenticated
-	// visitors go STRAIGHT to the gateway's sign-in page (no boilerplate login
-	// UI, no double sign-in). `next` points back to this page; mantra returns
-	// to it after sign-in.
+	// visitors go STRAIGHT to the gateway's sign-in page. `next` is the gateway
+	// root '/': the app-origin redirect row there (ensure-site step 7) turns the
+	// post-auth landing into an instant 302 back into this app — password submit
+	// ends up in myapp with no intermediate click.
 	if (!isAuthenticated) {
 		redirect(`${getSSOGatewayOrigin()}/login?next=%2F` as Route);
 	}

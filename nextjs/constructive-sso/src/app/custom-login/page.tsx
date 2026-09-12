@@ -55,7 +55,7 @@ function CustomLoginPageContent() {
 			)}
 			<SignInCard
 				forgotPasswordHref='/custom-forgot-password'
-				signUpHref='/custom-register'
+				signUpHref='/register'
 				onSubmit={async (vars): Promise<SignInResult | null> => {
 					setNotice(null);
 					const res = await fetch('/api/custom-auth/sign-in', {

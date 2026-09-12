@@ -49,7 +49,8 @@ Two parts:
 | 2 | Owner login + create the tenant | B | **yes** |
 | 3 | Rate-limiter stack | B | **yes** |
 | 4 | Membership seed (LEGACY only) | B | **yes** — auto-skipped in owner mode |
-| 5 | `fun register` + `ensure-site` | B | **yes** |
+| 5 | `fun register` + `ensure-site` (incl. root `/` → app redirect) | B | **yes** |
+| 5b | Publish site homepage (`index.html` → site bucket) | B | **yes** |
 | 6 | Bare-`localhost` ingress rule | B | **yes** |
 | 7 | Configure the provider | B | **yes** |
 | 8 | Start the app (`pnpm dev`) | B | **yes** — script's last step |

@@ -23,7 +23,11 @@
  *      doc, each carrying the typed `anonymous` flag the manifest declares
  *      (the gateway requires the route-level flag AND the definition's
  *      anonymous_callable — both halves, neither alone);
- *   6. verification walk through routing_public.resolve_route.
+ *   6. verification walk through routing_public.resolve_route;
+ *   7. site root '/' repointed to an app-origin redirect ROW — the mantra
+ *      pages may only land same-origin (open-redirect guard on `next`), and a
+ *      tenant-configured redirect is the sanctioned way to bridge that landing
+ *      into the consumer app (ports on localhost share the session cookie).
  *
  * Fail-loud throughout: a verb error or a route that does not resolve is a
  * fault to surface, never to skip.
@@ -45,6 +49,10 @@ const env = process.env;
 const SITE_NAME = env.DATABASE_NAME ?? 'myapp';
 const DOMAIN = env.SSO_ROUTE_HOST ?? 'localhost';
 const APP_ORIGIN = env.APP_ORIGIN ?? 'http://localhost:3000';
+// Scheme-less host of the app origin: the static gateway composes the
+// Location as `<request scheme>://<to_host><path>`, so the redirect follows
+// whatever scheme the browser arrived on.
+const REDIRECT_TO_HOST = new URL(APP_ORIGIN).host;
 const MANTRA_PRESET_SLUG = env.MANTRA_PRESET_SLUG ?? 'mantra';
 
 const PGHOST = env.PGHOST ?? 'localhost';
@@ -365,6 +373,66 @@ async function main(): Promise<void> {
     }
     console.log(`  ${DOMAIN}${path} -> ${task}${isMantra ? ` (site ${siteId})` : ''}`);
   }
+
+  // ---- 7. Site root '/' resolves to an app-origin redirect. ----
+  // The mantra pages' post-auth landing is '/' (same-origin `next` only —
+  // open-redirect guard). A redirect row is tenant-configured data, exempt
+  // from the guard, so a redirect route at '/' turns that landing into an
+  // instant hop into the app; the session cookie is already on localhost
+  // (cookies ignore ports).
+  // Shape: TWO routes at '/', never an in-place repoint — the site keeps its
+  // own '/' route because sites_install_mantra/install_route_bindings refuse
+  // to run for a site that "serves no hostname" (ROUTE_BINDINGS_SITE_NOT_ROUTED
+  // on re-run). The redirect route carries priority 10 and resolve_route orders
+  // priority DESC, so it wins while the site route keeps the verbs satisfied.
+  // Idempotent: upsert the redirect row by (database_id, name); insert the
+  // redirect route only when missing.
+  await tx(client, tenantClaims, async () => {
+    const redirect = await client.query(
+      `INSERT INTO routing_public.redirects
+         (database_id, name, to_host, to_path, status_code, preserve_path, preserve_query)
+       VALUES ($1, 'app-origin', $2, '/', 302, false, true)
+       ON CONFLICT (database_id, name) DO UPDATE SET
+         to_host = EXCLUDED.to_host, to_path = EXCLUDED.to_path,
+         status_code = EXCLUDED.status_code, preserve_path = EXCLUDED.preserve_path,
+         preserve_query = EXCLUDED.preserve_query, updated_at = now()
+       RETURNING id`,
+      [tenantDatabaseId, REDIRECT_TO_HOST]
+    );
+    const redirectId = (redirect.rows[0] as { id: string }).id;
+    const inserted = await client.query(
+      `INSERT INTO routing_public.routes (database_id, domain_id, path, target_redirect_id, priority, is_active)
+       SELECT $1::uuid, $2::uuid, '/', $3::uuid, 10, true
+        WHERE NOT EXISTS (
+          SELECT 1 FROM routing_public.routes x
+           WHERE x.database_id = $1 AND x.domain_id = $2 AND x.path = '/' AND x.target_redirect_id = $3
+        )
+       RETURNING id`,
+      [tenantDatabaseId, domainId, redirectId]
+    );
+    if (inserted.rowCount === 0) {
+      const stillThere = await client.query(
+        `SELECT 1 FROM routing_public.routes
+          WHERE database_id = $1 AND domain_id = $2 AND path = '/' AND target_redirect_id = $3`,
+        [tenantDatabaseId, domainId, redirectId]
+      );
+      if (stillThere.rowCount === 0) {
+        throw new Error('app-origin redirect route at "/" was neither inserted nor present');
+      }
+    }
+  });
+  const rootLane = await client.query(
+    `SELECT serving_lane, resolved_config->>'to_host' AS to_host
+       FROM routing_public.resolve_route($1, '/', 'GET')`,
+    [DOMAIN]
+  );
+  const root = rootLane.rows[0] as { serving_lane: string; to_host: string } | undefined;
+  if (root?.serving_lane !== 'redirect' || root.to_host !== REDIRECT_TO_HOST) {
+    throw new Error(
+      `root '/' does not resolve to the app-origin redirect (lane ${root?.serving_lane ?? 'none'}, to_host ${root?.to_host ?? 'none'})`
+    );
+  }
+  console.log(`site root: '/' -> 302 ${REDIRECT_TO_HOST}/ (app-origin redirect, priority over the site route)`);
 
   console.log(
     `tenant ${tenantDatabaseId}: site '${SITE_NAME}' provisioned, mantra + sync lanes bound, ${allPaths.length} route(s) resolving on ${DOMAIN}`

@@ -23,8 +23,12 @@
 #      --as platform-bootstrap — platform-scope registration is that
 #      principal's job) and ensure the tenant's site + routes on 'localhost'
 #      (provision ensure-site: site verb + mantra install + sync lanes,
-#      consuming the platform's shared images via the frame chain — NO
-#      per-tenant registrations).
+#      consuming the platform's shared images via the frame chain. NO
+#      per-tenant registrations). Includes repointing the site root '/' at the
+#      app origin (redirect row) so mantra post-auth landings hop into :3000.
+#   5b. Publish the site homepage: wait for the bucket's physical provisioning
+#       (storage:provision_bucket, fixed upstream 5e9605e2c50) and upload
+#       assets/homepage/index.html — an empty bucket serves Not Found at '/'.
 #   6. Add the 'localhost' rule to the sync-gateway ingress (checks first).
 #   7. Configure the SSO provider (real Google from OAUTH_* in .env) + the
 #      anonymous grants the sign-in lane needs, then start Next.js on :3000.
@@ -140,6 +144,30 @@ echo "[5/7] Registering shared functions + ensuring the tenant's site/routes on 
 # images through the frame chain. No per-tenant function registrations.
 # Installs the mantra page set and the auth-flows/sso sync lanes.
 (cd "$ROOT_DIR/packages/provision" && pnpm run ensure-site)
+
+echo "[5b/7] Publishing the site homepage (index.html)..."
+# The bucket's physical provisioning is asynchronous: bucket insert auto-enqueues
+# storage:provision_bucket, which (fixed upstream in 5e9605e2c50) resolves the
+# shared database-scope storage plane and sets physical_name. Poll for it, then
+# upload the placeholder homepage — the static gateway serves it at '/' (a
+# provisioned-but-empty bucket answers Not Found; content is tenant-authored).
+command -v mc >/dev/null 2>&1 || { echo "  ✗ mc (MinIO client) not on PATH"; exit 1; }
+SITE_BUCKET_KEY="${DATABASE_NAME:-myapp}"
+PHYS=""
+for _ in $(seq 1 30); do
+  PHYS=$(psql -h "$PGHOST" -p "$PGPORT" -U "${PGUSER:-postgres}" -d "$PGDATABASE" -Atc "
+    SELECT physical_name FROM constructive_storage_public.buckets
+     WHERE database_id = '${DATABASE_ID}'::uuid AND key = '${SITE_BUCKET_KEY}'" 2>/dev/null)
+  [ -n "$PHYS" ] && break
+  sleep 2
+done
+if [ -z "$PHYS" ]; then
+  echo "  ✗ bucket '${SITE_BUCKET_KEY}' has no physical_name after 60s — check app_jobs.jobs for storage:provision_bucket"
+  exit 1
+fi
+mc alias set localminio "http://localhost:${MINIO_API_PORT:-19000}" "${MINIO_ROOT_USER:-minioadmin}" "${MINIO_ROOT_PASSWORD:-minioadmin}" >/dev/null
+mc cp "$ROOT_DIR/assets/homepage/index.html" "localminio/${PHYS}/index.html"
+echo "  ✓ homepage published to bucket '${PHYS}'"
 
 echo "[6/7] Adding the 'localhost' rule to the sync-gateway ingress..."
 if ! kubectl get ingress constructive-route-hosts -n constructive-platform-default >/dev/null 2>&1; then
